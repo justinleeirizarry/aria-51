@@ -1,11 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import type { ScanResults } from '@accessibility-toolkit/core';
-import { TreeViewer } from './TreeViewer.js';
-import { Dashboard } from './Dashboard.js';
-import { ViolationCard } from './ViolationCard.js';
-import { Banner } from './Banner.js';
-import { KeyboardResults } from './KeyboardResults.js';
 import { colors, impactColors } from '../colors.js';
 
 interface ResultsProps {
@@ -17,170 +12,201 @@ interface ResultsProps {
     quiet?: boolean;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, outputFile, aiPromptFile, report, showTree, quiet }) => {
+function isUserComponent(name: string): boolean {
+    if (!name || name.length <= 2) return false;
+    if (name[0] !== name[0].toUpperCase()) return false;
+    if (/^(Provider|Context|Fragment|Suspense|StrictMode|Anonymous)/.test(name)) return false;
+    if (name.startsWith('__')) return false;
+    return true;
+}
+
+function fmtSource(s: any): string {
+    if (!s?.filePath) return '';
+    let loc = s.filePath;
+    if (s.lineNumber) loc += ':' + s.lineNumber;
+    if (s.columnNumber) loc += ':' + s.columnNumber;
+    return loc;
+}
+
+const Results: React.FC<ResultsProps> = ({ results, outputFile, aiPromptFile, quiet }) => {
     if (!results) {
-        return (
-            <Box flexDirection="column" padding={1}>
-                <Text color="gray">Loading scan results...</Text>
-            </Box>
-        );
+        return <Text color="gray">Scanning...</Text>;
     }
 
     const { violations, incomplete, summary, url } = results;
+    const sev = summary.violationsBySeverity;
 
-    // Quiet mode: plain text, no boxes or extra spacing
     if (quiet) {
-        const { totalViolations, totalPasses, violationsBySeverity } = summary;
-        const hasIssues = totalViolations > 0;
-
+        const icon = summary.totalViolations > 0 ? 'x' : 'v';
         return (
             <Box flexDirection="column">
-                {/* Summary line */}
-                <Text>
-                    <Text color={hasIssues ? colors.critical : colors.success} bold>{hasIssues ? '✗' : '✓'} </Text>
-                    <Text>{url} - {totalViolations} violations, {totalPasses} passes</Text>
-                </Text>
-
-                {/* Severity breakdown if issues exist */}
-                {hasIssues && (
-                    <Text color="gray">
-                        {violationsBySeverity.critical > 0 && `${violationsBySeverity.critical} critical `}
-                        {violationsBySeverity.serious > 0 && `${violationsBySeverity.serious} serious `}
-                        {violationsBySeverity.moderate > 0 && `${violationsBySeverity.moderate} moderate `}
-                        {violationsBySeverity.minor > 0 && `${violationsBySeverity.minor} minor`}
-                    </Text>
-                )}
-
-                {/* Violations - plain text format */}
-                {violations.map((violation, idx) => {
-                    const impactColor = impactColors[violation.impact] || colors.muted;
-
-                    return (
-                        <Box key={idx} flexDirection="column">
-                            <Text>
-                                <Text color={impactColor}>[{violation.impact}]</Text>
-                                <Text> {violation.id}: {violation.description}</Text>
-                            </Text>
-                            {violation.nodes.map((node, nodeIdx) => {
-                                const componentName = node.userComponentPath?.length
-                                    ? node.userComponentPath[node.userComponentPath.length - 1]
-                                    : node.component || 'Unknown';
-                                return (
-                                    <Text key={nodeIdx} color="gray">
-                                        {`  - ${componentName}`}{node.cssSelector ? ` (${node.cssSelector})` : ''}
-                                    </Text>
-                                );
-                            })}
-                            {violation.helpUrl && (
-                                <Text color="gray">  Docs: {violation.helpUrl}</Text>
-                            )}
-                        </Box>
-                    );
-                })}
-
-                {/* Output files */}
-                {outputFile && <Text color="gray">Output: {outputFile}</Text>}
-                {aiPromptFile && <Text color="gray">AI Prompt: {aiPromptFile}</Text>}
+                <Text>{icon} {url} — {summary.totalViolations} violations, {summary.totalPasses} passes</Text>
+                {violations.map((v, i) => (
+                    <Text key={i} color="gray">  [{v.impact}] {v.id}: {v.nodes.length} instances</Text>
+                ))}
             </Box>
         );
     }
 
     return (
-        <Box flexDirection="column" padding={1}>
-            <Banner url={url} />
+        <Box flexDirection="column">
+            {/* Header */}
+            <Text color="gray">{'━'.repeat(60)}</Text>
+            <Text>{' '}</Text>
+            <Text bold>{'  a11y.scan'}</Text>
+            <Text>{' '}</Text>
+            <Text color="gray">{'━'.repeat(60)}</Text>
 
-            {/* File Outputs */}
-            {(outputFile || aiPromptFile || report) && (
-                <Box flexDirection="column" marginBottom={1} paddingX={1}>
-                    {outputFile && (
-                        <Box>
-                            <Text color={colors.muted}>JSON Report: </Text>
-                            <Text color={colors.success}>{outputFile}</Text>
-                        </Box>
-                    )}
-                    {report && (
-                        <Box>
-                            <Text color={colors.muted}>HTML Report: </Text>
-                            <Text color={colors.success}>{report}</Text>
-                        </Box>
-                    )}
-                    {aiPromptFile && (
-                        <Box>
-                            <Text color={colors.muted}>AI Prompt: </Text>
-                            <Text color={colors.info}>{aiPromptFile}</Text>
-                        </Box>
-                    )}
+            <Box marginTop={1}>
+                <Text color="gray">target  </Text>
+                <Text>{url}</Text>
+            </Box>
+
+            {/* Stats */}
+            <Box marginTop={1}>
+                <Text bold color={summary.totalViolations > 0 ? colors.critical : colors.success}>
+                    {summary.totalViolations} violations
+                </Text>
+                <Text color="gray">  {summary.totalPasses} passes  {summary.totalComponents} components</Text>
+            </Box>
+
+            {summary.totalViolations > 0 && (
+                <Box>
+                    {sev.critical > 0 && <Text color={colors.critical}>{sev.critical} critical  </Text>}
+                    {sev.serious > 0 && <Text color={colors.serious}>{sev.serious} serious  </Text>}
+                    {sev.moderate > 0 && <Text color={colors.moderate}>{sev.moderate} moderate  </Text>}
+                    {sev.minor > 0 && <Text color={colors.minor}>{sev.minor} minor</Text>}
                 </Box>
             )}
 
-            {/* Dashboard Summary */}
-            <Dashboard
-                summary={summary}
-                keyboardSummary={results.keyboardTests?.summary}
-            />
-
-            {/* Keyboard Test Results */}
-            {results.keyboardTests && (
-                <KeyboardResults results={results.keyboardTests} />
+            {summary.keyboardIssues !== undefined && summary.keyboardIssues > 0 && (
+                <Text color="gray">{summary.keyboardIssues} keyboard issues</Text>
             )}
 
-            {/* Success Message */}
+            <Box marginTop={1} marginBottom={1}>
+                <Text color="gray">{'─'.repeat(60)}</Text>
+            </Box>
+
+            {/* Violations */}
             {violations.length === 0 && (
-                <Box marginTop={1} padding={1}>
-                    <Text color={colors.success} bold>✓ No accessibility violations found!</Text>
-                </Box>
+                <Text color={colors.success} bold>No violations found.</Text>
             )}
 
-            {/* Accessibility Tree - Only show if --tree flag is set */}
-            {violations.length > 0 && showTree && (
-                <TreeViewer violations={violations} />
-            )}
+            {violations.map((v, idx) => {
+                const impact = v.impact;
+                const impactColor = impactColors[impact] || colors.muted;
 
-            {/* Violation Cards */}
-            {violations.length > 0 && (
-                <Box flexDirection="column" marginTop={1}>
-                    <Text bold underline>Violations</Text>
-                    {violations.map((violation, idx) => (
-                        <ViolationCard key={idx} violation={violation} index={idx + 1} />
-                    ))}
-                </Box>
-            )}
+                return (
+                    <Box key={idx} flexDirection="column" marginBottom={1}>
+                        {/* Rule header */}
+                        <Box>
+                            <Text color={impactColor} bold>{impact.toUpperCase()}</Text>
+                            <Text>  {v.id}  </Text>
+                            <Text color="gray">{v.nodes.length} instance{v.nodes.length !== 1 ? 's' : ''}</Text>
+                        </Box>
 
-            {/* Incomplete - Manual Review Needed */}
-            {incomplete && incomplete.length > 0 && (
-                <Box flexDirection="column" marginTop={2}>
-                    <Box marginBottom={1}>
-                        <Text bold underline color={colors.serious}>Manual Review Required ({incomplete.length})</Text>
-                    </Box>
-                    <Text color={colors.muted} dimColor>
-                        These items could not be automatically verified and require manual testing:
-                    </Text>
-                    {incomplete.slice(0, 5).map((item, idx) => (
-                        <Box key={idx} flexDirection="column" marginTop={1} marginLeft={1}>
-                            <Box>
-                                <Text color={colors.serious}>• </Text>
-                                <Text bold>{item.id}</Text>
-                                <Text color={colors.muted}> - {item.description}</Text>
+                        {/* Description */}
+                        <Text color="gray">{v.description}</Text>
+
+                        {/* Fix suggestion */}
+                        {v.fixSuggestion && (
+                            <Box marginTop={1}>
+                                <Text color={colors.success}>FIX: </Text>
+                                <Text>{v.fixSuggestion.summary}</Text>
                             </Box>
-                            {item.nodes.length > 0 && item.nodes[0].message && (
-                                <Box marginLeft={2}>
-                                    <Text color="gray" dimColor>Reason: {item.nodes[0].message}</Text>
+                        )}
+
+                        {/* Instances */}
+                        {v.nodes.map((node, i) => {
+                            const source = (node as any).source;
+                            const sourceLoc = fmtSource(source);
+
+                            const rawPath = node.userComponentPath?.length
+                                ? node.userComponentPath
+                                : node.componentPath || [];
+                            const filtered = rawPath.filter(isUserComponent);
+                            const comp = filtered.length > 0
+                                ? filtered[filtered.length - 1]
+                                : node.component && isUserComponent(node.component)
+                                ? node.component
+                                : null;
+
+                            const sourceStack = (node as any).sourceStack as Array<{ filePath: string; lineNumber?: number | null; columnNumber?: number | null; componentName?: string | null }> | undefined;
+
+                            return (
+                                <Box key={i} flexDirection="column" marginLeft={2} marginTop={1}>
+                                    {/* Source + component */}
+                                    <Box>
+                                        {sourceLoc ? (
+                                            <>
+                                                <Text color={colors.accent} bold>{sourceLoc}</Text>
+                                                {comp && <Text color="gray"> in </Text>}
+                                                {comp && <Text bold>{comp}</Text>}
+                                            </>
+                                        ) : comp ? (
+                                            <Text bold>{comp}</Text>
+                                        ) : (
+                                            <Text color="gray">{node.cssSelector || node.target?.[0] || 'unknown'}</Text>
+                                        )}
+                                    </Box>
+
+                                    {/* Source stack */}
+                                    {sourceStack && sourceStack.length > 1 && (
+                                        <Box flexDirection="column" marginLeft={2}>
+                                            {sourceStack.slice(0, 5).map((frame, j) => {
+                                                const name = frame.componentName && frame.componentName.length > 2 ? frame.componentName : '';
+                                                const frameLoc = fmtSource(frame);
+                                                return (
+                                                    <Text key={j} color="gray" dimColor>
+                                                        {name ? `in ${name} ` : ''}({frameLoc})
+                                                    </Text>
+                                                );
+                                            })}
+                                        </Box>
+                                    )}
+
+                                    {/* HTML snippet */}
+                                    <Text color="gray" dimColor>
+                                        {(node.htmlSnippet || node.html || '').substring(0, 80)}
+                                    </Text>
                                 </Box>
-                            )}
-                            <Box marginLeft={2}>
-                                <Text color="gray" dimColor>
-                                    {item.nodes.length} element{item.nodes.length !== 1 ? 's' : ''} to check
-                                </Text>
+                            );
+                        })}
+
+                        {/* Help URL */}
+                        {v.helpUrl && (
+                            <Box marginLeft={2} marginTop={1}>
+                                <Text color="gray" dimColor underline>{v.helpUrl}</Text>
                             </Box>
+                        )}
+
+                        {/* Rule separator */}
+                        <Box marginTop={1}>
+                            <Text color="gray">{'─'.repeat(60)}</Text>
+                        </Box>
+                    </Box>
+                );
+            })}
+
+            {/* Incomplete */}
+            {incomplete && incomplete.length > 0 && (
+                <Box flexDirection="column" marginTop={1}>
+                    <Text bold>REVIEW  </Text>
+                    <Text color="gray">{incomplete.length} items need manual review</Text>
+                    {incomplete.slice(0, 5).map((item, i) => (
+                        <Box key={i} marginLeft={2} marginTop={1} flexDirection="column">
+                            <Text>{item.id}</Text>
+                            <Text color="gray">{item.description}</Text>
                         </Box>
                     ))}
-                    {incomplete.length > 5 && (
-                        <Box marginTop={1} marginLeft={1}>
-                            <Text color="gray" dimColor>
-                                ... and {incomplete.length - 5} more (see JSON output for full list)
-                            </Text>
-                        </Box>
-                    )}
+                </Box>
+            )}
+
+            {/* Output files */}
+            {(outputFile || aiPromptFile) && (
+                <Box flexDirection="column" marginTop={1}>
+                    {outputFile && <Text color="gray">json: {outputFile}</Text>}
+                    {aiPromptFile && <Text color="gray">prompt: {aiPromptFile}</Text>}
                 </Box>
             )}
         </Box>

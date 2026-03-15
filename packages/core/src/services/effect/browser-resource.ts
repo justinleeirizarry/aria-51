@@ -233,7 +233,7 @@ export const waitForPageStability = (
                 `Page did not stabilize after ${navigationCount} navigation checks. Proceeding anyway...`
             );
         } else if (isStable) {
-            logger.info('Page appears stable, proceeding...');
+            logger.debug('Page appears stable, proceeding...');
         }
 
         return { isStable, navigationCount };

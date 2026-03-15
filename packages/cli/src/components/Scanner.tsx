@@ -1,34 +1,30 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
-import { Banner } from './Banner.js';
 
 interface ScannerProps {
     url: string;
     browser: string;
 }
 
-const Scanner: React.FC<ScannerProps> = ({ url, browser }) => {
+const Scanner: React.FC<ScannerProps> = ({ url }) => {
     return (
-        <Box flexDirection="column" padding={1} borderStyle="round" borderColor="cyan">
-            <Banner />
+        <Box flexDirection="column">
+            <Text color="gray">{'━'.repeat(60)}</Text>
+            <Text>{' '}</Text>
+            <Text bold>{'  a11y.scan'}</Text>
+            <Text>{' '}</Text>
+            <Text color="gray">{'━'.repeat(60)}</Text>
 
-            <Box flexDirection="column" marginBottom={1}>
-                <Box>
-                    <Text color="gray">Target:  </Text>
-                    <Text bold>{url}</Text>
-                </Box>
-                <Box>
-                    <Text color="gray">Browser: </Text>
-                    <Text>{browser}</Text>
-                </Box>
+            <Box marginTop={1}>
+                <Text color="gray">target  </Text>
+                <Text>{url}</Text>
             </Box>
-
-            <Box borderStyle="single" borderColor="gray" paddingX={1}>
-                <Text color="green">
+            <Box>
+                <Text color="gray">
                     <Spinner type="dots" />
                 </Text>
-                <Text>  Scanning for accessibility violations...</Text>
+                <Text color="gray">  scanning</Text>
             </Box>
         </Box>
     );

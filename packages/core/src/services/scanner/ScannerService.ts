@@ -176,7 +176,7 @@ export class ScannerService implements IScannerService {
             const componentInfo = rawData.components.length > 0
                 ? ` and ${rawData.components.length} components`
                 : '';
-            logger.info(
+            logger.debug(
                 `Scan complete: Found ${rawData.violations.length} violations${componentInfo}`
             );
 

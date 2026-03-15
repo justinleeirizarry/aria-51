@@ -156,7 +156,7 @@ export const performScan = (
         let rawData = yield* pipe(
             scanner.scan(page, { tags, includeKeyboardTests, disableRules, exclude }),
             Effect.retry(retrySchedule),
-            Effect.tap(() => Effect.sync(() => logger.info('Scan completed successfully')))
+            Effect.tap(() => Effect.sync(() => logger.debug('Scan completed successfully')))
         );
 
         // If supported framework detected and component bundle provided, inject and attribute
@@ -265,7 +265,7 @@ const attributeWithComponentPlugin = (
             return rawData;
         }
 
-        logger.info('Component plugin injected, attributing violations to components...');
+        logger.debug('Component plugin injected, attributing violations to components...');
 
         // Call ReactA11yPlugin.attributeViolations in browser context
         const attributed = yield* Effect.tryPromise({
@@ -291,7 +291,7 @@ const attributeWithComponentPlugin = (
         });
 
         if (attributed && attributed.components) {
-            logger.info(`Component attribution complete: ${attributed.components.length} components found`);
+            logger.debug(`Component attribution complete: ${attributed.components.length} components found`);
             return {
                 ...rawData,
                 components: attributed.components,

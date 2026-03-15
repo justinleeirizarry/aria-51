@@ -175,21 +175,49 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
               })
             : null;
 
+          const source = (node as any).source;
+          const sourceStack = (node as any).sourceStack as Array<{ filePath: string; lineNumber?: number | null; columnNumber?: number | null; componentName?: string | null }> | undefined;
+          const sourceLoc = source?.filePath
+            ? source.filePath + (source.lineNumber ? ':' + source.lineNumber : '') + (source.columnNumber ? ':' + source.columnNumber : '')
+            : null;
+
           return (
             <Box key={i} flexDirection="column" marginTop={1}>
-              {/* Component and selector */}
+              {/* Source + component on one line */}
               <Box>
                 <Text color="gray">• </Text>
-                <Text color={colors.highlight} bold>
-                  {componentName}
-                </Text>
-                {node.cssSelector && (
-                  <Text color="gray" dimColor>
-                    {" "}
-                    ({node.cssSelector})
-                  </Text>
+                {sourceLoc ? (
+                  <>
+                    <Text color={colors.accent} bold>{sourceLoc}</Text>
+                    <Text color="gray"> in </Text>
+                    <Text color={colors.highlight} bold>{componentName}</Text>
+                  </>
+                ) : (
+                  <Text color={colors.highlight} bold>{componentName}</Text>
                 )}
               </Box>
+
+              {/* Selector on its own line */}
+              {node.cssSelector && (
+                <Box marginLeft={2}>
+                  <Text color="gray" dimColor>{node.cssSelector}</Text>
+                </Box>
+              )}
+
+              {/* Source stack */}
+              {sourceStack && sourceStack.length > 1 && (
+                <Box flexDirection="column" marginLeft={2}>
+                  {sourceStack.slice(0, 4).map((frame, j) => {
+                    const frameLoc = frame.filePath + (frame.lineNumber ? ':' + frame.lineNumber : '');
+                    const name = frame.componentName && frame.componentName.length > 2 ? frame.componentName + ' ' : '';
+                    return (
+                      <Text key={j} color="gray" dimColor>
+                        {name}{frameLoc}
+                      </Text>
+                    );
+                  })}
+                </Box>
+              )}
 
               {/* Contextual fix - Current element */}
               {contextualFix && (

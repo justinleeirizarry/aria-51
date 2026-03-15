@@ -240,7 +240,7 @@ export class BrowserService implements IBrowserService {
             logger.warn(`Page did not stabilize after ${navigationCount} navigation checks. Proceeding anyway...`);
             logger.debug(`Last error: ${lastError?.message || 'Unknown'}`);
         } else if (isStable) {
-            logger.info('Page appears stable, proceeding...');
+            logger.debug('Page appears stable, proceeding...');
         }
 
         return { isStable, navigationCount, lastError };

@@ -32,6 +32,7 @@ import {
     logger,
     LogLevel,
     generateAndExport,
+    generatePrompt,
     ScanError,
 } from '@accessibility-toolkit/core';
 import {
@@ -511,17 +512,74 @@ if (!isTTY) {
                             if (violation.helpUrl) console.log(`  Docs: ${violation.helpUrl}`);
                         }
                     } else {
-                        const seen = new WeakSet();
-                        const jsonOutput = JSON.stringify(results, (key, value) => {
-                            if (typeof value === 'object' && value !== null) {
-                                if (seen.has(value)) {
-                                    return '[Circular]';
+                        // Minimal formatted output
+                        const { summary, violations, incomplete } = results;
+                        const sev = summary.violationsBySeverity;
+                        const sep = '─'.repeat(60);
+
+                        console.log(`A11Y SCAN / ${scanUrl}\n`);
+                        const sevParts = [];
+                        if (sev.critical > 0) sevParts.push(`${sev.critical} critical`);
+                        if (sev.serious > 0) sevParts.push(`${sev.serious} serious`);
+                        if (sev.moderate > 0) sevParts.push(`${sev.moderate} moderate`);
+                        if (sev.minor > 0) sevParts.push(`${sev.minor} minor`);
+                        console.log(`${summary.totalViolations} violations  ${summary.totalPasses} passes  ${summary.totalComponents} components`);
+                        if (sevParts.length > 0) console.log(sevParts.join('  '));
+                        if (summary.keyboardIssues) console.log(`${summary.keyboardIssues} keyboard issues`);
+                        console.log(`\n${sep}\n`);
+
+                        if (violations.length === 0) {
+                            console.log('No violations found.\n');
+                        }
+
+                        for (const v of violations) {
+                            console.log(`${v.impact.toUpperCase()}  ${v.id}  ${v.nodes.length} instance${v.nodes.length !== 1 ? 's' : ''}`);
+                            console.log(v.description);
+                            if (v.fixSuggestion) console.log(`FIX: ${v.fixSuggestion.summary}`);
+                            console.log('');
+
+                            for (const n of v.nodes) {
+                                const src = (n as any).source;
+                                const sourceStack = (n as any).sourceStack as Array<{ filePath: string; lineNumber?: number | null; columnNumber?: number | null; componentName?: string | null }> | undefined;
+                                const fmtLoc = (s: any) => s?.filePath ? s.filePath + (s.lineNumber ? ':' + s.lineNumber : '') + (s.columnNumber ? ':' + s.columnNumber : '') : '';
+                                const loc = fmtLoc(src);
+                                const path = (n.userComponentPath || n.componentPath || []).filter(
+                                    (name: string) => name.length > 2 && name[0] === name[0].toUpperCase() && !/^(Provider|Context|Fragment|Suspense)/.test(name)
+                                );
+                                const comp = path.length > 0 ? path[path.length - 1] : (n.component && n.component.length > 2 ? n.component : null);
+
+                                // Source + component
+                                if (loc && comp) {
+                                    console.log(`  ${loc} in ${comp}`);
+                                } else if (loc) {
+                                    console.log(`  ${loc}`);
+                                } else if (comp) {
+                                    console.log(`  ${comp}`);
                                 }
-                                seen.add(value);
+
+                                // Source stack
+                                if (sourceStack && sourceStack.length > 1) {
+                                    for (const frame of sourceStack.slice(0, 5)) {
+                                        const name = frame.componentName && frame.componentName.length > 2 ? frame.componentName : '';
+                                        const frameLoc = fmtLoc(frame);
+                                        console.log(`    ${name ? 'in ' + name + ' ' : ''}(${frameLoc})`);
+                                    }
+                                }
+
+                                console.log(`  ${(n.htmlSnippet || n.html || '').substring(0, 80)}`);
                             }
-                            return value;
-                        }, 2);
-                        console.log(jsonOutput);
+
+                            if (v.helpUrl) console.log(`\n  ${v.helpUrl}`);
+                            console.log(`\n${sep}\n`);
+                        }
+
+                        if (incomplete && incomplete.length > 0) {
+                            console.log(`REVIEW  ${incomplete.length} items need manual review\n`);
+                            for (const item of incomplete.slice(0, 5)) {
+                                console.log(`  ${item.id}`);
+                                console.log(`  ${item.description}`);
+                            }
+                        }
                     }
 
                     // Handle AI prompt generation
