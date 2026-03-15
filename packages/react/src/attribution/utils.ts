@@ -88,3 +88,23 @@ export function extractHtmlSnippet(html: string, maxLength: number = 100): strin
 
     return snippet;
 }
+
+/**
+ * Clean up webpack/bundler prefixes from file paths
+ * e.g. "_N_E/./components/Button.tsx" → "components/Button.tsx"
+ *      "_N_E/../../../src/app/page.tsx" → "src/app/page.tsx"
+ */
+export function cleanFilePath(filePath: string): string {
+    let p = filePath;
+    // Strip Next.js webpack prefix
+    p = p.replace(/^_N_E\//, '');
+    // Strip leading ./
+    p = p.replace(/^\.\//, '');
+    // Normalize ../../.. paths — keep only from the first real directory
+    const parts = p.split('/');
+    const firstReal = parts.findIndex(s => s !== '..' && s !== '.');
+    if (firstReal > 0) {
+        p = parts.slice(firstReal).join('/');
+    }
+    return p;
+}

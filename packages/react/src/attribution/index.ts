@@ -19,7 +19,14 @@ import type {
 } from '../types.js';
 import { findComponentForElement } from '../fiber/traversal.js';
 import { filterUserComponents, isFrameworkComponent } from '../fiber/framework-filter.js';
-import { generateCssSelector, extractHtmlSnippet } from './utils.js';
+import { generateCssSelector, extractHtmlSnippet, cleanFilePath } from './utils.js';
+
+/**
+ * Clean source location file paths
+ */
+function cleanSource(s: { filePath: string; lineNumber: number | null; columnNumber: number | null; componentName?: string | null }) {
+    return { ...s, filePath: cleanFilePath(s.filePath) };
+}
 
 /**
  * Try to get component info directly from DOM element using element-source
@@ -37,19 +44,21 @@ async function getComponentFromElement(element: Element): Promise<ComponentInfo 
         // Build the full source stack with locations at each component level
         const sourceStack = info.stack
             ?.filter(s => s.filePath)
-            .map(s => ({
+            .map(s => cleanSource({
                 filePath: s.filePath,
                 lineNumber: s.lineNumber,
                 columnNumber: s.columnNumber,
                 componentName: s.componentName,
             })) ?? [];
 
+        const source = info.source ? cleanSource(info.source) : undefined;
+
         return {
             name: info.componentName,
             type: info.tagName === info.componentName ? 'host' : 'component',
             domNode: element,
             path,
-            source: info.source ?? undefined,
+            source,
             sourceStack: sourceStack.length > 0 ? sourceStack : undefined,
         };
     } catch {

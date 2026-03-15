@@ -39,6 +39,7 @@ export {
     // Orchestration Types (service migrated to Effect-based implementation)
     type BaseScanOptions,
     type ScanOperationResult,
+    type ScanProgressStep,
 } from './services/index.js';
 
 // =============================================================================

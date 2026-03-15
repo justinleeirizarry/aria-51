@@ -8,4 +8,5 @@ export type {
     BrowserType,
     BaseScanOptions,
     ScanOperationResult,
+    ScanProgressStep,
 } from './types.js';

@@ -28,6 +28,16 @@ export interface BaseScanOptions {
     disableRules?: string[];
     /** CSS selectors to exclude from scanning */
     exclude?: string[];
+    /** Progress callback fired at each scan step */
+    onProgress?: (step: ScanProgressStep) => void;
+}
+
+/**
+ * Progress step emitted during a scan
+ */
+export interface ScanProgressStep {
+    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'processing' | 'done';
+    message: string;
 }
 
 /**

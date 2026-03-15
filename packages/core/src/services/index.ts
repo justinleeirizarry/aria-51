@@ -38,4 +38,5 @@ export {
 export type {
     BaseScanOptions,
     ScanOperationResult,
+    ScanProgressStep,
 } from './orchestration/index.js';

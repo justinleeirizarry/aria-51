@@ -4,6 +4,7 @@
 
 import { resolveSource } from 'element-source';
 import { getComponentName, type FiberNode } from './component-resolver.js';
+import { cleanFilePath } from '../attribution/utils.js';
 import type { ComponentInfo } from '../types.js';
 
 /**
@@ -148,7 +149,7 @@ export async function enrichComponentsWithSource(components: ComponentInfo[]): P
             try {
                 const source = await resolveSource(component.domNode);
                 if (source) {
-                    component.source = source;
+                    component.source = { ...source, filePath: cleanFilePath(source.filePath) };
                 }
             } catch {
                 // element-source may fail for some elements; skip silently

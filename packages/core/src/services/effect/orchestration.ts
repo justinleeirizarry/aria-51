@@ -104,9 +104,15 @@ export const performScan = (
             mobile,
             disableRules,
             exclude,
+            onProgress,
         } = options;
 
+        const progress = (step: import('../orchestration/types.js').ScanProgressStep['step'], message: string) => {
+            onProgress?.({ step, message });
+        };
+
         // Launch browser (with mobile viewport if requested)
+        progress('launching', `Launching ${browserType} browser…`);
         yield* browser.launch({
             browserType,
             headless,
@@ -118,12 +124,15 @@ export const performScan = (
         });
 
         // Navigate to URL
+        progress('navigating', `Navigating to ${url}…`);
         yield* browser.navigate(url);
 
         // Wait for page stability (important for SPAs)
+        progress('stabilizing', 'Waiting for page to stabilize…');
         yield* browser.waitForStability();
 
         // Check for supported framework (only fail if explicitly required)
+        progress('detecting', 'Detecting frameworks…');
         const hasFramework = yield* browser.detectFramework();
         if (options.requireFramework && !hasFramework) {
             return yield* Effect.fail(new EffectReactNotDetectedError({ url }));
@@ -143,6 +152,7 @@ export const performScan = (
         });
 
         // Run scan with retry logic
+        progress('scanning', 'Running accessibility scan…');
         let rawData = yield* pipe(
             scanner.scan(page, { tags, includeKeyboardTests, disableRules, exclude }),
             Effect.retry(retrySchedule),
@@ -152,10 +162,12 @@ export const performScan = (
         // If supported framework detected and component bundle provided, inject and attribute
         logger.debug(`Framework detected: ${hasFramework}, bundle path: ${componentBundlePath ?? 'not provided'}`);
         if (hasFramework && componentBundlePath) {
+            progress('attributing', 'Attributing violations to components…');
             rawData = yield* attributeWithComponentPlugin(page, rawData, componentBundlePath);
         }
 
         // Process results
+        progress('processing', 'Processing results…');
         const results = yield* processor.process(rawData, {
             url,
             browser: browserType,

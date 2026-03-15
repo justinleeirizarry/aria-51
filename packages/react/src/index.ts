@@ -72,4 +72,5 @@ export {
 export {
     generateCssSelector,
     extractHtmlSnippet,
+    cleanFilePath,
 } from './attribution/utils.js';

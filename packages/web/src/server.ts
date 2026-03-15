@@ -1,14 +1,26 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { readFile } from 'fs/promises';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { runScanAsPromise, AppLayer, generatePrompt } from '@accessibility-toolkit/core';
 import { getComponentBundlePath } from '@accessibility-toolkit/react';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = new Hono();
 app.use('*', cors());
 
 app.get('/', (c) => {
     return c.html(PAGE_HTML);
+});
+
+app.get('/fonts/Satoshi-Variable.ttf', async (c) => {
+    const fontPath = join(__dirname, 'public/fonts/Satoshi-Variable.ttf');
+    const font = await readFile(fontPath);
+    return new Response(font, { headers: { 'Content-Type': 'font/ttf', 'Cache-Control': 'public, max-age=31536000' } });
 });
 
 app.post('/api/scan', async (c) => {
@@ -19,19 +31,40 @@ app.post('/api/scan', async (c) => {
         return c.json({ error: 'URL is required' }, 400);
     }
 
-    try {
-        const { results } = await runScanAsPromise({
-            url,
-            browser: 'chromium',
-            headless: true,
-            includeKeyboardTests: true,
-            componentBundlePath: components !== false ? getComponentBundlePath() : undefined,
-        }, AppLayer);
+    // SSE streaming response for progress updates
+    const stream = new ReadableStream({
+        start(controller) {
+            const encoder = new TextEncoder();
+            const send = (event: string, data: unknown) => {
+                controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`));
+            };
 
-        return c.json(results);
-    } catch (error: any) {
-        return c.json({ error: error.message || 'Scan failed' }, 500);
-    }
+            runScanAsPromise({
+                url,
+                browser: 'chromium',
+                headless: true,
+                includeKeyboardTests: true,
+                componentBundlePath: components !== false ? getComponentBundlePath() : undefined,
+                onProgress: (step) => {
+                    send('progress', step);
+                },
+            }, AppLayer).then(({ results }) => {
+                send('result', results);
+                controller.close();
+            }).catch((error: any) => {
+                send('error', { error: error.message || 'Scan failed' });
+                controller.close();
+            });
+        },
+    });
+
+    return new Response(stream, {
+        headers: {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        },
+    });
 });
 
 app.post('/api/prompt', async (c) => {
@@ -57,6 +90,12 @@ const PAGE_HTML = /* html */ `<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Accessibility Scanner</title>
 <style>
+  @font-face {
+    font-family: 'Satoshi';
+    src: url('/fonts/Satoshi-Variable.ttf') format('truetype');
+    font-weight: 300 900;
+    font-display: swap;
+  }
   :root {
     --bg: #ffffff;
     --fg: #000000;
@@ -72,7 +111,7 @@ const PAGE_HTML = /* html */ `<!DOCTYPE html>
     --blue: #0044cc;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'SF Mono', ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--bg); color: var(--fg); min-height: 100vh; font-size: 14px; }
+  body { font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; background: var(--bg); color: var(--fg); min-height: 100vh; font-size: 14px; }
 
   /* Top bar */
   .topbar { border-bottom: 2px solid var(--border); padding: 1rem 2.5rem; display: flex; align-items: center; gap: 1rem; }
@@ -193,7 +232,7 @@ async function runScan() {
     scanBtn.disabled = true;
     scanBtn.textContent = 'Scanning...';
     statusEl.className = 'status active';
-    statusEl.textContent = 'Launching browser and scanning...';
+    statusEl.textContent = 'Launching browser...';
     resultsEl.innerHTML = '';
 
     try {
@@ -202,11 +241,48 @@ async function runScan() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url }),
         });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Scan failed');
-        lastResults = data;
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let scanResult = null;
+        let scanError = null;
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            buffer += decoder.decode(value, { stream: true });
+
+            let boundary;
+            while ((boundary = buffer.indexOf('\\n\\n')) !== -1) {
+                const message = buffer.slice(0, boundary);
+                buffer = buffer.slice(boundary + 2);
+
+                let event = 'message';
+                let data = '';
+                for (const line of message.split('\\n')) {
+                    if (line.startsWith('event: ')) event = line.slice(7);
+                    else if (line.startsWith('data: ')) data = line.slice(6);
+                }
+                if (!data) continue;
+
+                if (event === 'progress') {
+                    const step = JSON.parse(data);
+                    statusEl.textContent = step.message;
+                } else if (event === 'result') {
+                    scanResult = JSON.parse(data);
+                } else if (event === 'error') {
+                    scanError = JSON.parse(data);
+                }
+            }
+        }
+
+        if (scanError) throw new Error(scanError.error || 'Scan failed');
+        if (!scanResult) throw new Error('No results received');
+
+        lastResults = scanResult;
         statusEl.className = 'status';
-        renderResults(data);
+        renderResults(scanResult);
     } catch (err) {
         statusEl.className = 'status active error';
         statusEl.textContent = err.message;
