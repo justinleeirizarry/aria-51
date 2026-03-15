@@ -34,9 +34,9 @@ export {
     type IResultsProcessorService,
 } from './processor/index.js';
 
-// Orchestration Types (service migrated to Effect-based implementation)
+// Orchestration Types
 export type {
     BaseScanOptions,
     ScanOperationResult,
     ScanProgressStep,
-} from './orchestration/index.js';
+} from './effect/orchestration.js';

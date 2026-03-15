@@ -198,11 +198,6 @@ export {
     exportPrompt,
 } from './prompts/prompt-generator.js';
 
-export {
-    getTemplate,
-    listTemplates,
-    templates,
-} from './prompts/templates/index.js';
 
 // =============================================================================
 // Suggestions - Contextual fix generation

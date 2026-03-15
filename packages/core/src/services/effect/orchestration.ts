@@ -7,8 +7,7 @@
 import { Effect, Exit, Cause, Chunk, Option, pipe, type Layer } from 'effect';
 import { mkdir, writeFile } from 'fs/promises';
 import { dirname } from 'path';
-import type { ScanResults, BrowserScanData } from '../../types.js';
-import type { BaseScanOptions, ScanOperationResult } from '../orchestration/types.js';
+import type { ScanResults, BrowserScanData, BrowserType } from '../../types.js';
 import { logger } from '../../utils/logger.js';
 import {
     BrowserService,
@@ -31,15 +30,49 @@ import { getConfig } from '../../config/index.js';
 // ============================================================================
 
 /**
- * Options for the Effect-based scan operation
- * Uses the shared BaseScanOptions
+ * Base options for scan operations
  */
-export type EffectScanOptions = BaseScanOptions;
+export interface BaseScanOptions {
+    url: string;
+    browser: BrowserType;
+    headless: boolean;
+    tags?: string[];
+    includeKeyboardTests?: boolean;
+    outputFile?: string;
+    ciMode?: boolean;
+    ciThreshold?: number;
+    /** Require a supported framework to be detected on the page (default: false for generic scanning) */
+    requireFramework?: boolean;
+    /** Path to the component attribution bundle for framework-aware scanning */
+    componentBundlePath?: string;
+    /** Emulate a mobile device (375x812 viewport, touch enabled) */
+    mobile?: boolean;
+    /** Axe rule IDs to disable (e.g. ['color-contrast']) */
+    disableRules?: string[];
+    /** CSS selectors to exclude from scanning */
+    exclude?: string[];
+    /** Progress callback fired at each scan step */
+    onProgress?: (step: ScanProgressStep) => void;
+}
 
 /**
- * Result of the Effect-based scan operation
- * Uses the shared ScanOperationResult
+ * Progress step emitted during a scan
  */
+export interface ScanProgressStep {
+    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'processing' | 'done';
+    message: string;
+}
+
+/**
+ * Result of a scan operation
+ */
+export interface ScanOperationResult {
+    results: ScanResults;
+    ciPassed?: boolean;
+    outputFile?: string;
+}
+
+export type EffectScanOptions = BaseScanOptions;
 export type EffectScanResult = ScanOperationResult;
 
 /**
@@ -107,7 +140,7 @@ export const performScan = (
             onProgress,
         } = options;
 
-        const progress = (step: import('../orchestration/types.js').ScanProgressStep['step'], message: string) => {
+        const progress = (step: ScanProgressStep['step'], message: string) => {
             onProgress?.({ step, message });
         };
 
