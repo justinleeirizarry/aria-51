@@ -1,10 +1,12 @@
 import React from 'react';
 import { Box, Text } from 'ink';
+import Spinner from 'ink-spinner';
 import type { ScanResults } from '@accessibility-toolkit/core';
 import { colors, impactColors } from '../colors.js';
 
 interface ResultsProps {
     results: ScanResults | null;
+    url?: string;
     outputFile?: string;
     aiPromptFile?: string;
     report?: string;
@@ -28,9 +30,27 @@ function fmtSource(s: any): string {
     return loc;
 }
 
-const Results: React.FC<ResultsProps> = ({ results, outputFile, aiPromptFile, quiet }) => {
+const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, aiPromptFile, quiet }) => {
     if (!results) {
-        return <Text color="gray">Scanning...</Text>;
+        return (
+            <Box flexDirection="column">
+                <Text color="gray">{'━'.repeat(60)}</Text>
+                <Text>{' '}</Text>
+                <Text bold>{'  a11y.scan'}</Text>
+                <Text>{' '}</Text>
+                <Text color="gray">{'━'.repeat(60)}</Text>
+                {scanUrl && (
+                    <Box marginTop={1}>
+                        <Text color="gray">target  </Text>
+                        <Text>{scanUrl}</Text>
+                    </Box>
+                )}
+                <Box marginTop={1}>
+                    <Text color="gray"><Spinner type="dots" /></Text>
+                    <Text color="gray">  scanning</Text>
+                </Box>
+            </Box>
+        );
     }
 
     const { violations, incomplete, summary, url } = results;

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Box, Text, useApp } from 'ink';
 import Spinner from 'ink-spinner';
 import { Effect } from 'effect';
-import Scanner from './components/Scanner.js';
 import Results from './components/Results.js';
 import TestGenerator from './components/TestGenerator.js';
 import TestGenerationResults from './components/TestGenerationResults.js';
@@ -373,7 +372,6 @@ const App: React.FC<AppProps> = ({
 
     // Scan mode
     if (scanState === 'scanning') {
-        // In quiet mode, show minimal scanning indicator
         if (quiet) {
             return (
                 <Box>
@@ -381,11 +379,11 @@ const App: React.FC<AppProps> = ({
                 </Box>
             );
         }
-        return <Scanner url={url} browser={browser} />;
+        return <Results results={null} url={url} quiet={quiet} />;
     }
 
     if (scanState === 'complete' && scanResults) {
-        return <Results results={scanResults} outputFile={output} aiPromptFile={aiPromptFilePath || undefined} showTree={tree} quiet={quiet} />;
+        return <Results results={scanResults} url={url} outputFile={output} aiPromptFile={aiPromptFilePath || undefined} showTree={tree} quiet={quiet} />;
     }
 
     // In quiet mode, show nothing during initialization
