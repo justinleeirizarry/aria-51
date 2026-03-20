@@ -150,23 +150,43 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
 
   /* Criteria table */
   .criteria-table { width: 100%; border-collapse: collapse; }
-  .criteria-table th { font-size: 0.5625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-light); }
-  .criteria-table td { padding: 0.625rem 0.75rem; font-size: 0.8125rem; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .criteria-table th { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-align: left; padding: 0.625rem 0.75rem; border-bottom: 1px solid var(--border-light); }
+  .criteria-table td { padding: 0.75rem 0.75rem; font-size: 0.9375rem; border-bottom: 1px solid var(--border-light); vertical-align: top; }
   .criteria-table tr:last-child td { border-bottom: none; }
   .criteria-table .criterion-id { font-weight: 600; white-space: nowrap; min-width: 4rem; }
   .criteria-table .criterion-title { }
-  .criteria-table .criterion-level { font-size: 0.6875rem; font-weight: 700; white-space: nowrap; }
+  .criteria-table .criterion-level { font-size: 0.8125rem; font-weight: 700; white-space: nowrap; }
   .criteria-table a { color: var(--fg); text-decoration: underline; text-underline-offset: 2px; }
   .criteria-table a:hover { text-decoration-thickness: 2px; }
 
-  .status-badge { font-size: 0.5625rem; padding: 0.1875rem 0.5rem; border: 1.5px solid; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; display: inline-block; }
+  .status-badge { font-size: 0.6875rem; padding: 0.25rem 0.625rem; border: 1.5px solid; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; display: inline-block; }
   .status-badge.fail { border-color: var(--red); color: var(--red); }
   .status-badge.pass { border-color: var(--green); color: var(--green); }
   .status-badge.not-tested { border-color: var(--border-light); color: #999; }
   .status-badge.manual-review { border-color: #b08d00; color: #b08d00; }
 
-  .criterion-violations { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+  .criterion-violations { font-size: 0.8125rem; color: var(--muted); margin-top: 0.25rem; }
   .criterion-violations span { color: var(--red); font-weight: 600; }
+
+  /* Coverage summary */
+  .coverage-summary { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.875rem; font-weight: 600; }
+  .coverage-sep { color: var(--border-light); }
+  .coverage-stat.pass { color: var(--green); }
+  .coverage-stat.fail { color: var(--red); }
+  .coverage-stat.manual { color: #b08d00; }
+
+  /* Testability badges */
+  .testability-badge { font-size: 0.625rem; padding: 0.1875rem 0.4375rem; border: 1px solid; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; vertical-align: middle; margin-left: 0.375rem; }
+  .testability-badge.semi-automated { border-color: var(--blue, #4a90d9); color: var(--blue, #4a90d9); }
+  .testability-badge.manual { border-color: #b08d00; color: #b08d00; }
+  .testability-badge.multi-page { border-color: #8b5cf6; color: #8b5cf6; }
+
+  /* Expandable criterion rows */
+  .criterion-row.expandable { cursor: pointer; }
+  .criterion-row.expandable:hover { background: var(--surface, rgba(255,255,255,0.02)); }
+  .criterion-row.expandable .criterion-id::before { content: '\\25B8  '; font-size: 0.625rem; color: var(--muted); }
+  .criterion-row.expanded .criterion-id::before { content: '\\25BE  '; }
+  .sc-text { font-size: 0.875rem; color: var(--muted); line-height: 1.6; padding: 0.75rem 0; white-space: pre-line; }
 
   /* Level filter */
   .level-filter { display: flex; gap: 0.5rem; margin-bottom: 2rem; }

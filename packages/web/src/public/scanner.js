@@ -155,6 +155,19 @@ function renderResults(r) {
         h.addEventListener('click', () => h.parentElement.classList.toggle('open'));
     });
 
+    // Wire up expandable criterion rows to show SC text
+    resultsEl.querySelectorAll('.criterion-row.expandable').forEach(row => {
+        row.addEventListener('click', (e) => {
+            if (e.target.closest('a')) return; // don't toggle when clicking links
+            const scRow = row.nextElementSibling;
+            if (scRow && scRow.classList.contains('sc-text-row')) {
+                const visible = scRow.style.display !== 'none';
+                scRow.style.display = visible ? 'none' : 'table-row';
+                row.classList.toggle('expanded', !visible);
+            }
+        });
+    });
+
     // Wire up level filter buttons
     resultsEl.querySelectorAll('.level-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -311,14 +324,28 @@ function renderComplianceReport(r) {
 
     let html = '';
 
+    // Coverage summary
+    const totalCriteria = Object.keys(wcagDb.criteria).length;
+    const testedTotal = data.testedCriteria.size;
+    const failedTotal = Object.keys(data.failedCriteria).length;
+    const passedTotal = testedTotal - failedTotal;
+    const manualTotal = Object.values(wcagDb.criteria).filter(c => c.testability === 'manual').length;
+    const scorePercent = testedTotal > 0 ? Math.round((passedTotal / testedTotal) * 100) : 0;
+
+    html += '<div class="coverage-summary">';
+    html += '<span class="coverage-stat">' + testedTotal + '/' + totalCriteria + ' tested</span>';
+    html += '<span class="coverage-sep">&middot;</span>';
+    html += '<span class="coverage-stat pass">' + passedTotal + ' passing</span>';
+    html += '<span class="coverage-sep">&middot;</span>';
+    html += '<span class="coverage-stat fail">' + failedTotal + ' failing</span>';
+    html += '<span class="coverage-sep">&middot;</span>';
+    html += '<span class="coverage-stat manual">' + manualTotal + ' manual review</span>';
+    html += '</div>';
+
     // Level conformance cards
     html += '<div class="compliance-header">';
 
     // Overall score
-    const testedTotal = data.testedCriteria.size;
-    const failedTotal = Object.keys(data.failedCriteria).length;
-    const passedTotal = testedTotal - failedTotal;
-    const scorePercent = testedTotal > 0 ? Math.round((passedTotal / testedTotal) * 100) : 0;
     html += '<div class="compliance-score"><div class="score-value">' + scorePercent + '%</div><div class="score-label">Criteria Passing</div></div>';
 
     html += '<div class="level-cards">';
@@ -368,9 +395,13 @@ function renderComplianceReport(r) {
         html += '<thead><tr><th>Criterion</th><th>Title</th><th>Level</th><th>Status</th></tr></thead>';
         html += '<tbody>';
         for (const c of filtered) {
-            html += '<tr>';
+            const hasSCText = c.successCriterionText && c.successCriterionText.length > 0;
+            html += '<tr class="criterion-row' + (hasSCText ? ' expandable' : '') + '">';
             html += '<td class="criterion-id">' + esc(c.id) + '</td>';
             html += '<td class="criterion-title"><a href="' + esc(c.w3cUrl) + '" target="_blank">' + esc(c.title) + '</a>';
+            if (c.testability && c.testability !== 'automated') {
+                html += ' <span class="testability-badge ' + c.testability + '">' + formatTestability(c.testability) + '</span>';
+            }
             if (c.violations.length > 0) {
                 html += '<div class="criterion-violations"><span>' + c.violations.length + ' violation' + (c.violations.length > 1 ? 's' : '') + '</span>';
                 html += ' &mdash; ' + c.violations.map(v => esc(v.help || v.id)).join(', ');
@@ -380,6 +411,9 @@ function renderComplianceReport(r) {
             html += '<td class="criterion-level">' + c.level + '</td>';
             html += '<td><span class="status-badge ' + c.status + '">' + formatStatus(c.status) + '</span></td>';
             html += '</tr>';
+            if (hasSCText) {
+                html += '<tr class="sc-text-row" style="display:none"><td></td><td colspan="3"><div class="sc-text">' + esc(c.successCriterionText) + '</div></td></tr>';
+            }
         }
         html += '</tbody></table></div>';
     }
@@ -398,6 +432,13 @@ function formatStatus(status) {
     if (status === 'pass') return 'Pass';
     if (status === 'manual-review') return 'Manual Review';
     return 'Not Tested';
+}
+
+function formatTestability(t) {
+    if (t === 'semi-automated') return 'Semi-Auto';
+    if (t === 'manual') return 'Manual';
+    if (t === 'multi-page') return 'Multi-Page';
+    return '';
 }
 
 function updateComplianceView() {
