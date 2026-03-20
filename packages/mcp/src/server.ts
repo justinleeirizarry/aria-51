@@ -27,7 +27,7 @@ if (hasEnvConfig()) {
 
 // Create server instance
 const server = new McpServer({
-    name: "accessibility-toolkit",
+    name: "a11y-scan",
     version: "1.0.0",
 });
 
@@ -143,7 +143,7 @@ server.registerTool(
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    logger.info("Accessibility Toolkit MCP Server running on stdio");
+    logger.info("a11y.scan MCP Server running on stdio");
 }
 
 main().catch((error) => {
