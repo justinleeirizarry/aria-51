@@ -6,6 +6,7 @@ import { relative, join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { scanHandler } from './routes/scan.js';
 import { promptHandler } from './routes/prompt.js';
+import { wcagCriteriaHandler } from './routes/wcag-criteria.js';
 import { ScannerPage } from './templates/page.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +25,7 @@ app.get('/', (c) => {
 
 app.post('/api/scan', scanHandler);
 app.post('/api/prompt', promptHandler);
+app.get('/api/wcag-criteria', wcagCriteriaHandler);
 
 const port = 3847;
 console.log(`Accessibility Scanner running at http://localhost:${port}`);

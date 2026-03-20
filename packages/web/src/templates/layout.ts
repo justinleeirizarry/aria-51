@@ -117,6 +117,61 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   .node-selector { color: #999; font-size: 0.75rem; margin-bottom: 0.5rem; }
   .node-html { font-size: 0.75rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border-light); padding: 1rem; overflow-x: auto; white-space: pre; margin-bottom: 0.75rem; max-height: 6rem; overflow-y: auto; line-height: 1.6; }
   .node-failure { color: var(--orange); font-size: 0.8125rem; line-height: 1.6; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; margin-bottom: 3rem; border-bottom: 2px solid var(--border); }
+  .tab { padding: 0.875rem 1.5rem; font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; border: 2px solid transparent; border-bottom: none; margin-bottom: -2px; background: none; font-family: inherit; color: var(--muted); }
+  .tab:hover { color: var(--fg); }
+  .tab.active { color: var(--fg); border-color: var(--border); background: var(--bg); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Compliance report */
+  .compliance-header { display: flex; gap: 2rem; align-items: flex-start; margin-bottom: 3rem; }
+  .compliance-score { min-width: 120px; padding: 1.5rem; border: 2px solid var(--border); text-align: center; }
+  .compliance-score .score-value { font-size: 2.5rem; font-weight: 700; line-height: 1; }
+  .compliance-score .score-label { font-size: 0.625rem; color: var(--muted); margin-top: 0.5rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; }
+
+  .level-cards { display: flex; gap: 0; flex: 1; border: 2px solid var(--border); }
+  .level-card { flex: 1; padding: 1.5rem; border-right: 2px solid var(--border); }
+  .level-card:last-child { border-right: none; }
+  .level-card-title { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.75rem; }
+  .level-card-value { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .level-card-detail { font-size: 0.6875rem; color: var(--muted); margin-top: 0.5rem; }
+  .level-card.pass .level-card-value { color: var(--green); }
+  .level-card.fail .level-card-value { color: var(--red); }
+  .level-card.partial .level-card-value { color: var(--orange); }
+
+  /* Principle sections */
+  .principle { margin-bottom: 2.5rem; }
+  .principle-header { display: flex; align-items: baseline; gap: 1rem; padding-bottom: 0.75rem; border-bottom: 2px solid var(--border); margin-bottom: 1rem; }
+  .principle-name { font-size: 0.875rem; font-weight: 700; }
+  .principle-stats { font-size: 0.6875rem; color: var(--muted); }
+
+  /* Criteria table */
+  .criteria-table { width: 100%; border-collapse: collapse; }
+  .criteria-table th { font-size: 0.5625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid var(--border-light); }
+  .criteria-table td { padding: 0.625rem 0.75rem; font-size: 0.8125rem; border-bottom: 1px solid var(--border-light); vertical-align: top; }
+  .criteria-table tr:last-child td { border-bottom: none; }
+  .criteria-table .criterion-id { font-weight: 600; white-space: nowrap; min-width: 4rem; }
+  .criteria-table .criterion-title { }
+  .criteria-table .criterion-level { font-size: 0.6875rem; font-weight: 700; white-space: nowrap; }
+  .criteria-table a { color: var(--fg); text-decoration: underline; text-underline-offset: 2px; }
+  .criteria-table a:hover { text-decoration-thickness: 2px; }
+
+  .status-badge { font-size: 0.5625rem; padding: 0.1875rem 0.5rem; border: 1.5px solid; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; display: inline-block; }
+  .status-badge.fail { border-color: var(--red); color: var(--red); }
+  .status-badge.pass { border-color: var(--green); color: var(--green); }
+  .status-badge.not-tested { border-color: var(--border-light); color: #999; }
+
+  .criterion-violations { font-size: 0.75rem; color: var(--muted); margin-top: 0.25rem; }
+  .criterion-violations span { color: var(--red); font-weight: 600; }
+
+  /* Level filter */
+  .level-filter { display: flex; gap: 0.5rem; margin-bottom: 2rem; }
+  .level-filter-btn { padding: 0.5rem 1rem; font-size: 0.625rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; border: 2px solid var(--border); background: none; font-family: inherit; }
+  .level-filter-btn:hover { background: var(--surface); }
+  .level-filter-btn.active { background: var(--fg); color: var(--bg); }
 </style>
 </head>
 <body>
