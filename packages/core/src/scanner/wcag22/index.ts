@@ -91,6 +91,8 @@ export function runWCAG22Checks(): WCAG22CheckResults {
         statusMessages: statusMessagesViolations,
         errorIdentification: errorIdentificationViolations,
         meaningfulSequence: meaningfulSequenceViolations,
+        reflow: [],          // Populated by post-scan Playwright check
+        hoverFocusContent: [], // Populated by post-scan Playwright check
         summary: {
             totalViolations: allViolations.length,
             byLevel,

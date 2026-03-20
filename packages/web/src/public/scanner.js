@@ -236,7 +236,9 @@ function buildComplianceData(r) {
             authentication: '3.3.8',
             statusMessages: '4.1.3',
             errorIdentification: '3.3.1',
-            meaningfulSequence: '1.3.2'
+            meaningfulSequence: '1.3.2',
+            reflow: '1.4.10',
+            hoverFocusContent: '1.4.13'
         };
         for (const [key, criterionId] of Object.entries(wcag22Map)) {
             testedCriteria.add(criterionId);
@@ -399,9 +401,6 @@ function renderComplianceReport(r) {
             html += '<tr class="criterion-row' + (hasSCText ? ' expandable' : '') + '">';
             html += '<td class="criterion-id">' + esc(c.id) + '</td>';
             html += '<td class="criterion-title"><a href="' + esc(c.w3cUrl) + '" target="_blank">' + esc(c.title) + '</a>';
-            if (c.testability && c.testability !== 'automated') {
-                html += ' <span class="testability-badge ' + c.testability + '">' + formatTestability(c.testability) + '</span>';
-            }
             if (c.violations.length > 0) {
                 html += '<div class="criterion-violations"><span>' + c.violations.length + ' violation' + (c.violations.length > 1 ? 's' : '') + '</span>';
                 html += ' &mdash; ' + c.violations.map(v => esc(v.help || v.id)).join(', ');

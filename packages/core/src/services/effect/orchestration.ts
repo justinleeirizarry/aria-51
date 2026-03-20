@@ -24,6 +24,8 @@ import {
 import { ScanError, formatTaggedError } from '../../errors/scan-error.js';
 import { createRetrySchedule } from '../../utils/effect-retry.js';
 import { getConfig } from '../../config/index.js';
+import { checkReflow } from '../../scanner/wcag22/reflow-check.js';
+import { checkHoverFocusContent } from '../../scanner/wcag22/hover-focus-check.js';
 
 // ============================================================================
 // Types
@@ -191,6 +193,34 @@ export const performScan = (
             Effect.retry(retrySchedule),
             Effect.tap(() => Effect.sync(() => logger.debug('Scan completed successfully')))
         );
+
+        // Run post-scan Playwright-based WCAG checks (reflow, hover/focus)
+        yield* Effect.tryPromise({
+            try: async () => {
+                logger.debug('Running post-scan Playwright checks…');
+                const [reflowViolations, hoverViolations] = await Promise.all([
+                    checkReflow(page),
+                    checkHoverFocusContent(page),
+                ]);
+
+                // Merge into wcag22 results
+                if (rawData.wcag22) {
+                    rawData.wcag22.reflow = reflowViolations;
+                    rawData.wcag22.hoverFocusContent = hoverViolations;
+                    rawData.wcag22.summary.totalViolations += reflowViolations.length + hoverViolations.length;
+                    for (const v of [...reflowViolations, ...hoverViolations]) {
+                        const key = v.criterion;
+                        rawData.wcag22.summary.byCriterion[key] = (rawData.wcag22.summary.byCriterion[key] || 0) + 1;
+                        if (v.level === 'AA') rawData.wcag22.summary.byLevel.AA++;
+                    }
+                }
+                logger.debug(`Post-scan checks: ${reflowViolations.length} reflow, ${hoverViolations.length} hover/focus violations`);
+            },
+            catch: (err) => {
+                logger.warn(`Post-scan Playwright checks failed (non-fatal): ${err}`);
+                return new EffectScanDataError({ reason: `Post-scan checks failed: ${err}` });
+            },
+        }).pipe(Effect.catchAll(() => Effect.void));
 
         // If supported framework detected and component bundle provided, inject and attribute
         logger.debug(`Framework detected: ${hasFramework}, bundle path: ${componentBundlePath ?? 'not provided'}`);

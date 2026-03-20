@@ -192,6 +192,45 @@ export class ResultsProcessorService implements IResultsProcessorService {
                 summary += 'No accessibility violations found!';
             }
 
+            // Add WCAG 2.2 custom check violations
+            if (results.wcag22) {
+                const wcag22Checks = results.wcag22;
+                const checkCategories = [
+                    { key: 'targetSize', label: 'Target Size (2.5.8)' },
+                    { key: 'focusObscured', label: 'Focus Not Obscured (2.4.11)' },
+                    { key: 'focusAppearance', label: 'Focus Appearance (2.4.13)' },
+                    { key: 'dragging', label: 'Dragging Movements (2.5.7)' },
+                    { key: 'authentication', label: 'Accessible Authentication (3.3.8)' },
+                    { key: 'statusMessages', label: 'Status Messages (4.1.3)' },
+                    { key: 'errorIdentification', label: 'Error Identification (3.3.1)' },
+                    { key: 'meaningfulSequence', label: 'Meaningful Sequence (1.3.2)' },
+                    { key: 'reflow', label: 'Reflow (1.4.10)' },
+                    { key: 'hoverFocusContent', label: 'Content on Hover or Focus (1.4.13)' },
+                ] as const;
+
+                const wcag22Violations: string[] = [];
+                for (const { key, label } of checkCategories) {
+                    const items = (wcag22Checks as any)[key];
+                    if (items && items.length > 0) {
+                        wcag22Violations.push(`\n#### ${label} — ${items.length} violation(s)\n`);
+                        for (const v of items) {
+                            wcag22Violations.push(`- **${v.description}**\n  Element: \`${v.selector}\`\n  Impact: ${v.impact}\n`);
+                        }
+                    }
+                }
+
+                if (wcag22Violations.length > 0) {
+                    summary += '\n### WCAG 2.2 Custom Check Violations\n';
+                    summary += wcag22Violations.join('');
+                }
+            }
+
+            // Add keyboard test summary
+            if (results.keyboardTests && results.summary.keyboardIssues && results.summary.keyboardIssues > 0) {
+                summary += `\n### Keyboard Issues\n`;
+                summary += `Found **${results.summary.keyboardIssues}** keyboard accessibility issues.\n`;
+            }
+
             const content: MCPToolContent[] = [{ type: 'text', text: summary }];
 
             // Optionally include accessibility tree

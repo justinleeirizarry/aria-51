@@ -54,6 +54,8 @@ export interface WCAG22CheckResults {
     statusMessages: WCAG22Violation[];
     errorIdentification: WCAG22Violation[];
     meaningfulSequence: WCAG22Violation[];
+    reflow: WCAG22Violation[];
+    hoverFocusContent: WCAG22Violation[];
     summary: {
         totalViolations: number;
         byLevel: {

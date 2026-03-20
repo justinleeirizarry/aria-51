@@ -56,14 +56,20 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
     const { violations, incomplete, summary, url } = results;
     const sev = summary.violationsBySeverity;
 
+    const wcag22Total = results.wcag22?.summary?.totalViolations ?? 0;
+
     if (quiet) {
-        const icon = summary.totalViolations > 0 ? 'x' : 'v';
+        const total = summary.totalViolations + wcag22Total;
+        const icon = total > 0 ? 'x' : 'v';
         return (
             <Box flexDirection="column">
-                <Text>{icon} {url} — {summary.totalViolations} violations, {summary.totalPasses} passes</Text>
+                <Text>{icon} {url} — {total} violations, {summary.totalPasses} passes</Text>
                 {violations.map((v, i) => (
                     <Text key={i} color="gray">  [{v.impact}] {v.id}: {v.nodes.length} instances</Text>
                 ))}
+                {wcag22Total > 0 && (
+                    <Text color="gray">  + {wcag22Total} WCAG 2.2 violations</Text>
+                )}
             </Box>
         );
     }
@@ -84,8 +90,8 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
 
             {/* Stats */}
             <Box marginTop={1}>
-                <Text bold color={summary.totalViolations > 0 ? colors.critical : colors.success}>
-                    {summary.totalViolations} violations
+                <Text bold color={(summary.totalViolations + wcag22Total) > 0 ? colors.critical : colors.success}>
+                    {summary.totalViolations + wcag22Total} violations
                 </Text>
                 <Text color="gray">  {summary.totalPasses} passes  {summary.totalComponents} components</Text>
             </Box>
@@ -207,6 +213,52 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
                     </Box>
                 );
             })}
+
+            {/* WCAG 2.2 Custom Check Violations */}
+            {results.wcag22 && results.wcag22.summary.totalViolations > 0 && (() => {
+                const checks = [
+                    { key: 'targetSize', label: 'Target Size (2.5.8)' },
+                    { key: 'focusObscured', label: 'Focus Not Obscured (2.4.11)' },
+                    { key: 'focusAppearance', label: 'Focus Appearance (2.4.13)' },
+                    { key: 'dragging', label: 'Dragging Movements (2.5.7)' },
+                    { key: 'authentication', label: 'Accessible Auth (3.3.8)' },
+                    { key: 'statusMessages', label: 'Status Messages (4.1.3)' },
+                    { key: 'errorIdentification', label: 'Error Identification (3.3.1)' },
+                    { key: 'meaningfulSequence', label: 'Meaningful Sequence (1.3.2)' },
+                    { key: 'reflow', label: 'Reflow (1.4.10)' },
+                    { key: 'hoverFocusContent', label: 'Hover/Focus Content (1.4.13)' },
+                ] as const;
+                const wcag22 = results.wcag22 as any;
+                return (
+                    <Box flexDirection="column" marginTop={1}>
+                        <Text bold color={colors.serious}>WCAG 2.2 Checks — {results.wcag22.summary.totalViolations} violations</Text>
+                        {checks.map(({ key, label }) => {
+                            const items = wcag22[key];
+                            if (!items || items.length === 0) return null;
+                            return (
+                                <Box key={key} flexDirection="column" marginTop={1}>
+                                    <Box>
+                                        <Text color={colors.serious} bold>{label}</Text>
+                                        <Text color="gray">  {items.length} instance{items.length !== 1 ? 's' : ''}</Text>
+                                    </Box>
+                                    {items.slice(0, 5).map((v: any, i: number) => (
+                                        <Box key={i} marginLeft={2} flexDirection="column">
+                                            <Text color="gray">{v.selector}</Text>
+                                            <Text color="gray" dimColor>{v.description}</Text>
+                                        </Box>
+                                    ))}
+                                    {items.length > 5 && (
+                                        <Box marginLeft={2}><Text color="gray">...and {items.length - 5} more</Text></Box>
+                                    )}
+                                </Box>
+                            );
+                        })}
+                        <Box marginTop={1}>
+                            <Text color="gray">{'─'.repeat(60)}</Text>
+                        </Box>
+                    </Box>
+                );
+            })()}
 
             {/* Incomplete */}
             {incomplete && incomplete.length > 0 && (
