@@ -385,6 +385,7 @@ describe('WCAG 2.2 Schemas', () => {
             authentication: [],
             statusMessages: [],
             errorIdentification: [],
+            errorSuggestion: [],
             meaningfulSequence: [],
             reflow: [],
             hoverFocusContent: [],

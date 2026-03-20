@@ -236,6 +236,7 @@ function buildComplianceData(r) {
             authentication: '3.3.8',
             statusMessages: '4.1.3',
             errorIdentification: '3.3.1',
+            errorSuggestion: '3.3.3',
             meaningfulSequence: '1.3.2',
             reflow: '1.4.10',
             hoverFocusContent: '1.4.13'

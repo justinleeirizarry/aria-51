@@ -66,7 +66,8 @@ export function addWcag22ToLevelCounts(
         wcag22.targetSize.length +
         wcag22.focusObscured.length +
         wcag22.dragging.length +
-        wcag22.authentication.length;
+        wcag22.authentication.length +
+        wcag22.errorSuggestion.length;
 
     // Focus Appearance is AAA level
     counts.wcag2aaa += wcag22.focusAppearance.length;

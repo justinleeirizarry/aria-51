@@ -53,6 +53,7 @@ export interface WCAG22CheckResults {
     authentication: WCAG22Violation[];
     statusMessages: WCAG22Violation[];
     errorIdentification: WCAG22Violation[];
+    errorSuggestion: WCAG22Violation[];
     meaningfulSequence: WCAG22Violation[];
     reflow: WCAG22Violation[];
     hoverFocusContent: WCAG22Violation[];

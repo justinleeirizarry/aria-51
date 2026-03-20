@@ -13,6 +13,7 @@ export { checkDraggingMovements, getDraggableElements } from './dragging.js';
 export { checkAccessibleAuthentication, getAuthenticationInfo } from './authentication.js';
 export { checkStatusMessages, getStatusMessageInfo } from './status-messages.js';
 export { checkErrorIdentification, getErrorIdentificationInfo } from './error-identification.js';
+export { checkErrorSuggestion, getErrorSuggestionInfo } from './error-suggestion.js';
 export { checkMeaningfulSequence, getMeaningfulSequenceInfo } from './meaningful-sequence.js';
 
 import type { WCAG22CheckResults, WCAG22Violation } from './types.js';
@@ -23,6 +24,7 @@ import { checkDraggingMovements } from './dragging.js';
 import { checkAccessibleAuthentication } from './authentication.js';
 import { checkStatusMessages } from './status-messages.js';
 import { checkErrorIdentification } from './error-identification.js';
+import { checkErrorSuggestion } from './error-suggestion.js';
 import { checkMeaningfulSequence } from './meaningful-sequence.js';
 
 /**
@@ -53,6 +55,9 @@ export function runWCAG22Checks(): WCAG22CheckResults {
     const errorIdentificationViolations = checkErrorIdentification();
     console.log(`  ✓ Error Identification (3.3.1): ${errorIdentificationViolations.length} violations`);
 
+    const errorSuggestionViolations = checkErrorSuggestion();
+    console.log(`  ✓ Error Suggestion (3.3.3): ${errorSuggestionViolations.length} violations`);
+
     const meaningfulSequenceViolations = checkMeaningfulSequence();
     console.log(`  ✓ Meaningful Sequence (1.3.2): ${meaningfulSequenceViolations.length} violations`);
 
@@ -65,6 +70,7 @@ export function runWCAG22Checks(): WCAG22CheckResults {
         ...authenticationViolations,
         ...statusMessagesViolations,
         ...errorIdentificationViolations,
+        ...errorSuggestionViolations,
         ...meaningfulSequenceViolations
     ];
 
@@ -90,6 +96,7 @@ export function runWCAG22Checks(): WCAG22CheckResults {
         authentication: authenticationViolations,
         statusMessages: statusMessagesViolations,
         errorIdentification: errorIdentificationViolations,
+        errorSuggestion: errorSuggestionViolations,
         meaningfulSequence: meaningfulSequenceViolations,
         reflow: [],          // Populated by post-scan Playwright check
         hoverFocusContent: [], // Populated by post-scan Playwright check

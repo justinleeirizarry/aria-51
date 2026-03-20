@@ -203,6 +203,7 @@ export class ResultsProcessorService implements IResultsProcessorService {
                     { key: 'authentication', label: 'Accessible Authentication (3.3.8)' },
                     { key: 'statusMessages', label: 'Status Messages (4.1.3)' },
                     { key: 'errorIdentification', label: 'Error Identification (3.3.1)' },
+                    { key: 'errorSuggestion', label: 'Error Suggestion (3.3.3)' },
                     { key: 'meaningfulSequence', label: 'Meaningful Sequence (1.3.2)' },
                     { key: 'reflow', label: 'Reflow (1.4.10)' },
                     { key: 'hoverFocusContent', label: 'Content on Hover or Focus (1.4.13)' },
