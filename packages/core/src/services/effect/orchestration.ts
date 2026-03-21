@@ -26,6 +26,8 @@ import { createRetrySchedule } from '../../utils/effect-retry.js';
 import { getConfig } from '../../config/index.js';
 import { checkReflow } from '../../scanner/wcag22/reflow-check.js';
 import { checkHoverFocusContent } from '../../scanner/wcag22/hover-focus-check.js';
+import { checkScreenReaderNavigation } from '../../scanner/wcag22/screen-reader-check.js';
+import { checkKeyboardNavigation } from '../../scanner/wcag22/keyboard-nav-check.js';
 
 // ============================================================================
 // Types
@@ -65,7 +67,7 @@ export interface BaseScanOptions {
  * Progress step emitted during a scan
  */
 export interface ScanProgressStep {
-    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'ai-testing' | 'processing' | 'done';
+    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'supplemental-checks' | 'ai-testing' | 'processing' | 'done';
     message: string;
 }
 
@@ -242,13 +244,30 @@ export const performScan = (
             browser: browserType,
         });
 
+        // Run lightweight Playwright-based supplemental checks (always, no AI needed)
+        progress('supplemental-checks', 'Running supplemental accessibility checks…');
+        yield* Effect.tryPromise({
+            try: async () => {
+                const [screenReaderResults, keyboardResults] = await Promise.all([
+                    checkScreenReaderNavigation(page),
+                    checkKeyboardNavigation(page),
+                ]);
+                results.supplementalResults = [...screenReaderResults, ...keyboardResults];
+                logger.debug(`Supplemental checks: ${results.supplementalResults.length} criteria evaluated`);
+            },
+            catch: (err) => {
+                logger.warn(`Supplemental checks failed (non-fatal): ${err}`);
+                return new EffectScanDataError({ reason: `Supplemental checks failed: ${err}` });
+            },
+        }).pipe(Effect.catchAll(() => Effect.void));
+
         // Run optional AI-powered Stagehand tests (keyboard, tree, screen reader)
         if (enableStagehand) {
             progress('ai-testing', 'Running AI-powered accessibility tests…');
             yield* Effect.tryPromise({
                 try: async () => {
                     const { runStagehandTests } = await import('./stagehand-runner.js');
-                    const supplemental = await runStagehandTests(url, { model: stagehandModel });
+                    const supplemental = await runStagehandTests(url, { model: stagehandModel }, results.supplementalResults);
                     results.supplementalResults = supplemental;
                     logger.info(`Stagehand tests complete: ${supplemental.length} criteria evaluated`);
                 },

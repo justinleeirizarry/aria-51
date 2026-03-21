@@ -14,9 +14,10 @@ interface StagehandRunnerOptions {
 export async function runStagehandTests(
     url: string,
     options?: StagehandRunnerOptions,
+    existingResults?: SupplementalTestResult[],
 ): Promise<SupplementalTestResult[]> {
     // Dynamic import so the ai-auditor dependency is optional (not in core's package.json)
-    // @ts-expect-error — ai-auditor is an optional peer, resolved at runtime
+    // @ts-ignore — ai-auditor is an optional peer, resolved at runtime
     const auditor = await import('@accessibility-toolkit/ai-auditor') as any;
     const { Effect } = await import('effect');
     const model = options?.model || 'openai/gpt-4o-mini';
@@ -61,7 +62,7 @@ export async function runStagehandTests(
         logger.warn(`Screen reader tests failed: ${err}`);
     }
 
-    // Deduplicate: if multiple sources test the same criterion, prefer the one with issues
+    // Deduplicate Stagehand results among themselves first
     const byId = new Map<string, SupplementalTestResult>();
     for (const result of allResults) {
         const existing = byId.get(result.criterionId);
@@ -78,5 +79,30 @@ export async function runStagehandTests(
         }
     }
 
-    return Array.from(byId.values());
+    // Merge with lightweight Playwright results (if any)
+    // Stagehand results override same criterion (higher fidelity), merging issues
+    const merged = new Map<string, SupplementalTestResult>();
+
+    // Start with existing lightweight results
+    if (existingResults) {
+        for (const r of existingResults) {
+            merged.set(r.criterionId, r);
+        }
+    }
+
+    // Stagehand overrides, combining issues from both sources
+    for (const r of byId.values()) {
+        const prev = merged.get(r.criterionId);
+        if (!prev) {
+            merged.set(r.criterionId, r);
+        } else {
+            merged.set(r.criterionId, {
+                ...r,
+                source: `${r.source}, ${prev.source}`,
+                issues: [...r.issues, ...prev.issues],
+            });
+        }
+    }
+
+    return Array.from(merged.values());
 }
