@@ -28,6 +28,7 @@ import { checkReflow } from '../../scanner/wcag22/reflow-check.js';
 import { checkHoverFocusContent } from '../../scanner/wcag22/hover-focus-check.js';
 import { checkScreenReaderNavigation } from '../../scanner/wcag22/screen-reader-check.js';
 import { checkKeyboardNavigation } from '../../scanner/wcag22/keyboard-nav-check.js';
+import { checkMultiPage } from '../../scanner/multi-page/index.js';
 
 // ============================================================================
 // Types
@@ -530,5 +531,24 @@ export const runMultiScanAsPromise = async (
         const result = await runScanAsPromise({ ...baseOptions, url }, layer);
         results.push(result);
     }
+
+    // Run cross-page comparison checks when multiple pages are scanned
+    if (results.length >= 2) {
+        try {
+            const allScanResults = results.map(r => r.results);
+            const multiPageResults = checkMultiPage(allScanResults);
+            if (multiPageResults.length > 0) {
+                logger.info(`Multi-page checks: ${multiPageResults.length} criteria evaluated across ${results.length} pages`);
+                // Attach multi-page results to every page's supplementalResults
+                for (const result of results) {
+                    const existing = result.results.supplementalResults || [];
+                    result.results.supplementalResults = [...existing, ...multiPageResults];
+                }
+            }
+        } catch (err) {
+            logger.warn(`Multi-page checks failed (non-fatal): ${err}`);
+        }
+    }
+
     return results;
 };

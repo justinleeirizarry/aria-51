@@ -578,7 +578,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.4 Navigable',
         description: 'More than one way is available to locate a page within a set.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/multiple-ways.html',
-        testability: 'multi-page',
+        testability: 'semi-automated',
         successCriterionText: 'More than one way is available to locate a web page within a set of web pages except where the web page is the result of, or a step in, a process.'
     },
     '2.4.6': {
@@ -863,7 +863,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.2 Predictable',
         description: 'Navigation mechanisms occur in the same relative order.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/consistent-navigation.html',
-        testability: 'multi-page',
+        testability: 'semi-automated',
         successCriterionText: 'Navigational mechanisms that are repeated on multiple web pages within a set of web pages occur in the same relative order each time they are repeated, unless a change is initiated by the user.'
     },
     '3.2.4': {
@@ -874,7 +874,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.2 Predictable',
         description: 'Components with the same functionality are identified consistently.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/consistent-identification.html',
-        testability: 'multi-page',
+        testability: 'semi-automated',
         successCriterionText: 'Components that have the same functionality within a set of web pages are identified consistently.'
     },
     '3.2.5': {
@@ -896,7 +896,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.2 Predictable',
         description: 'Help mechanisms occur in the same relative order across pages.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/consistent-help.html',
-        testability: 'multi-page',
+        testability: 'semi-automated',
         successCriterionText: 'If a web page contains any of the following help mechanisms, and those mechanisms are repeated on multiple web pages within a set of web pages, they occur in the same order relative to other page content, unless a change is initiated by the user: - Human contact details; - Human contact mechanism; - Self-help option; - A fully automated contact mechanism. Note 1 Help mechanisms may be provided directly on the page, or may be provided via a direct link to a different page containing the information. Note 2 For this success criterion, "the same order relative to other page content" can be thought of as how the content is ordered when the page is serialized. The visual position of a help mechanism is likely to be consistent across pages for the same page variation (e.g., CSS break-point). The user can initiate a change, such as changing the page\'s zoom or orientation, which may trigger a different page variation. This criterion is concerned with relative order across pages displayed in the same page variation (e.g., same zoom level and orientation). - Harmonizing occurrences of "breakpoint" to be one word View all errata'
     },
 
