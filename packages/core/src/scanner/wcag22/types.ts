@@ -57,6 +57,19 @@ export interface WCAG22CheckResults {
     meaningfulSequence: WCAG22Violation[];
     reflow: WCAG22Violation[];
     hoverFocusContent: WCAG22Violation[];
+    sensoryCharacteristics: WCAG22Violation[];
+    identifyPurpose: WCAG22Violation[];
+    visualPresentation: WCAG22Violation[];
+    characterKeyShortcuts: WCAG22Violation[];
+    animationInteractions: WCAG22Violation[];
+    threeFlashes: WCAG22Violation[];
+    sectionHeadings: WCAG22Violation[];
+    pointerGestures: WCAG22Violation[];
+    pointerCancellation: WCAG22Violation[];
+    motionActuation: WCAG22Violation[];
+    onFocus: WCAG22Violation[];
+    onInput: WCAG22Violation[];
+    redundantEntry: WCAG22Violation[];
     summary: {
         totalViolations: number;
         byLevel: {

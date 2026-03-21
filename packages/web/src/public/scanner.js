@@ -242,7 +242,20 @@ function buildComplianceData(r) {
             errorSuggestion: '3.3.3',
             meaningfulSequence: '1.3.2',
             reflow: '1.4.10',
-            hoverFocusContent: '1.4.13'
+            hoverFocusContent: '1.4.13',
+            sensoryCharacteristics: '1.3.3',
+            identifyPurpose: '1.3.6',
+            visualPresentation: '1.4.8',
+            characterKeyShortcuts: '2.1.4',
+            animationInteractions: '2.3.3',
+            threeFlashes: '2.3.1',
+            sectionHeadings: '2.4.10',
+            pointerGestures: '2.5.1',
+            pointerCancellation: '2.5.2',
+            motionActuation: '2.5.4',
+            onFocus: '3.2.1',
+            onInput: '3.2.2',
+            redundantEntry: '3.3.7',
         };
         for (const [key, criterionId] of Object.entries(wcag22Map)) {
             testedCriteria.add(criterionId);

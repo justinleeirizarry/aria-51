@@ -190,7 +190,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.3 Adaptable',
         description: 'Instructions do not rely solely on sensory characteristics like shape or location.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/sensory-characteristics.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Instructions provided for understanding and operating content do not rely solely on sensory characteristics of components such as shape, color, size, visual location, orientation, or sound. Note For requirements related to color, refer to Guideline 1.4.'
     },
     '1.3.4': {
@@ -223,7 +223,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.3 Adaptable',
         description: 'The purpose of UI components, icons, and regions can be programmatically determined.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/identify-purpose.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'In content implemented using markup languages, the purpose of user interface components, icons, and regions can be programmatically determined.'
     },
 
@@ -313,7 +313,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.4 Distinguishable',
         description: 'Text blocks can be customized for width, colors, spacing, and alignment.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/visual-presentation.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'For the visual presentation of blocks of text, a mechanism is available to achieve the following: - Foreground and background colors can be selected by the user. - Width is no more than 80 characters or glyphs (40 if CJK). - Text is not justified (aligned to both the left and the right margins). - Line spacing (leading) is at least space-and-a-half within paragraphs, and paragraph spacing is at least 1.5 times larger than the line spacing. - Text can be resized without assistive technology up to 200 percent in a way that does not require the user to scroll horizontally to read a line of text on a full-screen window. Note 1 Content is not required to use these values. The requirement is that a mechanism is available for users to change these presentation aspects. The mechanism can be provided by the browser or other user agent. Content is not required to provide the mechanism. Note 2 Writing systems for some languages use different presentation aspects to improve readability and legibility. If a presentation aspect in this success criterion is not used in a writing system, content in that writing system does not need to use that presentation setting and can conform without it. Authors are encouraged to follow guidance for improving readability and legibility of text in their writing system.'
     },
     '1.4.9': {
@@ -418,7 +418,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.1 Keyboard Accessible',
         description: 'Single-character key shortcuts can be turned off or remapped.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/character-key-shortcuts.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'If a keyboard shortcut is implemented in content using only letter (including upper- and lower-case letters), punctuation, number, or symbol characters, then at least one of the following is true: Turn off: A mechanism is available to turn the shortcut off; Remap: A mechanism is available to remap the shortcut to include one or more non-printable keyboard keys (e.g., Ctrl, Alt); Active only on focus: The keyboard shortcut for a user interface component is only active when that component has focus.'
     },
 
@@ -499,7 +499,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.3 Seizures and Physical Reactions',
         description: 'Content does not flash more than 3 times per second.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/three-flashes-or-below-threshold.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Web pages do not contain anything that flashes more than three times in any one second period, or the flash is below the general flash and red flash thresholds. Note Since any content that does not meet this success criterion can interfere with a user\'s ability to use the whole page, all content on the web page (whether it is used to meet other success criteria or not) must meet this success criterion. See Conformance Requirement 5: Non-Interference.'
     },
     '2.3.2': {
@@ -521,7 +521,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.3 Seizures and Physical Reactions',
         description: 'Motion animation triggered by interaction can be disabled.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Motion animation triggered by interaction can be disabled, unless the animation is essential to the functionality or the information being conveyed.'
     },
 
@@ -633,7 +633,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.4 Navigable',
         description: 'Section headings are used to organize content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/section-headings.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Section headings are used to organize the content. Note 1 "Heading" is used in its general sense and includes titles and other ways to add a heading to different types of content. Note 2 This success criterion covers sections within writing, not user interface components. User interface components are covered under Success Criterion 4.1.2.'
     },
     '2.4.11': {
@@ -679,7 +679,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.5 Input Modalities',
         description: 'Multi-point gestures have single-pointer alternatives.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'All functionality that uses multipoint or path-based gestures for operation can be operated with a single pointer without a path-based gesture, unless a multipoint or path-based gesture is essential. Note This requirement applies to web content that interprets pointer actions (i.e., this does not apply to actions that are required to operate the user agent or assistive technology).'
     },
     '2.5.2': {
@@ -690,7 +690,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.5 Input Modalities',
         description: 'Single pointer actions can be cancelled or undone.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/pointer-cancellation.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'For functionality that can be operated using a single pointer, at least one of the following is true: No Down-Event: The down-event of the pointer is not used to execute any part of the function; Abort or Undo: Completion of the function is on the up-event, and a mechanism is available to abort the function before completion or to undo the function after completion; Up Reversal: The up-event reverses any outcome of the preceding down-event; Essential: Completing the function on the down-event is essential. Note 1 Functions that emulate a keyboard or numeric keypad key press are considered essential. Note 2 This requirement applies to web content that interprets pointer actions (i.e., this does not apply to actions that are required to operate the user agent or assistive technology).'
     },
     '2.5.3': {
@@ -712,7 +712,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.5 Input Modalities',
         description: 'Motion-triggered functionality has UI alternatives.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/motion-actuation.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Functionality that can be operated by device motion or user motion can also be operated by user interface components and responding to the motion can be disabled to prevent accidental actuation, except when: Supported Interface: The motion is used to operate functionality through an accessibility supported interface; Essential: The motion is essential for the function and doing so would invalidate the activity.'
     },
     '2.5.5': {
@@ -841,7 +841,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.2 Predictable',
         description: 'Focusing a component does not initiate a change of context.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/on-focus.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'When any user interface component receives focus, it does not initiate a change of context.'
     },
     '3.2.2': {
@@ -852,7 +852,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.2 Predictable',
         description: 'Changing a setting does not automatically cause a context change.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/on-input.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Changing the setting of any user interface component does not automatically cause a change of context unless the user has been advised of the behavior before using the component.'
     },
     '3.2.3': {
@@ -975,7 +975,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.3 Input Assistance',
         description: 'Previously entered information is auto-populated or selectable.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/redundant-entry.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Information previously entered by or provided to the user that is required to be entered again in the same process is either: - auto-populated, or - available for the user to select. Except when: - re-entering the information is essential, - the information is required to ensure the security of the content, or - previously entered information is no longer valid.'
     },
     '3.3.8': {
