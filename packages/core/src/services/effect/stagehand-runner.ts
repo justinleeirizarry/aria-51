@@ -18,7 +18,7 @@ export async function runStagehandTests(
 ): Promise<SupplementalTestResult[]> {
     // Dynamic import so the ai-auditor dependency is optional (not in core's package.json)
     // @ts-ignore — ai-auditor is an optional peer, resolved at runtime
-    const auditor = await import('@accessibility-toolkit/ai-auditor') as any;
+    const auditor = await import('@aria51/ai-auditor') as any;
     const { Effect } = await import('effect');
     const model = options?.model || 'openai/gpt-4o-mini';
     const allResults: SupplementalTestResult[] = [];

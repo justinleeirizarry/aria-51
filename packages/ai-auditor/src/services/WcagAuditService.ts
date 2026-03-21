@@ -8,7 +8,7 @@ import { Effect } from 'effect';
 import type { Page } from 'playwright';
 import { StagehandWcagAuditAgent } from '../stagehand/wcag-audit-agent.js';
 import type { WcagAuditOptions, WcagAuditResult } from '../types.js';
-import { logger } from '@accessibility-toolkit/core';
+import { logger } from '@aria51/core';
 import {
     EffectWcagAuditInitError,
     EffectWcagAuditError,

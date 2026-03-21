@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Text } from 'ink';
-import type { TestGenerationResults as TestGenResults } from '@accessibility-toolkit/ai-auditor';
+import type { TestGenerationResults as TestGenResults } from '@aria51/ai-auditor';
 import { Banner } from './Banner.js';
 
 interface TestGenerationResultsProps {

@@ -19,7 +19,7 @@ const mockTestGenService = vi.hoisted(() => ({
     close: vi.fn(),
 }));
 
-vi.mock('@accessibility-toolkit/core', async (importOriginal) => {
+vi.mock('@aria51/core', async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...actual as object,
@@ -29,7 +29,7 @@ vi.mock('@accessibility-toolkit/core', async (importOriginal) => {
     };
 });
 
-vi.mock('@accessibility-toolkit/ai-auditor', async (importOriginal) => {
+vi.mock('@aria51/ai-auditor', async (importOriginal) => {
     const actual = await importOriginal();
     return {
         ...actual as object,
@@ -47,8 +47,8 @@ vi.mock(import('fs/promises'), async (importOriginal) => {
     };
 });
 
-import type { ScanResults } from '@accessibility-toolkit/core';
-import type { TestGenerationResults } from '@accessibility-toolkit/ai-auditor';
+import type { ScanResults } from '@aria51/core';
+import type { TestGenerationResults } from '@aria51/ai-auditor';
 
 describe('App Component', () => {
     // Store original process.exitCode

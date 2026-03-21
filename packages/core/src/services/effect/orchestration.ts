@@ -360,24 +360,24 @@ const attributeWithComponentPlugin = (
             }
         });
 
-        // Verify ReactA11yPlugin is available (window global name kept for bundle compat)
+        // Verify Aria51ReactPlugin is available (window global name kept for bundle compat)
         const hasPlugin = yield* Effect.tryPromise({
-            try: () => page.evaluate(() => typeof (window as any).ReactA11yPlugin !== 'undefined'),
+            try: () => page.evaluate(() => typeof (window as any).Aria51ReactPlugin !== 'undefined'),
             catch: () => new EffectScanDataError({ reason: 'Failed to verify component plugin injection' })
         });
 
         if (!hasPlugin) {
-            logger.warn('Component plugin bundle did not expose ReactA11yPlugin on window');
+            logger.warn('Component plugin bundle did not expose Aria51ReactPlugin on window');
             return rawData;
         }
 
         logger.debug('Component plugin injected, attributing violations to components...');
 
-        // Call ReactA11yPlugin.attributeViolations in browser context
+        // Call Aria51ReactPlugin.attributeViolations in browser context
         const attributed = yield* Effect.tryPromise({
             try: () => page.evaluate(
                 ({ violations, passes, incomplete }) => {
-                    return (window as any).ReactA11yPlugin.attributeViolations(
+                    return (window as any).Aria51ReactPlugin.attributeViolations(
                         violations,
                         passes || [],
                         incomplete || []

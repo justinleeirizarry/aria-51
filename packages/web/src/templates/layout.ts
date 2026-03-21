@@ -7,7 +7,7 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Accessibility Scanner</title>
+<title>aria51</title>
 <style>
   @font-face {
     font-family: 'Satoshi';

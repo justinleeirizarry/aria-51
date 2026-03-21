@@ -14,7 +14,7 @@ import type {
     A11yTreeNode,
     WcagCriterionInfo,
 } from "../types.js";
-import { logger, getCriterionById } from "@accessibility-toolkit/core";
+import { logger, getCriterionById } from "@aria51/core";
 import {
     TREE_ISSUE_WCAG_MAP,
     isValidRole,

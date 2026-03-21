@@ -13,7 +13,7 @@ import type {
     TabOrderEntry,
     WcagCriterionInfo,
 } from "../types.js";
-import { logger, getCriterionById } from "@accessibility-toolkit/core";
+import { logger, getCriterionById } from "@aria51/core";
 
 // WCAG criteria relevant to keyboard accessibility
 const KEYBOARD_WCAG_CRITERIA = {

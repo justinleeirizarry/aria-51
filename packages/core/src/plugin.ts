@@ -58,7 +58,7 @@ export interface AttributedNode {
  *
  * @example
  * ```typescript
- * import { FrameworkPlugin } from '@accessibility-toolkit/core';
+ * import { FrameworkPlugin } from '@aria51/core';
  *
  * export const ReactPlugin: FrameworkPlugin = {
  *   name: 'react',
@@ -73,7 +73,7 @@ export interface AttributedNode {
  *     // Inject React-specific bundle, traverse Fiber tree
  *     const bundle = await loadReactBundle();
  *     await page.evaluate(bundle);
- *     return page.evaluate(() => (window as any).ReactA11yPlugin.scan());
+ *     return page.evaluate(() => (window as any).Aria51ReactPlugin.scan());
  *   },
  *
  *   attributeViolations(violations, data) {

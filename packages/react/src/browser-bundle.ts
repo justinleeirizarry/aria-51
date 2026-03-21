@@ -57,9 +57,9 @@ export interface ReactAttributedScanData {
 }
 
 /**
- * API exposed on window.ReactA11yPlugin
+ * API exposed on window.Aria51ReactPlugin
  */
-export interface ReactA11yPluginAPI {
+export interface Aria51ReactPluginAPI {
     scan: () => Promise<ReactBrowserScanData>;
     attributeViolations: (
         violations: any[],
@@ -97,13 +97,13 @@ export async function scan(): Promise<ReactBrowserScanData> {
         const MAX_COMPONENTS = 10000;
         components = traverseFiberTree(root);
         if (components.length > MAX_COMPONENTS) {
-            console.warn(`[react-a11y-plugin] Component limit reached (${MAX_COMPONENTS}), truncating`);
+            console.warn(`[aria51-react] Component limit reached (${MAX_COMPONENTS}), truncating`);
             components = components.slice(0, MAX_COMPONENTS);
         }
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const errorStack = error instanceof Error ? error.stack : undefined;
-        console.error('[react-a11y-plugin] Fiber traversal failed:', error);
+        console.error('[aria51-react] Fiber traversal failed:', error);
         errors.push({
             phase: 'fiber-traversal',
             message: errorMessage,
@@ -117,7 +117,7 @@ export async function scan(): Promise<ReactBrowserScanData> {
     try {
         await enrichComponentsWithSource(components);
     } catch (error) {
-        console.warn('[react-a11y-plugin] Source enrichment failed:', error);
+        console.warn('[aria51-react] Source enrichment failed:', error);
     }
 
     console.log(`✓ Found ${components.length} React components`);
@@ -179,12 +179,12 @@ export async function attributeViolations(
 
 // Expose to global window for evaluation
 if (typeof window !== 'undefined') {
-    (window as any).ReactA11yPlugin = { scan, attributeViolations };
+    (window as any).Aria51ReactPlugin = { scan, attributeViolations };
 }
 
 // Type augmentation for window
 declare global {
     interface Window {
-        ReactA11yPlugin?: ReactA11yPluginAPI;
+        Aria51ReactPlugin?: Aria51ReactPluginAPI;
     }
 }

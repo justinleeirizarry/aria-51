@@ -12,8 +12,8 @@ import { render } from 'ink';
 import meow from 'meow';
 import { Effect } from 'effect';
 import App from './App.js';
-import { getComponentBundlePath } from '@accessibility-toolkit/react';
-import type { BrowserType, WcagLevel } from '@accessibility-toolkit/core';
+import { getComponentBundlePath } from '@aria51/react';
+import type { BrowserType, WcagLevel } from '@aria51/core';
 import {
     validateUrl,
     validateTags,
@@ -34,13 +34,13 @@ import {
     generateAndExport,
     generatePrompt,
     ScanError,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 import {
     createTestGenerationService,
     createKeyboardTestService,
     createTreeAnalysisService,
     createWcagAuditService,
-} from '@accessibility-toolkit/ai-auditor';
+} from '@aria51/ai-auditor';
 
 // Load configuration: config file first, then env vars override
 const configFileResult = await loadConfigFile();
@@ -55,7 +55,7 @@ if (hasEnvConfig()) {
 const cli = meow(
     `
   Usage
-    $ a11y-toolkit <url> [url2] [url3] ...
+    $ aria51 <url> [url2] [url3] ...
 
   Accessibility Scan Options
     --browser, -b      Browser to use (chromium, firefox, webkit) [default: chromium]
@@ -89,25 +89,25 @@ const cli = meow(
 
   Examples
     # Generic Accessibility Scanning (any website)
-    $ a11y-toolkit https://example.com
-    $ a11y-toolkit https://example.com --browser firefox
-    $ a11y-toolkit https://example.com --output report.json --ci
+    $ aria51 https://example.com
+    $ aria51 https://example.com --browser firefox
+    $ aria51 https://example.com --output report.json --ci
 
     # Multiple URLs
-    $ a11y-toolkit https://example.com https://example.com/about https://example.com/contact
+    $ aria51 https://example.com https://example.com/about https://example.com/contact
 
     # Component Attribution (auto-detected, disable with --no-components)
-    $ a11y-toolkit https://my-app.com --no-components
-    $ a11y-toolkit https://my-app.com --ai --tree
+    $ aria51 https://my-app.com --no-components
+    $ aria51 https://my-app.com --ai --tree
 
     # Test Generation
-    $ a11y-toolkit https://example.com --generate-test
-    $ a11y-toolkit https://example.com --generate-test --test-file tests/a11y.spec.ts
+    $ aria51 https://example.com --generate-test
+    $ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
 
     # AI-Powered WCAG Audit
-    $ a11y-toolkit https://example.com --wcag-audit --audit-level AA
-    $ a11y-toolkit https://example.com --stagehand-keyboard
-    $ a11y-toolkit https://example.com --stagehand-tree
+    $ aria51 https://example.com --wcag-audit --audit-level AA
+    $ aria51 https://example.com --stagehand-keyboard
+    $ aria51 https://example.com --stagehand-tree
 `,
     {
         importMeta: import.meta,
@@ -517,7 +517,7 @@ if (!isTTY) {
                         const sev = summary.violationsBySeverity;
                         const sep = '─'.repeat(60);
 
-                        console.log(`A11Y SCAN / ${scanUrl}\n`);
+                        console.log(`aria51 / ${scanUrl}\n`);
                         const sevParts = [];
                         if (sev.critical > 0) sevParts.push(`${sev.critical} critical`);
                         if (sev.serious > 0) sevParts.push(`${sev.serious} serious`);

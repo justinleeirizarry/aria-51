@@ -14,7 +14,7 @@ import type {
     WcagCriterionInfo,
     WcagLevel,
 } from "../types.js";
-import { logger, getCriterionById } from "@accessibility-toolkit/core";
+import { logger, getCriterionById } from "@aria51/core";
 import {
     buildWcagAuditPrompt,
     buildCriteriaList,

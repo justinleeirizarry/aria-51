@@ -1,8 +1,8 @@
 {
-    "name": "accessibility-toolkit-monorepo",
+    "name": "aria51-monorepo",
     "version": "0.1.0",
     "private": true,
-    "description": "Monorepo for Accessibility Toolkit - Generic accessibility testing with optional React support and AI-powered auditing",
+    "description": "Monorepo for aria51 - Generic accessibility testing with optional React support and AI-powered auditing",
     "type": "module",
     "scripts": {
         "build": "pnpm -r build",
@@ -12,7 +12,7 @@
         "test:ui": "vitest --ui",
         "test:coverage": "vitest run --coverage",
         "clean": "pnpm -r exec rm -rf dist node_modules && rm -rf node_modules",
-        "start": "pnpm --filter @accessibility-toolkit/cli start"
+        "start": "pnpm --filter @aria51/cli start"
     },
     "keywords": [
         "accessibility",

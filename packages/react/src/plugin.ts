@@ -6,8 +6,8 @@
  */
 
 import type { Page } from 'playwright';
-import type { FrameworkPlugin, FrameworkScanData, AttributedViolation } from '@accessibility-toolkit/core';
-import type { AxeViolation } from '@accessibility-toolkit/core';
+import type { FrameworkPlugin, FrameworkScanData, AttributedViolation } from '@aria51/core';
+import type { AxeViolation } from '@aria51/core';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { readFileSync } from 'fs';
@@ -40,8 +40,8 @@ async function loadReactBundle(): Promise<string> {
  *
  * @example
  * ```typescript
- * import { scan } from '@accessibility-toolkit/core';
- * import { ReactPlugin } from '@accessibility-toolkit/react';
+ * import { scan } from '@aria51/core';
+ * import { ReactPlugin } from '@aria51/react';
  *
  * const results = await scan({
  *   url: 'https://my-react-app.com',
@@ -118,7 +118,7 @@ export const ReactPlugin: FrameworkPlugin = {
 
         // Execute the scan in the browser context
         const result = await page.evaluate(() => {
-            return (window as any).ReactA11yPlugin.scan();
+            return (window as any).Aria51ReactPlugin.scan();
         });
 
         // Convert the serialized map back to a Map

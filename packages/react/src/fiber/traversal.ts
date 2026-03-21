@@ -107,7 +107,7 @@ export function traverseFiberTree(
     // Limit total traversal
     count.value++;
     if (count.value > MAX_FIBER_COUNT) {
-        console.warn('[react-a11y-scanner] Max fiber count reached, stopping traversal');
+        console.warn('[aria51] Max fiber count reached, stopping traversal');
         return components;
     }
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
-import type { ScanResults } from '@accessibility-toolkit/core';
+import type { ScanResults } from '@aria51/core';
 import { colors, impactColors } from '../colors.js';
 
 interface ResultsProps {

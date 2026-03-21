@@ -1,7 +1,7 @@
 /**
  * Environment variable configuration loading
  *
- * Loads configuration from environment variables with the prefix REACT_A11Y_
+ * Loads configuration from environment variables with the prefix ARIA51_
  * Environment variables take precedence over config file settings.
  */
 
@@ -11,7 +11,7 @@ import type { ScannerConfig } from './defaults.js';
 /**
  * Environment variable prefix for all config options
  */
-const ENV_PREFIX = 'REACT_A11Y_';
+const ENV_PREFIX = 'ARIA51_';
 
 /**
  * Mapping of environment variables to config paths
@@ -80,7 +80,7 @@ function setNestedValue(
 /**
  * Load configuration from environment variables
  *
- * Reads all REACT_A11Y_* environment variables and returns a partial config
+ * Reads all ARIA51_* environment variables and returns a partial config
  * object that can be merged with the base config.
  *
  * @returns Partial config object with values from environment variables
@@ -106,7 +106,7 @@ export function loadEnvConfig(): DeepPartial<ScannerConfig> {
 /**
  * Check if any config environment variables are set
  *
- * @returns true if at least one REACT_A11Y_* env var is set
+ * @returns true if at least one ARIA51_* env var is set
  */
 export function hasEnvConfig(): boolean {
     for (const envName of Object.keys(ENV_VAR_MAP)) {

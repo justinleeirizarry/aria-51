@@ -5,7 +5,7 @@
  * It runs in the browser context and uses only axe-core - no framework dependencies.
  *
  * For framework-specific features (React component attribution), use the
- * framework plugin packages (e.g., @accessibility-toolkit/react).
+ * framework plugin packages (e.g., @aria51/react).
  */
 
 // @ts-ignore - axe-core is bundled as IIFE by esbuild and TypeScript cannot resolve the runtime import
@@ -75,9 +75,9 @@ export interface GenericBrowserScanData {
 }
 
 /**
- * API exposed on window.A11yScanner
+ * API exposed on window.Aria51Scanner
  */
-export interface A11yScannerAPI {
+export interface Aria51ScannerAPI {
     scan: (options?: GenericBrowserScanOptions) => Promise<GenericBrowserScanData>;
 }
 
@@ -188,12 +188,6 @@ export async function scan(options: GenericBrowserScanOptions = {}): Promise<Gen
 
 // Expose to global window for evaluation
 if (typeof window !== 'undefined') {
-    (window as any).A11yScanner = { scan };
+    (window as any).Aria51Scanner = { scan };
 }
 
-// Type augmentation for window
-declare global {
-    interface Window {
-        A11yScanner?: A11yScannerAPI;
-    }
-}

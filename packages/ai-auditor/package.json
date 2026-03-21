@@ -1,5 +1,5 @@
 {
-    "name": "@accessibility-toolkit/ai-auditor",
+    "name": "@aria51/ai-auditor",
     "version": "0.1.0",
     "description": "AI-powered accessibility auditing using Stagehand and Browserbase",
     "main": "dist/index.js",
@@ -30,7 +30,7 @@
     ],
     "license": "MIT",
     "dependencies": {
-        "@accessibility-toolkit/core": "workspace:*",
+        "@aria51/core": "workspace:*",
         "@browserbasehq/stagehand": "^3.0.3",
         "@browserbasehq/sdk": "^2.0.0",
         "effect": "^3.19.15",

@@ -13,25 +13,25 @@ import {
     EXIT_CODES,
     setExitCode,
     generateAndExport,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 import {
     createTestGenerationService,
     createKeyboardTestService,
     createTreeAnalysisService,
     createWcagAuditService,
-} from '@accessibility-toolkit/ai-auditor';
-import { getComponentBundlePath } from '@accessibility-toolkit/react';
+} from '@aria51/ai-auditor';
+import { getComponentBundlePath } from '@aria51/react';
 import type {
     ScanResults,
     BrowserType,
     WcagLevel,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 import type {
     TestGenerationResults as TestGenResults,
     StagehandKeyboardResults,
     TreeAnalysisResult,
     WcagAuditResult,
-} from '@accessibility-toolkit/ai-auditor';
+} from '@aria51/ai-auditor';
 
 type AppMode = 'scan' | 'generate-test' | 'stagehand-keyboard' | 'stagehand-tree' | 'wcag-audit';
 

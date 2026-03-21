@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Text } from 'ink';
 import Spinner from 'ink-spinner';
-import type { WcagLevel } from '@accessibility-toolkit/core';
+import type { WcagLevel } from '@aria51/core';
 
 type StagehandMode = 'stagehand-keyboard' | 'stagehand-tree' | 'wcag-audit';
 type StagehandState = 'idle' | 'initializing' | 'running' | 'complete' | 'error';

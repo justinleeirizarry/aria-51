@@ -5,7 +5,7 @@
  * and runtime validation via Effect Schema.
  *
  * Usage:
- *   import { Schemas } from '@accessibility-toolkit/core';
+ *   import { Schemas } from '@aria51/core';
  *   const result = Schema.decodeUnknownSync(Schemas.BrowserScanData)(rawData);
  */
 

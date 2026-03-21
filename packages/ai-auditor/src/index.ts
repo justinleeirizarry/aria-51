@@ -1,5 +1,5 @@
 /**
- * @accessibility-toolkit/ai-auditor
+ * @aria51/ai-auditor
  *
  * AI-powered accessibility auditing using Stagehand and Browserbase.
  * Provides intelligent WCAG auditing, keyboard navigation testing,
@@ -10,7 +10,7 @@
  * import {
  *   BrowserbaseClient,
  *   createLiveAuditSession,
- * } from '@accessibility-toolkit/ai-auditor';
+ * } from '@aria51/ai-auditor';
  *
  * // Create a live audit session with Browserbase
  * const client = new BrowserbaseClient({

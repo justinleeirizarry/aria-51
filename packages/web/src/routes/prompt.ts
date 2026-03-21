@@ -1,5 +1,5 @@
 import type { Context } from 'hono';
-import { generatePrompt } from '@accessibility-toolkit/core';
+import { generatePrompt } from '@aria51/core';
 
 export const promptHandler = async (c: Context) => {
     const body = await c.req.json();

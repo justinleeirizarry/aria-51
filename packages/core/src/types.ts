@@ -2,7 +2,7 @@
 // Shared Type Definitions
 //
 // Types with Effect Schema equivalents are re-exported from ./schemas/.
-// Types without schemas (PromptTemplate, ReactA11yScannerAPI, etc.) remain here.
+// Types without schemas (PromptTemplate, Aria51ScannerAPI, etc.) remain here.
 // ============================================================================
 
 // --- Re-exports from schemas (single source of truth) ---
@@ -72,14 +72,14 @@ export interface PromptExportOptions {
     outputPath?: string;
 }
 
-// ReactA11yScanner API exposed on window in browser context
-export interface ReactA11yScannerAPI {
+// Aria51Scanner API exposed on window in browser context
+export interface Aria51ScannerAPI {
     scan: (options?: BrowserScanOptions) => Promise<BrowserScanData>;
 }
 
 // Global window augmentation for browser context
 declare global {
     interface Window {
-        ReactA11yScanner?: ReactA11yScannerAPI;
+        Aria51Scanner?: Aria51ScannerAPI;
     }
 }

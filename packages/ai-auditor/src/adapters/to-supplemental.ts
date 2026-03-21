@@ -2,7 +2,7 @@
  * Adapters to convert ai-auditor service results into SupplementalTestResult[]
  * for integration with the main scan compliance table.
  */
-import type { SupplementalTestResult, SupplementalIssue } from '@accessibility-toolkit/core';
+import type { SupplementalTestResult, SupplementalIssue } from '@aria51/core';
 import type {
     StagehandKeyboardResults,
     StagehandKeyboardIssue,

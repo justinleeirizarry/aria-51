@@ -4,7 +4,7 @@ import { Layout } from './layout.js';
 export function ScannerPage() {
     return Layout({ children: html`
 <div class="topbar">
-    <span class="topbar-title">Accessibility Scanner</span>
+    <span class="topbar-title">aria51</span>
     <span class="topbar-sep">/</span>
     <span class="topbar-url" id="topbar-url">Enter a URL to scan</span>
 </div>

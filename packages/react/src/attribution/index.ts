@@ -8,7 +8,7 @@ import type {
     AxeResult,
     AxeViolation,
     AxeCheckResult,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 import type {
     ComponentInfo,
     AttributedViolation,

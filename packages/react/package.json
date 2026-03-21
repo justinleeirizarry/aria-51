@@ -1,7 +1,7 @@
 {
-    "name": "@accessibility-toolkit/react",
+    "name": "@aria51/react",
     "version": "0.1.0",
-    "description": "React plugin for Accessibility Toolkit - Fiber traversal and component attribution",
+    "description": "React plugin for aria51 - Fiber traversal and component attribution",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
     "type": "module",
@@ -16,7 +16,7 @@
     ],
     "scripts": {
         "build": "tsc && npm run build:bundle",
-        "build:bundle": "esbuild src/browser-bundle.ts --bundle --platform=browser --format=iife --global-name=ReactA11yPlugin --outfile=dist/react-bundle.js",
+        "build:bundle": "esbuild src/browser-bundle.ts --bundle --platform=browser --format=iife --global-name=Aria51ReactPlugin --outfile=dist/react-bundle.js",
         "dev": "tsc --watch",
         "test": "vitest run",
         "test:watch": "vitest"
@@ -30,7 +30,7 @@
     ],
     "license": "MIT",
     "dependencies": {
-        "@accessibility-toolkit/core": "workspace:*",
+        "@aria51/core": "workspace:*",
         "element-source": "^0.0.4"
     },
     "devDependencies": {

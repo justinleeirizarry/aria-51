@@ -9,9 +9,9 @@ describe('Environment Variable Configuration', () => {
     const originalEnv = { ...process.env };
 
     beforeEach(() => {
-        // Clear all REACT_A11Y_* env vars before each test
+        // Clear all ARIA51_* env vars before each test
         for (const key of Object.keys(process.env)) {
-            if (key.startsWith('REACT_A11Y_')) {
+            if (key.startsWith('ARIA51_')) {
                 delete process.env[key];
             }
         }
@@ -29,44 +29,44 @@ describe('Environment Variable Configuration', () => {
         });
 
         it('should parse boolean env vars', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'false';
+            process.env.ARIA51_BROWSER_HEADLESS = 'false';
 
             const config = loadEnvConfig();
             expect(config.browser?.headless).toBe(false);
         });
 
         it('should parse boolean "true" value', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'true';
+            process.env.ARIA51_BROWSER_HEADLESS = 'true';
 
             const config = loadEnvConfig();
             expect(config.browser?.headless).toBe(true);
         });
 
         it('should parse boolean "1" as true', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = '1';
+            process.env.ARIA51_BROWSER_HEADLESS = '1';
 
             const config = loadEnvConfig();
             expect(config.browser?.headless).toBe(true);
         });
 
         it('should parse boolean "0" as false', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = '0';
+            process.env.ARIA51_BROWSER_HEADLESS = '0';
 
             const config = loadEnvConfig();
             expect(config.browser?.headless).toBe(false);
         });
 
         it('should parse number env vars', () => {
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = '60000';
+            process.env.ARIA51_BROWSER_TIMEOUT = '60000';
 
             const config = loadEnvConfig();
             expect(config.browser?.timeout).toBe(60000);
         });
 
         it('should handle multiple env vars', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'false';
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = '45000';
-            process.env.REACT_A11Y_SCAN_MAX_RETRIES = '5';
+            process.env.ARIA51_BROWSER_HEADLESS = 'false';
+            process.env.ARIA51_BROWSER_TIMEOUT = '45000';
+            process.env.ARIA51_SCAN_MAX_RETRIES = '5';
 
             const config = loadEnvConfig();
 
@@ -76,34 +76,34 @@ describe('Environment Variable Configuration', () => {
         });
 
         it('should ignore invalid boolean values', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'invalid';
+            process.env.ARIA51_BROWSER_HEADLESS = 'invalid';
 
             const config = loadEnvConfig();
             expect(config.browser?.headless).toBeUndefined();
         });
 
         it('should ignore invalid number values', () => {
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = 'not-a-number';
+            process.env.ARIA51_BROWSER_TIMEOUT = 'not-a-number';
 
             const config = loadEnvConfig();
             expect(config.browser?.timeout).toBeUndefined();
         });
 
         it('should ignore empty string values', () => {
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = '';
+            process.env.ARIA51_BROWSER_TIMEOUT = '';
 
             const config = loadEnvConfig();
             expect(config.browser?.timeout).toBeUndefined();
         });
 
         it('should load all browser config options', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'false';
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = '60000';
-            process.env.REACT_A11Y_BROWSER_STABILIZATION_DELAY = '5000';
-            process.env.REACT_A11Y_BROWSER_MAX_NAVIGATION_WAITS = '5';
-            process.env.REACT_A11Y_BROWSER_NAVIGATION_CHECK_INTERVAL = '2000';
-            process.env.REACT_A11Y_BROWSER_NETWORK_IDLE_TIMEOUT = '10000';
-            process.env.REACT_A11Y_BROWSER_POST_NAVIGATION_DELAY = '3000';
+            process.env.ARIA51_BROWSER_HEADLESS = 'false';
+            process.env.ARIA51_BROWSER_TIMEOUT = '60000';
+            process.env.ARIA51_BROWSER_STABILIZATION_DELAY = '5000';
+            process.env.ARIA51_BROWSER_MAX_NAVIGATION_WAITS = '5';
+            process.env.ARIA51_BROWSER_NAVIGATION_CHECK_INTERVAL = '2000';
+            process.env.ARIA51_BROWSER_NETWORK_IDLE_TIMEOUT = '10000';
+            process.env.ARIA51_BROWSER_POST_NAVIGATION_DELAY = '3000';
 
             const config = loadEnvConfig();
 
@@ -119,9 +119,9 @@ describe('Environment Variable Configuration', () => {
         });
 
         it('should load all scan config options', () => {
-            process.env.REACT_A11Y_SCAN_MAX_RETRIES = '5';
-            process.env.REACT_A11Y_SCAN_RETRY_DELAY_BASE = '3000';
-            process.env.REACT_A11Y_SCAN_MAX_ELEMENTS_TO_CHECK = '200';
+            process.env.ARIA51_SCAN_MAX_RETRIES = '5';
+            process.env.ARIA51_SCAN_RETRY_DELAY_BASE = '3000';
+            process.env.ARIA51_SCAN_MAX_ELEMENTS_TO_CHECK = '200';
 
             const config = loadEnvConfig();
 
@@ -140,17 +140,17 @@ describe('Environment Variable Configuration', () => {
         });
 
         it('should return true when at least one env var is set', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = 'true';
+            process.env.ARIA51_BROWSER_HEADLESS = 'true';
             expect(hasEnvConfig()).toBe(true);
         });
 
         it('should return false for empty string values', () => {
-            process.env.REACT_A11Y_BROWSER_HEADLESS = '';
+            process.env.ARIA51_BROWSER_HEADLESS = '';
             expect(hasEnvConfig()).toBe(false);
         });
 
         it('should detect any supported env var', () => {
-            process.env.REACT_A11Y_SCAN_MAX_RETRIES = '5';
+            process.env.ARIA51_SCAN_MAX_RETRIES = '5';
             expect(hasEnvConfig()).toBe(true);
         });
     });
@@ -166,16 +166,16 @@ describe('Environment Variable Configuration', () => {
         it('should include expected env vars', () => {
             const vars = getSupportedEnvVars();
 
-            expect(vars).toContain('REACT_A11Y_BROWSER_HEADLESS');
-            expect(vars).toContain('REACT_A11Y_BROWSER_TIMEOUT');
-            expect(vars).toContain('REACT_A11Y_SCAN_MAX_RETRIES');
+            expect(vars).toContain('ARIA51_BROWSER_HEADLESS');
+            expect(vars).toContain('ARIA51_BROWSER_TIMEOUT');
+            expect(vars).toContain('ARIA51_SCAN_MAX_RETRIES');
         });
 
         it('should have correct prefix on all vars', () => {
             const vars = getSupportedEnvVars();
 
             for (const v of vars) {
-                expect(v).toMatch(/^REACT_A11Y_/);
+                expect(v).toMatch(/^ARIA51_/);
             }
         });
     });
@@ -226,7 +226,7 @@ describe('Environment Variable Configuration', () => {
 
     describe('Integration with config loading', () => {
         it('should produce config compatible with deep merge', () => {
-            process.env.REACT_A11Y_BROWSER_TIMEOUT = '60000';
+            process.env.ARIA51_BROWSER_TIMEOUT = '60000';
 
             const config = loadEnvConfig();
 

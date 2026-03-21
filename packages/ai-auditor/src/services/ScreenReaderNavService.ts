@@ -8,7 +8,7 @@ import { Effect } from 'effect';
 import type { Page } from 'playwright';
 import { ScreenReaderNavigator } from '../stagehand/screen-reader-navigator.js';
 import type { ScreenReaderNavigatorConfig, ScreenReaderNavigationResults } from '../types.js';
-import { logger } from '@accessibility-toolkit/core';
+import { logger } from '@aria51/core';
 import {
     EffectScreenReaderNavInitError,
     EffectScreenReaderNavError,

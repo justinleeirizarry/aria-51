@@ -1,6 +1,6 @@
 import type { Context } from 'hono';
-import { runScanAsPromise, AppLayer } from '@accessibility-toolkit/core';
-import { getComponentBundlePath } from '@accessibility-toolkit/react';
+import { runScanAsPromise, AppLayer } from '@aria51/core';
+import { getComponentBundlePath } from '@aria51/react';
 
 export const scanHandler = async (c: Context) => {
     const body = await c.req.json();

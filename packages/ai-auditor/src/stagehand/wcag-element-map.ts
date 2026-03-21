@@ -5,7 +5,7 @@
  * for prioritizing elements by WCAG conformance level.
  */
 
-import { getWcagCriteriaForViolation, formatCriterionDisplay, type WcagCriterion } from '@accessibility-toolkit/core';
+import { getWcagCriteriaForViolation, formatCriterionDisplay, type WcagCriterion } from '@aria51/core';
 import type { ElementType } from '../types.js';
 
 /**

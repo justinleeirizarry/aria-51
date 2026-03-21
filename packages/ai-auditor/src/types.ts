@@ -9,7 +9,7 @@ export type {
     ImpactLevel,
     WcagLevel,
     WcagCriterionInfo,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 
 // ============================================================================
 // Stagehand Keyboard Testing Types
@@ -57,7 +57,7 @@ export interface StagehandKeyboardIssue {
     /** Human-readable issue description */
     message: string;
     /** Related WCAG criteria */
-    wcagCriteria: import('@accessibility-toolkit/core').WcagCriterionInfo[];
+    wcagCriteria: import('@aria51/core').WcagCriterionInfo[];
     /** Issue severity */
     severity: 'critical' | 'serious' | 'moderate';
     /** Steps to reproduce the issue */
@@ -172,7 +172,7 @@ export interface TreeIssue {
     /** Human-readable description */
     message: string;
     /** Related WCAG criteria */
-    wcagCriteria: import('@accessibility-toolkit/core').WcagCriterionInfo[];
+    wcagCriteria: import('@aria51/core').WcagCriterionInfo[];
     /** Issue severity */
     severity: 'critical' | 'serious' | 'moderate' | 'minor';
 }
@@ -225,7 +225,7 @@ export interface TreeAnalysisConfig {
  */
 export interface WcagAuditOptions {
     /** Target WCAG conformance level */
-    targetLevel: import('@accessibility-toolkit/core').WcagLevel;
+    targetLevel: import('@aria51/core').WcagLevel;
     /** Maximum pages to visit (for multi-page audits) */
     maxPages?: number;
     /** Maximum agent steps before stopping */
@@ -248,7 +248,7 @@ export type AuditStatus = 'pass' | 'fail' | 'manual-review';
  */
 export interface AuditFinding {
     /** The WCAG criterion being tested */
-    criterion: import('@accessibility-toolkit/core').WcagCriterionInfo;
+    criterion: import('@aria51/core').WcagCriterionInfo;
     /** Result status */
     status: AuditStatus;
     /** Affected element (if applicable) */
@@ -258,7 +258,7 @@ export interface AuditFinding {
     /** Description of the finding */
     description: string;
     /** Impact level (for failures) */
-    impact?: import('@accessibility-toolkit/core').ImpactLevel;
+    impact?: import('@aria51/core').ImpactLevel;
     /** Evidence or details supporting the finding */
     evidence?: string;
 }
@@ -272,7 +272,7 @@ export interface WcagAuditResult {
     /** When the audit was performed */
     timestamp: string;
     /** Target conformance level */
-    targetLevel: import('@accessibility-toolkit/core').WcagLevel;
+    targetLevel: import('@aria51/core').WcagLevel;
     /** All audit findings */
     findings: AuditFinding[];
     /** Summary statistics */
@@ -345,7 +345,7 @@ export interface ScreenReaderIssue {
     /** Human-readable description */
     message: string;
     /** Related WCAG criteria */
-    wcagCriteria: import('@accessibility-toolkit/core').WcagCriterionInfo[];
+    wcagCriteria: import('@aria51/core').WcagCriterionInfo[];
     /** Issue severity */
     severity: 'critical' | 'serious' | 'moderate' | 'minor';
 }

@@ -1,13 +1,13 @@
 /**
- * @accessibility-toolkit/react
+ * @aria51/react
  *
  * React plugin for the Accessibility Toolkit. Provides component attribution
  * for accessibility violations by traversing the React Fiber tree.
  *
  * @example
  * ```typescript
- * import { scan } from '@accessibility-toolkit/core';
- * import { ReactPlugin } from '@accessibility-toolkit/react';
+ * import { scan } from '@aria51/core';
+ * import { ReactPlugin } from '@aria51/react';
  *
  * const results = await scan({
  *   url: 'https://my-react-app.com',

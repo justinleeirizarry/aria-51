@@ -40,7 +40,7 @@ export class ScannerService implements IScannerService {
     isBundleInjected(page: Page): Effect.Effect<boolean> {
         return Effect.promise(() =>
             page.evaluate(() => {
-                return typeof (window as any).A11yScanner !== 'undefined';
+                return typeof (window as any).Aria51Scanner !== 'undefined';
             })
         );
     }
@@ -127,7 +127,7 @@ export class ScannerService implements IScannerService {
                                 history.pushState = () => {};
                                 history.replaceState = () => {};
 
-                                const result = (window as any).A11yScanner!.scan({
+                                const result = (window as any).Aria51Scanner!.scan({
                                     tags: scanTags,
                                     includeKeyboardTests: runKeyboardTests,
                                     disableRules: rulesToDisable,

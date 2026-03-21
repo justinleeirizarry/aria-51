@@ -5,7 +5,7 @@
  */
 
 import type { WcagLevel } from '../types.js';
-import { WCAG_CRITERIA, getAllCriteriaByLevel } from '@accessibility-toolkit/core';
+import { WCAG_CRITERIA, getAllCriteriaByLevel } from '@aria51/core';
 
 /**
  * Build the main WCAG audit system prompt

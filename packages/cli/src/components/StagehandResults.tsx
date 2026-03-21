@@ -4,7 +4,7 @@ import type {
     StagehandKeyboardResults,
     TreeAnalysisResult,
     WcagAuditResult,
-} from '@accessibility-toolkit/ai-auditor';
+} from '@aria51/ai-auditor';
 
 type StagehandMode = 'stagehand-keyboard' | 'stagehand-tree' | 'wcag-audit';
 type StagehandResultType = StagehandKeyboardResults | TreeAnalysisResult | WcagAuditResult;

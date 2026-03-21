@@ -14,8 +14,8 @@ import {
     updateConfig,
     loadEnvConfig,
     hasEnvConfig,
-} from "@accessibility-toolkit/core";
-import { getComponentBundlePath } from "@accessibility-toolkit/react";
+} from "@aria51/core";
+import { getComponentBundlePath } from "@aria51/react";
 
 // Configure logger to use stderr to avoid corrupting JSON-RPC on stdout
 logger.setUseStderr(true);
@@ -27,7 +27,7 @@ if (hasEnvConfig()) {
 
 // Create server instance
 const server = new McpServer({
-    name: "a11y-toolkit",
+    name: "aria51",
     version: "1.0.0",
 });
 
@@ -151,7 +151,7 @@ server.registerTool(
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
-    logger.info("a11y-toolkit MCP Server running on stdio");
+    logger.info("aria51 MCP Server running on stdio");
 }
 
 main().catch((error) => {

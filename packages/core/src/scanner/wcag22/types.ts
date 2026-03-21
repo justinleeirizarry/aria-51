@@ -3,7 +3,7 @@
  *
  * Re-exports from schemas for backward compatibility.
  * The discriminated violation types with typed details are also available
- * directly from '@accessibility-toolkit/core' via Schemas namespace.
+ * directly from '@aria51/core' via Schemas namespace.
  */
 import type { ImpactLevel, WcagLevel } from '../../types.js';
 import type { WCAG22ExceptionType as SchemaExceptionType } from '../../schemas/wcag22-violations.js';

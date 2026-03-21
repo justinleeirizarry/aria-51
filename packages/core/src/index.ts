@@ -1,11 +1,11 @@
 /**
- * @accessibility-toolkit/core
+ * @aria51/core
  *
  * Core library for accessibility testing. Framework-agnostic accessibility
  * scanning with axe-core, keyboard testing, and WCAG 2.2 checks.
  *
- * For React component attribution, use @accessibility-toolkit/react
- * For AI-powered auditing, use @accessibility-toolkit/ai-auditor
+ * For React component attribution, use @aria51/react
+ * For AI-powered auditing, use @aria51/ai-auditor
  */
 
 // =============================================================================
@@ -130,7 +130,7 @@ export type {
     SupplementalIssue,
 
     // API types
-    ReactA11yScannerAPI,
+    Aria51ScannerAPI,
 } from './types.js';
 
 // =============================================================================

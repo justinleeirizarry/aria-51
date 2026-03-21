@@ -20,7 +20,7 @@ import type {
     ScreenReaderIssueType,
     WcagCriterionInfo,
 } from "../types.js";
-import { logger, getCriterionById } from "@accessibility-toolkit/core";
+import { logger, getCriterionById } from "@aria51/core";
 
 /** WCAG criteria relevant to screen reader navigation */
 const SCREEN_READER_WCAG_MAP: Record<ScreenReaderIssueType, string[]> = {

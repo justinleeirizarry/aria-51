@@ -52,7 +52,7 @@ describe('Browser Bundle', () => {
     });
 
     describe('Scanner Initialization', () => {
-        it('should expose A11yScanner on window after injection', async () => {
+        it('should expose Aria51Scanner on window after injection', async () => {
             await page.goto(TEST_APP_FIXTURE, { waitUntil: 'networkidle' });
             await page.waitForTimeout(2000); // Wait for React to render
 
@@ -63,15 +63,15 @@ describe('Browser Bundle', () => {
                 document.head.appendChild(script);
             }, scannerBundle);
 
-            // Check if A11yScanner is available
+            // Check if Aria51Scanner is available
             const hasScanner = await page.evaluate(() => {
-                return typeof window.A11yScanner !== 'undefined';
+                return typeof window.Aria51Scanner !== 'undefined';
             });
 
             expect(hasScanner).toBe(true);
         }, 30000);
 
-        it('should have scan function on A11yScanner', async () => {
+        it('should have scan function on Aria51Scanner', async () => {
             await page.goto(TEST_APP_FIXTURE, { waitUntil: 'networkidle' });
             await page.waitForTimeout(2000);
 
@@ -83,8 +83,8 @@ describe('Browser Bundle', () => {
 
             const hasScanFunction = await page.evaluate(() => {
                 return (
-                    typeof window.A11yScanner !== 'undefined' &&
-                    typeof window.A11yScanner.scan === 'function'
+                    typeof window.Aria51Scanner !== 'undefined' &&
+                    typeof window.Aria51Scanner.scan === 'function'
                 );
             });
 
@@ -104,7 +104,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Verify structure
@@ -131,7 +131,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Generic scanner returns empty components - framework plugins provide component data
@@ -149,7 +149,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Test fixture has intentional violations
@@ -179,7 +179,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             const violationIds = result.violations.map((v: any) => v.id);
@@ -202,7 +202,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Generic scanner returns raw axe nodes without component attribution
@@ -230,7 +230,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan({ includeKeyboardTests: true });
+                return await window.Aria51Scanner!.scan({ includeKeyboardTests: true });
             });
 
             expect(result.keyboardTests).toBeDefined();
@@ -251,7 +251,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan({ includeKeyboardTests: false });
+                return await window.Aria51Scanner!.scan({ includeKeyboardTests: false });
             });
 
             expect(result.keyboardTests).toBeUndefined();
@@ -270,7 +270,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // WCAG 2.2 results should be present
@@ -292,7 +292,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             expect(result.wcag22).toBeDefined();
@@ -312,11 +312,11 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const resultAll = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             const resultFiltered = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan({ tags: ['wcag2a'] });
+                return await window.Aria51Scanner!.scan({ tags: ['wcag2a'] });
             });
 
             // Filtered results should be a subset (or equal)
@@ -341,7 +341,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Accessibility tree should be present
@@ -362,7 +362,7 @@ describe('Browser Bundle', () => {
 
             // Scan should complete even if some parts fail
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan({ includeKeyboardTests: true });
+                return await window.Aria51Scanner!.scan({ includeKeyboardTests: true });
             });
 
             // Result should be valid even if errors occurred
@@ -392,7 +392,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Generic scanner should succeed - it doesn't require React
@@ -414,7 +414,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Should have some passing rules
@@ -444,7 +444,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Incomplete should be defined (may be empty array)
@@ -465,7 +465,7 @@ describe('Browser Bundle', () => {
             }, scannerBundle);
 
             const result = await page.evaluate(async () => {
-                return await window.A11yScanner!.scan();
+                return await window.Aria51Scanner!.scan();
             });
 
             // Inapplicable should be defined

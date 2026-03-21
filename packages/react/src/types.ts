@@ -14,7 +14,7 @@ export type {
     AxeCheckResult,
     WcagCriterionInfo,
     FixSuggestion,
-} from '@accessibility-toolkit/core';
+} from '@aria51/core';
 
 /**
  * Source location information from element-source
@@ -61,7 +61,7 @@ export interface ReactScanData {
  */
 export interface AttributedCheck {
     id: string;
-    impact: import('@accessibility-toolkit/core').ImpactLevelOrNull;
+    impact: import('@aria51/core').ImpactLevelOrNull;
     message: string;
     relatedNodes?: Array<{
         html: string;
@@ -111,14 +111,14 @@ export interface AttributedViolationNode {
  */
 export interface AttributedViolation {
     id: string;
-    impact: import('@accessibility-toolkit/core').ImpactLevel;
+    impact: import('@aria51/core').ImpactLevel;
     description: string;
     help: string;
     helpUrl: string;
     tags: string[];
-    wcagCriteria?: import('@accessibility-toolkit/core').WcagCriterionInfo[];
+    wcagCriteria?: import('@aria51/core').WcagCriterionInfo[];
     nodes: AttributedViolationNode[];
-    fixSuggestion?: import('@accessibility-toolkit/core').FixSuggestion;
+    fixSuggestion?: import('@aria51/core').FixSuggestion;
 }
 
 /**
@@ -126,7 +126,7 @@ export interface AttributedViolation {
  */
 export interface AttributedPass {
     id: string;
-    impact: import('@accessibility-toolkit/core').ImpactLevelOrNull;
+    impact: import('@aria51/core').ImpactLevelOrNull;
     description: string;
     help: string;
     helpUrl: string;
@@ -144,7 +144,7 @@ export interface AttributedPass {
  */
 export interface AttributedIncomplete {
     id: string;
-    impact: import('@accessibility-toolkit/core').ImpactLevelOrNull;
+    impact: import('@aria51/core').ImpactLevelOrNull;
     description: string;
     help: string;
     helpUrl: string;

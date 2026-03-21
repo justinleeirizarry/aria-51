@@ -1,5 +1,5 @@
 {
-    "name": "@accessibility-toolkit/web",
+    "name": "@aria51/web",
     "version": "0.1.0",
     "description": "Web UI for accessibility scanning",
     "type": "module",
@@ -9,9 +9,9 @@
         "start": "node dist/server.js"
     },
     "dependencies": {
-        "@accessibility-toolkit/core": "workspace:*",
-        "@accessibility-toolkit/react": "workspace:*",
-        "@accessibility-toolkit/ai-auditor": "workspace:*",
+        "@aria51/core": "workspace:*",
+        "@aria51/react": "workspace:*",
+        "@aria51/ai-auditor": "workspace:*",
         "@hono/node-server": "^1.13.0",
         "hono": "^4.7.0"
     },

@@ -8,7 +8,7 @@ import { Effect } from 'effect';
 import type { Page } from 'playwright';
 import { StagehandTreeAnalyzer } from '../stagehand/a11y-tree-analyzer.js';
 import type { TreeAnalysisConfig, TreeAnalysisResult } from '../types.js';
-import { logger } from '@accessibility-toolkit/core';
+import { logger } from '@aria51/core';
 import {
     EffectTreeAnalysisInitError,
     EffectTreeAnalysisError,

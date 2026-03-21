@@ -9,7 +9,7 @@ import type { Page } from 'playwright';
 import { StagehandScanner } from '../stagehand/scanner.js';
 import { TestGenerator } from '../stagehand/test-generator.js';
 import type { ElementDiscovery } from '../types.js';
-import { logger } from '@accessibility-toolkit/core';
+import { logger } from '@aria51/core';
 import {
     EffectTestGenNotInitializedError,
     EffectTestGenInitError,

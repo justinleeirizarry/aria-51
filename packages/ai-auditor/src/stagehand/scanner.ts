@@ -1,6 +1,6 @@
 import { Stagehand } from "@browserbasehq/stagehand";
 import type { StagehandConfig, ElementDiscovery, ElementType } from "../types.js";
-import { logger } from "@accessibility-toolkit/core";
+import { logger } from "@aria51/core";
 
 export class StagehandScanner {
     private stagehand: Stagehand | null = null;
