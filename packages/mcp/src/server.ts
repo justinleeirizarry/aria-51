@@ -44,11 +44,13 @@ server.registerTool(
             components: z.boolean().optional().default(true).describe("Auto-detect and attribute violations to framework components (React, Vue, Svelte, Solid). Set false to disable."),
             disable_rules: z.array(z.string()).optional().describe("Axe rule IDs to disable (e.g. ['color-contrast'])"),
             exclude: z.array(z.string()).optional().describe("CSS selectors to exclude from scanning"),
+            stagehand: z.boolean().optional().default(false).describe("Enable AI-powered tests (keyboard navigation, tree analysis, screen reader). Requires OPENAI_API_KEY."),
+            stagehand_model: z.string().optional().describe("AI model for Stagehand tests (default: openai/gpt-4o-mini)"),
         },
     },
-    async ({ url, browser, mobile, include_tree, components, disable_rules, exclude }) => {
+    async ({ url, browser, mobile, include_tree, components, disable_rules, exclude, stagehand, stagehand_model }) => {
         try {
-            logger.info(`Starting scan for ${url} using ${browser}`);
+            logger.info(`Starting scan for ${url} using ${browser}${stagehand ? ' with Stagehand AI tests' : ''}`);
 
             const { results } = await runScanAsPromise({
                 url,
@@ -59,6 +61,8 @@ server.registerTool(
                 mobile,
                 disableRules: disable_rules,
                 exclude,
+                stagehand,
+                stagehandModel: stagehand_model,
             }, AppLayer);
 
             const processor = createResultsProcessorService();
@@ -96,11 +100,13 @@ server.registerTool(
             components: z.boolean().optional().default(true).describe("Auto-detect and attribute violations to framework components (React, Vue, Svelte, Solid). Set false to disable."),
             disable_rules: z.array(z.string()).optional().describe("Axe rule IDs to disable (e.g. ['color-contrast'])"),
             exclude: z.array(z.string()).optional().describe("CSS selectors to exclude from scanning"),
+            stagehand: z.boolean().optional().default(false).describe("Enable AI-powered tests (keyboard navigation, tree analysis, screen reader). Requires OPENAI_API_KEY."),
+            stagehand_model: z.string().optional().describe("AI model for Stagehand tests (default: openai/gpt-4o-mini)"),
         },
     },
-    async ({ urls, browser, mobile, include_tree, components, disable_rules, exclude }) => {
+    async ({ urls, browser, mobile, include_tree, components, disable_rules, exclude, stagehand, stagehand_model }) => {
         try {
-            logger.info(`Starting multi-page scan for ${urls.length} URLs using ${browser}`);
+            logger.info(`Starting multi-page scan for ${urls.length} URLs using ${browser}${stagehand ? ' with Stagehand AI tests' : ''}`);
 
             const scanResults = await runMultiScanAsPromise(
                 urls,
@@ -112,6 +118,8 @@ server.registerTool(
                     mobile,
                     disableRules: disable_rules,
                     exclude,
+                    stagehand,
+                    stagehandModel: stagehand_model,
                 },
                 AppLayer,
             );

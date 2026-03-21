@@ -226,6 +226,24 @@ export class ResultsProcessorService implements IResultsProcessorService {
                 }
             }
 
+            // Add supplemental (Stagehand) results
+            if (results.supplementalResults && results.supplementalResults.length > 0) {
+                const failed = results.supplementalResults.filter(r => r.status === 'fail');
+                if (failed.length > 0) {
+                    summary += '\n### AI-Powered Test Findings\n';
+                    for (const result of failed) {
+                        summary += `\n#### ${result.criterionId} — ${result.issues.length} issue(s) (${result.source})\n`;
+                        for (const issue of result.issues) {
+                            summary += `- **[${issue.severity}]** ${issue.message}`;
+                            if (issue.selector) summary += `\n  Element: \`${issue.selector}\``;
+                            summary += '\n';
+                        }
+                    }
+                }
+                const passed = results.supplementalResults.filter(r => r.status === 'pass').length;
+                summary += `\n*AI tests: ${passed} criteria passed, ${failed.length} criteria with issues*\n`;
+            }
+
             // Add keyboard test summary
             if (results.keyboardTests && results.summary.keyboardIssues && results.summary.keyboardIssues > 0) {
                 summary += `\n### Keyboard Issues\n`;

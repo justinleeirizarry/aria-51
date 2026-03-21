@@ -27,6 +27,7 @@
     "dependencies": {
         "@accessibility-toolkit/core": "workspace:*",
         "@accessibility-toolkit/react": "workspace:*",
+        "@accessibility-toolkit/ai-auditor": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.22.0",
         "zod": "^3.25.76"
     },

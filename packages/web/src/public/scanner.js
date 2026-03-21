@@ -27,7 +27,10 @@ async function runScan() {
         const res = await fetch('/api/scan', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url }),
+            body: JSON.stringify({
+                url,
+                stagehand: document.getElementById('stagehand-toggle')?.checked || false,
+            }),
         });
 
         const reader = res.body.getReader();
@@ -252,6 +255,24 @@ function buildComplianceData(r) {
                         help: v.description,
                         impact: v.impact,
                         nodes: [{ html: v.html || '', target: [v.selector || ''] }]
+                    });
+                }
+            }
+        }
+    }
+
+    // Integrate supplemental (Stagehand) results
+    if (r.supplementalResults) {
+        for (const sr of r.supplementalResults) {
+            testedCriteria.add(sr.criterionId);
+            if (sr.status === 'fail' && sr.issues.length > 0) {
+                if (!failedCriteria[sr.criterionId]) failedCriteria[sr.criterionId] = [];
+                for (const issue of sr.issues) {
+                    failedCriteria[sr.criterionId].push({
+                        id: sr.source,
+                        help: issue.message,
+                        impact: issue.severity,
+                        nodes: [{ html: '', target: [issue.selector || ''] }]
                     });
                 }
             }

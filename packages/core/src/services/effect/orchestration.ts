@@ -53,6 +53,10 @@ export interface BaseScanOptions {
     disableRules?: string[];
     /** CSS selectors to exclude from scanning */
     exclude?: string[];
+    /** Enable AI-powered Stagehand tests (keyboard, tree, screen reader) */
+    stagehand?: boolean;
+    /** Stagehand AI model (default: openai/gpt-4o-mini) */
+    stagehandModel?: string;
     /** Progress callback fired at each scan step */
     onProgress?: (step: ScanProgressStep) => void;
 }
@@ -61,7 +65,7 @@ export interface BaseScanOptions {
  * Progress step emitted during a scan
  */
 export interface ScanProgressStep {
-    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'processing' | 'done';
+    step: 'launching' | 'navigating' | 'stabilizing' | 'detecting' | 'scanning' | 'attributing' | 'ai-testing' | 'processing' | 'done';
     message: string;
 }
 
@@ -139,6 +143,8 @@ export const performScan = (
             mobile,
             disableRules,
             exclude,
+            stagehand: enableStagehand,
+            stagehandModel,
             onProgress,
         } = options;
 
@@ -235,6 +241,23 @@ export const performScan = (
             url,
             browser: browserType,
         });
+
+        // Run optional AI-powered Stagehand tests (keyboard, tree, screen reader)
+        if (enableStagehand) {
+            progress('ai-testing', 'Running AI-powered accessibility tests…');
+            yield* Effect.tryPromise({
+                try: async () => {
+                    const { runStagehandTests } = await import('./stagehand-runner.js');
+                    const supplemental = await runStagehandTests(url, { model: stagehandModel });
+                    results.supplementalResults = supplemental;
+                    logger.info(`Stagehand tests complete: ${supplemental.length} criteria evaluated`);
+                },
+                catch: (err) => {
+                    logger.warn(`Stagehand tests failed (non-fatal): ${err}`);
+                    return new EffectScanDataError({ reason: `Stagehand tests failed: ${err}` });
+                },
+            }).pipe(Effect.catchAll(() => Effect.void));
+        }
 
         // Build result
         const result: EffectScanResult = { results };

@@ -49,6 +49,12 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   .btn:hover { background: #333; }
   .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
+  /* Scan options */
+  .scan-options { margin-top: -3.5rem; margin-bottom: 3rem; }
+  .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--muted); }
+  .checkbox-label input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; }
+  .option-hint { font-size: 0.75rem; color: #888; }
+
   /* Status */
   .status { padding: 1.25rem 1.5rem; border: 2px solid var(--border); margin-bottom: 3rem; font-size: 0.875rem; color: var(--muted); display: none; }
   .status.active { display: block; }

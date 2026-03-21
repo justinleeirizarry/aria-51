@@ -13,6 +13,13 @@ export function ScannerPage() {
         <input type="url" id="url" placeholder="https://example.com" autofocus>
         <button class="btn" id="scan" onclick="runScan()">Scan</button>
     </div>
+    <div class="scan-options">
+        <label class="checkbox-label">
+            <input type="checkbox" id="stagehand-toggle">
+            <span>AI-powered tests</span>
+            <span class="option-hint">(keyboard, tree, screen reader — requires OPENAI_API_KEY)</span>
+        </label>
+    </div>
     <div class="status" id="status"></div>
     <div id="results"></div>
 </div>

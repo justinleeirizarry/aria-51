@@ -9,6 +9,7 @@ import { BrowserType, SourceLocation, type Mutable } from './primitives.js';
 import { AttributedViolation, AttributedPass, AttributedIncomplete, InapplicableRule } from './violations.js';
 import { KeyboardTestResults } from './keyboard.js';
 import { WCAG22Results } from './wcag22-violations.js';
+import { SupplementalTestResult } from './supplemental-results.js';
 
 // Component information from element-source / fiber traversal
 export const ComponentInfo = Schema.Struct({
@@ -78,6 +79,7 @@ export const ScanResults = Schema.Struct({
     accessibilityTree: Schema.optional(Schema.Unknown),
     keyboardTests: Schema.optional(KeyboardTestResults),
     wcag22: Schema.optional(WCAG22Results),
+    supplementalResults: Schema.optional(Schema.Array(SupplementalTestResult)),
     summary: Schema.Struct({
         totalComponents: Schema.Number,
         totalViolations: Schema.Number,

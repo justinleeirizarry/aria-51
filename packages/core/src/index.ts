@@ -125,6 +125,10 @@ export type {
     WCAG22Results,
     WCAG22ViolationSummary,
 
+    // Supplemental results (Stagehand)
+    SupplementalTestResult,
+    SupplementalIssue,
+
     // API types
     ReactA11yScannerAPI,
 } from './types.js';

@@ -11,6 +11,7 @@
     "dependencies": {
         "@accessibility-toolkit/core": "workspace:*",
         "@accessibility-toolkit/react": "workspace:*",
+        "@accessibility-toolkit/ai-auditor": "workspace:*",
         "@hono/node-server": "^1.13.0",
         "hono": "^4.7.0"
     },

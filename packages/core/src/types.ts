@@ -42,6 +42,9 @@ export type { ScanError } from './schemas/scan-results.js';
 export type { WCAG22Results } from './schemas/wcag22-violations.js';
 export type { WCAG22ViolationSummary } from './schemas/wcag22-violations.js';
 
+export type { SupplementalTestResult } from './schemas/supplemental-results.js';
+export type { SupplementalIssue } from './schemas/supplemental-results.js';
+
 // --- Types without schemas (remain defined here) ---
 
 // Prompt template types

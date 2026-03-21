@@ -4,7 +4,7 @@ import { getComponentBundlePath } from '@accessibility-toolkit/react';
 
 export const scanHandler = async (c: Context) => {
     const body = await c.req.json();
-    const { url, components = true } = body as { url: string; components?: boolean };
+    const { url, components = true, stagehand = false, stagehandModel } = body as { url: string; components?: boolean; stagehand?: boolean; stagehandModel?: string };
 
     if (!url) {
         return c.json({ error: 'URL is required' }, 400);
@@ -24,6 +24,8 @@ export const scanHandler = async (c: Context) => {
                 headless: true,
                 includeKeyboardTests: true,
                 componentBundlePath: components !== false ? getComponentBundlePath() : undefined,
+                stagehand,
+                stagehandModel,
                 onProgress: (step) => {
                     send('progress', step);
                 },

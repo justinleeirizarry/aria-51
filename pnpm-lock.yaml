@@ -115,6 +115,10 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
+    optionalDependencies:
+      '@accessibility-toolkit/ai-auditor':
+        specifier: workspace:*
+        version: link:../ai-auditor
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.0
@@ -143,6 +147,9 @@ importers:
 
   packages/mcp:
     dependencies:
+      '@accessibility-toolkit/ai-auditor':
+        specifier: workspace:*
+        version: link:../ai-auditor
       '@accessibility-toolkit/core':
         specifier: workspace:*
         version: link:../core
@@ -187,6 +194,9 @@ importers:
 
   packages/web:
     dependencies:
+      '@accessibility-toolkit/ai-auditor':
+        specifier: workspace:*
+        version: link:../ai-auditor
       '@accessibility-toolkit/core':
         specifier: workspace:*
         version: link:../core

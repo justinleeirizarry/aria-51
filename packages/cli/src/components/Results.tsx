@@ -261,6 +261,46 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
                 );
             })()}
 
+            {/* Supplemental (Stagehand) Results */}
+            {results.supplementalResults && results.supplementalResults.length > 0 && (() => {
+                const failed = results.supplementalResults!.filter(r => r.status === 'fail');
+                const passed = results.supplementalResults!.filter(r => r.status === 'pass').length;
+                if (failed.length === 0 && passed > 0) {
+                    return (
+                        <Box flexDirection="column" marginTop={1}>
+                            <Text bold color={colors.success}>AI Tests — {passed} criteria passed</Text>
+                            <Box marginTop={1}>
+                                <Text color="gray">{'─'.repeat(60)}</Text>
+                            </Box>
+                        </Box>
+                    );
+                }
+                return (
+                    <Box flexDirection="column" marginTop={1}>
+                        <Text bold color={colors.serious}>AI Tests — {failed.length} criteria with issues, {passed} passed</Text>
+                        {failed.map((r) => (
+                            <Box key={r.criterionId} flexDirection="column" marginTop={1}>
+                                <Box>
+                                    <Text color={colors.serious} bold>{r.criterionId}</Text>
+                                    <Text color="gray">  {r.issues.length} issue{r.issues.length !== 1 ? 's' : ''} ({r.source})</Text>
+                                </Box>
+                                {r.issues.slice(0, 3).map((issue, i) => (
+                                    <Box key={i} marginLeft={2} flexDirection="column">
+                                        <Text color="gray">{issue.message}</Text>
+                                    </Box>
+                                ))}
+                                {r.issues.length > 3 && (
+                                    <Box marginLeft={2}><Text color="gray">...and {r.issues.length - 3} more</Text></Box>
+                                )}
+                            </Box>
+                        ))}
+                        <Box marginTop={1}>
+                            <Text color="gray">{'─'.repeat(60)}</Text>
+                        </Box>
+                    </Box>
+                );
+            })()}
+
             {/* Incomplete */}
             {incomplete && incomplete.length > 0 && (
                 <Box flexDirection="column" marginTop={1}>

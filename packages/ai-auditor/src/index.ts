@@ -153,6 +153,16 @@ export {
 } from './errors.js';
 
 // =============================================================================
+// Adapters (convert service results → supplemental test results)
+// =============================================================================
+
+export {
+    keyboardResultsToSupplemental,
+    treeResultsToSupplemental,
+    screenReaderResultsToSupplemental,
+} from './adapters/to-supplemental.js';
+
+// =============================================================================
 // Types
 // =============================================================================
 
