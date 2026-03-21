@@ -70,6 +70,35 @@ export interface WCAG22CheckResults {
     onFocus: WCAG22Violation[];
     onInput: WCAG22Violation[];
     redundantEntry: WCAG22Violation[];
+    // Media checks
+    mediaAudioDescription: WCAG22Violation[];
+    mediaLiveCaptions: WCAG22Violation[];
+    mediaSignLanguage: WCAG22Violation[];
+    mediaExtendedAudioDescription: WCAG22Violation[];
+    mediaAlternative: WCAG22Violation[];
+    mediaLiveAudio: WCAG22Violation[];
+    mediaBackgroundAudio: WCAG22Violation[];
+    imagesOfText: WCAG22Violation[];
+    // Timing & interaction checks
+    keyboardNoException: WCAG22Violation[];
+    noTiming: WCAG22Violation[];
+    interruptions: WCAG22Violation[];
+    reAuthenticating: WCAG22Violation[];
+    timeouts: WCAG22Violation[];
+    threeFlashesAbsolute: WCAG22Violation[];
+    location: WCAG22Violation[];
+    focusNotObscuredEnhanced: WCAG22Violation[];
+    targetSizeEnhanced: WCAG22Violation[];
+    concurrentInput: WCAG22Violation[];
+    // Language & error prevention checks
+    unusualWords: WCAG22Violation[];
+    abbreviations: WCAG22Violation[];
+    readingLevel: WCAG22Violation[];
+    pronunciation: WCAG22Violation[];
+    errorPreventionLegal: WCAG22Violation[];
+    help: WCAG22Violation[];
+    errorPreventionAll: WCAG22Violation[];
+    accessibleAuthEnhanced: WCAG22Violation[];
     summary: {
         totalViolations: number;
         byLevel: {

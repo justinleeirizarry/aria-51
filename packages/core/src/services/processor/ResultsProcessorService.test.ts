@@ -222,10 +222,10 @@ describe('ResultsProcessorService', () => {
 
             const content = Effect.runSync(service.formatForMCP(scanResult));
 
-            expect(content).toHaveLength(1);
+            expect(content.length).toBeGreaterThanOrEqual(1);
             expect(content[0].type).toBe('text');
             expect(content[0].text).toContain('Scan Complete');
-            expect(content[0].text).toContain('1** violations');
+            expect(content[0].text).toContain('axe-core violations');
         });
 
         it('should include accessibility tree when requested', () => {
@@ -238,8 +238,8 @@ describe('ResultsProcessorService', () => {
 
             const content = Effect.runSync(service.formatForMCP(scanResult, { includeTree: true }));
 
-            expect(content).toHaveLength(2);
-            expect(content[1].text).toContain('Accessibility Tree');
+            const treeBlock = content.find(c => c.text.includes('Accessibility Tree'));
+            expect(treeBlock).toBeDefined();
         });
 
         it('should handle zero violations', () => {
@@ -257,7 +257,8 @@ describe('ResultsProcessorService', () => {
 
             const content = Effect.runSync(service.formatForMCP(scanResult));
 
-            expect(content[0].text).toContain('No accessibility violations found');
+            const allText = content.map(c => c.text).join('\n');
+            expect(allText).toContain('No axe-core violations found');
         });
     });
 

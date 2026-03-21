@@ -24,6 +24,9 @@ export { checkSectionHeadings, getSectionHeadingsInfo } from './section-headings
 export { checkPointerGestures, getPointerGesturesInfo } from './pointer-gestures.js';
 export { checkOnFocusOnInput, getOnFocusOnInputInfo } from './on-focus-on-input.js';
 export { checkRedundantEntry, getRedundantEntryInfo } from './redundant-entry.js';
+export { checkMediaAccessibility, getMediaAccessibilityInfo } from './media-checks.js';
+export { checkTimingAndInteraction, getTimingAndInteractionInfo } from './timing-interaction-checks.js';
+export { checkLanguageAndErrorPrevention, getLanguageAndErrorPreventionInfo } from './language-error-prevention.js';
 
 import type { WCAG22CheckResults, WCAG22Violation } from './types.js';
 import { checkTargetSize } from './target-size.js';
@@ -44,6 +47,9 @@ import { checkSectionHeadings } from './section-headings.js';
 import { checkPointerGestures } from './pointer-gestures.js';
 import { checkOnFocusOnInput } from './on-focus-on-input.js';
 import { checkRedundantEntry } from './redundant-entry.js';
+import { checkMediaAccessibility } from './media-checks.js';
+import { checkTimingAndInteraction } from './timing-interaction-checks.js';
+import { checkLanguageAndErrorPrevention } from './language-error-prevention.js';
 
 /**
  * Run all WCAG 2.2 checks
@@ -120,6 +126,41 @@ export function runWCAG22Checks(): WCAG22CheckResults {
     const redundantEntryViolations = checkRedundantEntry();
     console.log(`  ✓ Redundant Entry (3.3.7): ${redundantEntryViolations.length} violations`);
 
+    const mediaViolations = checkMediaAccessibility();
+    const mediaAudioDescViolations = mediaViolations.filter(v => v.id === 'media-audio-description');
+    const mediaLiveCaptionsViolations = mediaViolations.filter(v => v.id === 'media-live-captions');
+    const mediaSignLanguageViolations = mediaViolations.filter(v => v.id === 'media-sign-language');
+    const mediaExtAudioDescViolations = mediaViolations.filter(v => v.id === 'media-extended-audio-description');
+    const mediaAlternativeViolations = mediaViolations.filter(v => v.id === 'media-alternative');
+    const mediaLiveAudioViolations = mediaViolations.filter(v => v.id === 'media-live-audio');
+    const mediaBackgroundAudioViolations = mediaViolations.filter(v => v.id === 'media-background-audio');
+    const imagesOfTextViolations = mediaViolations.filter(v => v.id === 'images-of-text');
+    console.log(`  ✓ Media checks: ${mediaViolations.length} violations`);
+
+    const timingViolations = checkTimingAndInteraction();
+    const keyboardNoExceptionViolations = timingViolations.filter(v => v.id === 'keyboard-no-exception');
+    const noTimingViolations = timingViolations.filter(v => v.id === 'no-timing');
+    const interruptionViolations = timingViolations.filter(v => v.id === 'interruptions');
+    const reAuthViolations = timingViolations.filter(v => v.id === 're-authenticating');
+    const timeoutViolations = timingViolations.filter(v => v.id === 'timeouts');
+    const threeFlashAbsoluteViolations = timingViolations.filter(v => v.id === 'three-flashes-absolute');
+    const locationViolations = timingViolations.filter(v => v.id === 'location');
+    const focusObscuredEnhancedViolations = timingViolations.filter(v => v.id === 'focus-not-obscured-enhanced');
+    const targetSizeEnhancedViolations = timingViolations.filter(v => v.id === 'target-size-enhanced');
+    const concurrentInputViolations = timingViolations.filter(v => v.id === 'concurrent-input');
+    console.log(`  ✓ Timing & interaction checks: ${timingViolations.length} violations`);
+
+    const langErrorViolations = checkLanguageAndErrorPrevention();
+    const unusualWordsViolations = langErrorViolations.filter(v => v.id === 'unusual-words');
+    const abbreviationViolations = langErrorViolations.filter(v => v.id === 'abbreviations');
+    const readingLevelViolations = langErrorViolations.filter(v => v.id === 'reading-level');
+    const pronunciationViolations = langErrorViolations.filter(v => v.id === 'pronunciation');
+    const errorPreventionLegalViolations = langErrorViolations.filter(v => v.id === 'error-prevention-legal');
+    const helpViolations = langErrorViolations.filter(v => v.id === 'help');
+    const errorPreventionAllViolations = langErrorViolations.filter(v => v.id === 'error-prevention-all');
+    const accessibleAuthEnhancedViolations = langErrorViolations.filter(v => v.id === 'accessible-auth-enhanced');
+    console.log(`  ✓ Language & error prevention checks: ${langErrorViolations.length} violations`);
+
     // Calculate summary
     const allViolations: WCAG22Violation[] = [
         ...targetSizeViolations,
@@ -140,6 +181,9 @@ export function runWCAG22Checks(): WCAG22CheckResults {
         ...pointerViolations,
         ...focusInputViolations,
         ...redundantEntryViolations,
+        ...mediaViolations,
+        ...timingViolations,
+        ...langErrorViolations,
     ];
 
     const byLevel = {
@@ -181,6 +225,32 @@ export function runWCAG22Checks(): WCAG22CheckResults {
         onFocus: onFocusViolations,
         onInput: onInputViolations,
         redundantEntry: redundantEntryViolations,
+        mediaAudioDescription: mediaAudioDescViolations,
+        mediaLiveCaptions: mediaLiveCaptionsViolations,
+        mediaSignLanguage: mediaSignLanguageViolations,
+        mediaExtendedAudioDescription: mediaExtAudioDescViolations,
+        mediaAlternative: mediaAlternativeViolations,
+        mediaLiveAudio: mediaLiveAudioViolations,
+        mediaBackgroundAudio: mediaBackgroundAudioViolations,
+        imagesOfText: imagesOfTextViolations,
+        keyboardNoException: keyboardNoExceptionViolations,
+        noTiming: noTimingViolations,
+        interruptions: interruptionViolations,
+        reAuthenticating: reAuthViolations,
+        timeouts: timeoutViolations,
+        threeFlashesAbsolute: threeFlashAbsoluteViolations,
+        location: locationViolations,
+        focusNotObscuredEnhanced: focusObscuredEnhancedViolations,
+        targetSizeEnhanced: targetSizeEnhancedViolations,
+        concurrentInput: concurrentInputViolations,
+        unusualWords: unusualWordsViolations,
+        abbreviations: abbreviationViolations,
+        readingLevel: readingLevelViolations,
+        pronunciation: pronunciationViolations,
+        errorPreventionLegal: errorPreventionLegalViolations,
+        help: helpViolations,
+        errorPreventionAll: errorPreventionAllViolations,
+        accessibleAuthEnhanced: accessibleAuthEnhancedViolations,
         summary: {
             totalViolations: allViolations.length,
             byLevel,

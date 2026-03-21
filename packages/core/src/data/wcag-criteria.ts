@@ -89,7 +89,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'An alternative or audio description is provided for prerecorded video content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/audio-description-or-media-alternative-prerecorded.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'An alternative for time-based media or audio description of the prerecorded video content is provided for synchronized media, except when the media is a media alternative for text and is clearly labeled as such.'
     },
     '1.2.4': {
@@ -100,7 +100,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'Captions are provided for all live audio content in synchronized media.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/captions-live.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Captions are provided for all live audio content in synchronized media.'
     },
     '1.2.5': {
@@ -122,7 +122,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'Sign language interpretation is provided for all prerecorded audio content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/sign-language-prerecorded.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Sign language interpretation is provided for all prerecorded audio content in synchronized media.'
     },
     '1.2.7': {
@@ -133,7 +133,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'Extended audio description is provided when pauses are insufficient.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/extended-audio-description-prerecorded.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Where pauses in foreground audio are insufficient to allow audio descriptions to convey the sense of the video, extended audio description is provided for all prerecorded video content in synchronized media.'
     },
     '1.2.8': {
@@ -144,7 +144,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'An alternative for time-based media is provided for all prerecorded content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/media-alternative-prerecorded.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'An alternative for time-based media is provided for all prerecorded synchronized media and for all prerecorded video-only media.'
     },
     '1.2.9': {
@@ -155,7 +155,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.2 Time-based Media',
         description: 'An alternative is provided for live audio-only content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/audio-only-live.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'An alternative for time-based media that presents equivalent information for live audio-only content is provided.'
     },
 
@@ -302,7 +302,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.4 Distinguishable',
         description: 'Background sounds are at least 20dB lower than foreground speech.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/low-or-no-background-audio.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'For prerecorded audio-only content that (1) contains primarily speech in the foreground, (2) is not an audio CAPTCHA or audio logo, and (3) is not vocalization intended to be primarily musical expression such as singing or rapping, at least one of the following is true: No Background: The audio does not contain background sounds. Turn Off: The background sounds can be turned off. 20 dB: The background sounds are at least 20 decibels lower than the foreground speech content, with the exception of occasional sounds that last for only one or two seconds. Note Per the definition of "decibel," background sound that meets this requirement will be approximately four times quieter than the foreground speech content.'
     },
     '1.4.8': {
@@ -324,7 +324,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '1.4 Distinguishable',
         description: 'Images of text are only used for pure decoration or essential presentation.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/images-of-text-no-exception.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Images of text are only used for pure decoration or where a particular presentation of text is essential to the information being conveyed. Note Logotypes (text that is part of a logo or brand name) are considered essential.'
     },
     '1.4.10': {
@@ -407,7 +407,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.1 Keyboard Accessible',
         description: 'All functionality is operable through keyboard without exception.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/keyboard-no-exception.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'All functionality of the content is operable through a keyboard interface without requiring specific timings for individual keystrokes.'
     },
     '2.1.4': {
@@ -453,7 +453,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.2 Enough Time',
         description: 'Timing is not an essential part of the activity.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/no-timing.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Timing is not an essential part of the event or activity presented by the content, except for non-interactive synchronized media and real-time events.'
     },
     '2.2.4': {
@@ -464,7 +464,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.2 Enough Time',
         description: 'Interruptions can be postponed or suppressed by the user.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/interruptions.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Interruptions can be postponed or suppressed by the user, except interruptions involving an emergency.'
     },
     '2.2.5': {
@@ -475,7 +475,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.2 Enough Time',
         description: 'Users can continue activity without data loss after re-authenticating.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/re-authenticating.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'When an authenticated session expires, the user can continue the activity without loss of data after re-authenticating.'
     },
     '2.2.6': {
@@ -486,7 +486,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.2 Enough Time',
         description: 'Users are warned of timeout duration that could cause data loss.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/timeouts.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Users are warned of the duration of any user inactivity that could cause data loss, unless the data is preserved for more than 20 hours when the user does not take any actions. Note Privacy regulations may require explicit user consent before user identification has been authenticated and before user data is preserved. In cases where the user is a minor, explicit consent may not be solicited in most jurisdictions, countries or regions. Consultation with privacy professionals and legal counsel is advised when considering data preservation as an approach to satisfy this success criterion.'
     },
 
@@ -510,7 +510,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.3 Seizures and Physical Reactions',
         description: 'Content does not flash more than 3 times per second (no exceptions).',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/three-flashes.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Web pages do not contain anything that flashes more than three times in any one second period.'
     },
     '2.3.3': {
@@ -611,7 +611,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.4 Navigable',
         description: 'Information about user location within a set of pages is available.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/location.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Information about the user\'s location within a set of web pages is available.'
     },
     '2.4.9': {
@@ -655,7 +655,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.4 Navigable',
         description: 'No part of the focused component is hidden by author-created content.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-enhanced.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'When a user interface component receives keyboard focus, no part of the component is hidden by author-created content.'
     },
     '2.4.13': {
@@ -723,7 +723,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.5 Input Modalities',
         description: 'Pointer targets are at least 44x44 CSS pixels.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/target-size-enhanced.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'The size of the target for pointer inputs is at least 44 by 44 CSS pixels except when: Equivalent: The target is available through an equivalent link or control on the same page that is at least 44 by 44 CSS pixels; Inline: The target is in a sentence or block of text; User Agent Control: The size of the target is determined by the user agent and is not modified by the author; Essential: A particular presentation of the target is essential to the information being conveyed.'
     },
     '2.5.6': {
@@ -734,7 +734,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '2.5 Input Modalities',
         description: 'Content does not restrict use of different input modalities.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/concurrent-input-mechanisms.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Web content does not restrict use of input modalities available on a platform except where the restriction is essential, required to ensure the security of the content, or required to respect user settings.'
     },
     '2.5.7': {
@@ -795,7 +795,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.1 Readable',
         description: 'A mechanism identifies definitions of unusual words or jargon.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/unusual-words.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'A mechanism is available for identifying specific definitions of words or phrases used in an unusual or restricted way, including idioms and jargon.'
     },
     '3.1.4': {
@@ -806,7 +806,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.1 Readable',
         description: 'A mechanism identifies the expanded form of abbreviations.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/abbreviations.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'A mechanism for identifying the expanded form or meaning of abbreviations is available.'
     },
     '3.1.5': {
@@ -817,7 +817,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.1 Readable',
         description: 'Content is available at a lower secondary education reading level.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/reading-level.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'When text requires reading ability more advanced than the lower secondary education level after removal of proper names and titles, supplemental content, or a version that does not require reading ability more advanced than the lower secondary education level, is available.'
     },
     '3.1.6': {
@@ -828,7 +828,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.1 Readable',
         description: 'A mechanism identifies pronunciation of ambiguous words.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/pronunciation.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'A mechanism is available for identifying specific pronunciation of words where meaning of the words, in context, is ambiguous without knowing the pronunciation.'
     },
 
@@ -942,7 +942,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.3 Input Assistance',
         description: 'Submissions are reversible, checked, or confirmed.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-legal-financial-data.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'For web pages that cause legal commitments or financial transactions for the user to occur, that modify or delete user-controllable data in data storage systems, or that submit user test responses, at least one of the following is true: Reversible: Submissions are reversible. Checked: Data entered by the user is checked for input errors and the user is provided an opportunity to correct them. Confirmed: A mechanism is available for reviewing, confirming, and correcting information before finalizing the submission.'
     },
     '3.3.5': {
@@ -953,7 +953,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.3 Input Assistance',
         description: 'Context-sensitive help is available.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/help.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'Context-sensitive help is available.'
     },
     '3.3.6': {
@@ -964,7 +964,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.3 Input Assistance',
         description: 'All submissions are reversible, checked, or confirmed.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/error-prevention-all.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'For web pages that require the user to submit information, at least one of the following is true: Reversible: Submissions are reversible. Checked: Data entered by the user is checked for input errors and the user is provided an opportunity to correct them. Confirmed: A mechanism is available for reviewing, confirming, and correcting information before finalizing the submission.'
     },
     '3.3.7': {
@@ -997,7 +997,7 @@ export const WCAG_CRITERIA: Record<string, WcagCriterion> = {
         guideline: '3.3 Input Assistance',
         description: 'No cognitive function tests required, with fewer exceptions.',
         w3cUrl: 'https://www.w3.org/WAI/WCAG22/Understanding/accessible-authentication-enhanced.html',
-        testability: 'manual',
+        testability: 'semi-automated',
         successCriterionText: 'A cognitive function test (such as remembering a password or solving a puzzle) is not required for any step in an authentication process unless that step provides at least one of the following: Alternative: Another authentication method that does not rely on a cognitive function test. Mechanism: A mechanism is available to assist the user in completing the cognitive function test.'
     },
 

@@ -182,20 +182,51 @@ export class ResultsProcessorService implements IResultsProcessorService {
             const violationCount = results.violations.length;
             const criticalCount = results.summary.violationsBySeverity.critical;
 
-            let summary = `## Scan Complete for ${results.url}\n\n`;
-            summary += `Found **${violationCount}** violations (**${criticalCount}** critical).\n\n`;
+            // --- Build content as separate blocks so nothing gets truncated ---
+            const content: MCPToolContent[] = [];
 
-            if (violationCount > 0) {
-                summary += '### Violations Summary\n';
-                summary += formatViolations(results.violations);
-            } else {
-                summary += 'No accessibility violations found!';
+            // Block 1: Summary + coverage overview
+            const wcag22Total = results.wcag22?.summary?.totalViolations || 0;
+            const supplementalTotal = results.supplementalResults?.length || 0;
+            const supplementalFailed = results.supplementalResults?.filter(r => r.status === 'fail').length || 0;
+            const supplementalPassed = supplementalTotal - supplementalFailed;
+
+            let header = `## Scan Complete for ${results.url}\n\n`;
+            header += `Found **${violationCount}** axe-core violations (**${criticalCount}** critical), **${wcag22Total}** WCAG 2.2 check violations.\n`;
+            header += `**Supplemental tests:** ${supplementalTotal} criteria evaluated — ${supplementalPassed} passed, ${supplementalFailed} failed.\n`;
+
+            // Add keyboard test summary
+            if (results.keyboardTests && results.summary.keyboardIssues && results.summary.keyboardIssues > 0) {
+                header += `**Keyboard issues:** ${results.summary.keyboardIssues}\n`;
             }
 
-            // Add WCAG 2.2 custom check violations
-            if (results.wcag22) {
+            content.push({ type: 'text', text: header });
+
+            // Block 2: Supplemental test results (screen reader + keyboard checks)
+            if (results.supplementalResults && results.supplementalResults.length > 0) {
+                let supplementalText = '\n### Supplemental Test Results\n\n';
+                for (const result of results.supplementalResults) {
+                    const icon = result.status === 'pass' ? 'PASS' : result.status === 'fail' ? 'FAIL' : 'REVIEW';
+                    supplementalText += `- **[${icon}]** ${result.criterionId} (${result.source})`;
+                    if (result.status === 'fail' && result.issues.length > 0) {
+                        supplementalText += ` — ${result.issues.length} issue(s)\n`;
+                        for (const issue of result.issues.slice(0, 3)) {
+                            supplementalText += `  - [${issue.severity}] ${issue.message}\n`;
+                        }
+                        if (result.issues.length > 3) {
+                            supplementalText += `  - *...and ${result.issues.length - 3} more*\n`;
+                        }
+                    } else {
+                        supplementalText += '\n';
+                    }
+                }
+                content.push({ type: 'text', text: supplementalText });
+            }
+
+            // Block 3: WCAG 2.2 custom check violations
+            if (results.wcag22 && wcag22Total > 0) {
                 const wcag22Checks = results.wcag22;
-                const checkCategories = [
+                const checkCategories: Array<{ key: string; label: string }> = [
                     { key: 'targetSize', label: 'Target Size (2.5.8)' },
                     { key: 'focusObscured', label: 'Focus Not Obscured (2.4.11)' },
                     { key: 'focusAppearance', label: 'Focus Appearance (2.4.13)' },
@@ -207,50 +238,72 @@ export class ResultsProcessorService implements IResultsProcessorService {
                     { key: 'meaningfulSequence', label: 'Meaningful Sequence (1.3.2)' },
                     { key: 'reflow', label: 'Reflow (1.4.10)' },
                     { key: 'hoverFocusContent', label: 'Content on Hover or Focus (1.4.13)' },
-                ] as const;
+                    { key: 'sensoryCharacteristics', label: 'Sensory Characteristics (1.3.3)' },
+                    { key: 'identifyPurpose', label: 'Identify Purpose (1.3.6)' },
+                    { key: 'visualPresentation', label: 'Visual Presentation (1.4.8)' },
+                    { key: 'characterKeyShortcuts', label: 'Character Key Shortcuts (2.1.4)' },
+                    { key: 'animationInteractions', label: 'Animation from Interactions (2.3.3)' },
+                    { key: 'threeFlashes', label: 'Three Flashes (2.3.1)' },
+                    { key: 'sectionHeadings', label: 'Section Headings (2.4.10)' },
+                    { key: 'pointerGestures', label: 'Pointer Gestures (2.5.1)' },
+                    { key: 'pointerCancellation', label: 'Pointer Cancellation (2.5.2)' },
+                    { key: 'motionActuation', label: 'Motion Actuation (2.5.4)' },
+                    { key: 'onFocus', label: 'On Focus (3.2.1)' },
+                    { key: 'onInput', label: 'On Input (3.2.2)' },
+                    { key: 'redundantEntry', label: 'Redundant Entry (3.3.7)' },
+                    { key: 'mediaAudioDescription', label: 'Audio Description (1.2.3)' },
+                    { key: 'mediaLiveCaptions', label: 'Captions — Live (1.2.4)' },
+                    { key: 'mediaSignLanguage', label: 'Sign Language (1.2.6)' },
+                    { key: 'mediaExtendedAudioDescription', label: 'Extended Audio Description (1.2.7)' },
+                    { key: 'mediaAlternative', label: 'Media Alternative (1.2.8)' },
+                    { key: 'mediaLiveAudio', label: 'Audio-only — Live (1.2.9)' },
+                    { key: 'mediaBackgroundAudio', label: 'Low/No Background Audio (1.4.7)' },
+                    { key: 'imagesOfText', label: 'Images of Text (1.4.9)' },
+                    { key: 'keyboardNoException', label: 'Keyboard — No Exception (2.1.3)' },
+                    { key: 'noTiming', label: 'No Timing (2.2.3)' },
+                    { key: 'interruptions', label: 'Interruptions (2.2.4)' },
+                    { key: 'reAuthenticating', label: 'Re-authenticating (2.2.5)' },
+                    { key: 'timeouts', label: 'Timeouts (2.2.6)' },
+                    { key: 'threeFlashesAbsolute', label: 'Three Flashes (2.3.2)' },
+                    { key: 'location', label: 'Location (2.4.8)' },
+                    { key: 'focusNotObscuredEnhanced', label: 'Focus Not Obscured — Enhanced (2.4.12)' },
+                    { key: 'targetSizeEnhanced', label: 'Target Size — Enhanced (2.5.5)' },
+                    { key: 'concurrentInput', label: 'Concurrent Input Mechanisms (2.5.6)' },
+                    { key: 'unusualWords', label: 'Unusual Words (3.1.3)' },
+                    { key: 'abbreviations', label: 'Abbreviations (3.1.4)' },
+                    { key: 'readingLevel', label: 'Reading Level (3.1.5)' },
+                    { key: 'pronunciation', label: 'Pronunciation (3.1.6)' },
+                    { key: 'errorPreventionLegal', label: 'Error Prevention — Legal/Financial (3.3.4)' },
+                    { key: 'help', label: 'Help (3.3.5)' },
+                    { key: 'errorPreventionAll', label: 'Error Prevention — All (3.3.6)' },
+                    { key: 'accessibleAuthEnhanced', label: 'Accessible Auth — Enhanced (3.3.9)' },
+                ];
 
-                const wcag22Violations: string[] = [];
+                let wcag22Text = '\n### WCAG 2.2 Custom Check Violations\n';
                 for (const { key, label } of checkCategories) {
                     const items = (wcag22Checks as any)[key];
                     if (items && items.length > 0) {
-                        wcag22Violations.push(`\n#### ${label} — ${items.length} violation(s)\n`);
-                        for (const v of items) {
-                            wcag22Violations.push(`- **${v.description}**\n  Element: \`${v.selector}\`\n  Impact: ${v.impact}\n`);
+                        wcag22Text += `\n#### ${label} — ${items.length} violation(s)\n`;
+                        const maxShow = 3;
+                        for (const v of items.slice(0, maxShow)) {
+                            wcag22Text += `- **${v.description}**\n  Element: \`${v.selector}\`\n  Impact: ${v.impact}\n`;
+                        }
+                        if (items.length > maxShow) {
+                            wcag22Text += `- *...and ${items.length - maxShow} more*\n`;
                         }
                     }
                 }
-
-                if (wcag22Violations.length > 0) {
-                    summary += '\n### WCAG 2.2 Custom Check Violations\n';
-                    summary += wcag22Violations.join('');
-                }
+                content.push({ type: 'text', text: wcag22Text });
             }
 
-            // Add supplemental (Stagehand) results
-            if (results.supplementalResults && results.supplementalResults.length > 0) {
-                const failed = results.supplementalResults.filter(r => r.status === 'fail');
-                if (failed.length > 0) {
-                    summary += '\n### AI-Powered Test Findings\n';
-                    for (const result of failed) {
-                        summary += `\n#### ${result.criterionId} — ${result.issues.length} issue(s) (${result.source})\n`;
-                        for (const issue of result.issues) {
-                            summary += `- **[${issue.severity}]** ${issue.message}`;
-                            if (issue.selector) summary += `\n  Element: \`${issue.selector}\``;
-                            summary += '\n';
-                        }
-                    }
-                }
-                const passed = results.supplementalResults.filter(r => r.status === 'pass').length;
-                summary += `\n*AI tests: ${passed} criteria passed, ${failed.length} criteria with issues*\n`;
+            // Block 4: Axe-core violation details
+            if (violationCount > 0) {
+                let axeText = '\n### Axe-Core Violation Details\n';
+                axeText += formatViolations(results.violations);
+                content.push({ type: 'text', text: axeText });
+            } else {
+                content.push({ type: 'text', text: '\nNo axe-core violations found!' });
             }
-
-            // Add keyboard test summary
-            if (results.keyboardTests && results.summary.keyboardIssues && results.summary.keyboardIssues > 0) {
-                summary += `\n### Keyboard Issues\n`;
-                summary += `Found **${results.summary.keyboardIssues}** keyboard accessibility issues.\n`;
-            }
-
-            const content: MCPToolContent[] = [{ type: 'text', text: summary }];
 
             // Optionally include accessibility tree
             if (options?.includeTree && results.accessibilityTree) {

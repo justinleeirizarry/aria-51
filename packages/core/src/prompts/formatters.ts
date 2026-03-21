@@ -161,7 +161,10 @@ export function formatViolations(violations: AttributedViolation[]): string {
             output += `**Component Stack:**\n${stackStr}\n`;
         }
 
-        output += `**Component Path:** \`${userPath}\`\n`;
+        // Only show component path if a framework was detected
+        if (userPath !== 'Unknown') {
+            output += `**Component Path:** \`${userPath}\`\n`;
+        }
 
         if (firstNode?.cssSelector) {
             output += `**Selector:** \`${firstNode.cssSelector}\`\n`;
