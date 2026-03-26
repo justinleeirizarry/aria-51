@@ -50,13 +50,11 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   .btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
   /* Scan options */
-  .scan-options { margin-top: -3.5rem; margin-bottom: 3rem; }
-  .checkbox-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--muted); }
-  .checkbox-label input[type="checkbox"] { -webkit-appearance: none; appearance: none; width: 1rem; height: 1rem; border: 2px solid var(--border); border-radius: 0; background: var(--bg); cursor: pointer; display: grid; place-content: center; margin: 0; }
-  .checkbox-label input[type="checkbox"]::after { content: ''; width: 0.5rem; height: 0.5rem; background: var(--fg); transform: scale(0); }
-  .checkbox-label input[type="checkbox"]:checked::after { transform: scale(1); }
-  .checkbox-label input[type="checkbox"]:checked { border-color: var(--fg); }
-  .option-hint { font-size: 0.75rem; color: #888; }
+  .scan-options { margin-top: -3.5rem; margin-bottom: 3rem; display: flex; align-items: center; gap: 0.75rem; }
+  .toggle-btn { padding: 0.5rem 1rem; background: none; color: var(--muted); border: 2px solid var(--border-light); border-radius: 0; font-size: 0.6875rem; font-weight: 700; font-family: inherit; text-transform: uppercase; letter-spacing: 0.06em; cursor: pointer; }
+  .toggle-btn:hover { border-color: var(--border); color: var(--fg); }
+  .toggle-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  .option-hint { font-size: 0.6875rem; color: #999; letter-spacing: 0.02em; }
 
   /* Status */
   .status { padding: 1.25rem 1.5rem; border: 2px solid var(--border); margin-bottom: 3rem; font-size: 0.875rem; color: var(--muted); display: none; }

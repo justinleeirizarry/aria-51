@@ -1,0 +1,45 @@
+{
+    "name": "@aria51/agent",
+    "version": "0.1.0",
+    "description": "Autonomous accessibility auditing agent harness powered by Claude",
+    "main": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "type": "module",
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "build": "tsc",
+        "dev": "tsc --watch",
+        "test": "vitest run",
+        "test:watch": "vitest"
+    },
+    "keywords": [
+        "accessibility",
+        "a11y",
+        "agent",
+        "harness",
+        "wcag",
+        "claude",
+        "anthropic"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "@aria51/core": "workspace:*",
+        "@aria51/ai-auditor": "workspace:*",
+        "@anthropic-ai/sdk": "^0.80.0",
+        "effect": "^3.19.15",
+        "zod": "^3.22.0"
+    },
+    "devDependencies": {
+        "@types/node": "^20.10.0",
+        "typescript": "^5.3.0",
+        "vitest": "^4.0.13"
+    }
+}
