@@ -1,16 +1,20 @@
-# Accessibility Toolkit
+# aria-51
 
-A monorepo for accessibility testing tools. The core scanner is framework-agnostic; React component attribution, AI-powered auditing, and an MCP server are available as plugins.
+Accessibility testing platform with scanning, AI auditing, and an autonomous agent. Framework-agnostic core with optional React component attribution.
+
+See the [full introduction](docs/introduction.md) for a detailed walkthrough of the architecture.
 
 ## Packages
 
 | Package | Description |
 | ------- | ----------- |
-| [`core`](packages/core) | Framework-agnostic scanning: axe-core, keyboard tests, WCAG 2.2 checks, fix suggestions |
-| [`react`](packages/react) | React plugin: Fiber traversal via Bippy, component attribution for violations |
-| [`cli`](packages/cli) | Ink-based terminal UI. Binary: `a11y-toolkit` |
-| [`mcp`](packages/mcp) | MCP server exposing `scan_url` tool for Claude Desktop |
-| [`ai-auditor`](packages/ai-auditor) | AI-powered auditing via Stagehand/Browserbase |
+| [`@aria51/core`](packages/core) | Scanning engine: axe-core, keyboard tests, WCAG 2.2 checks, fix suggestions |
+| [`@aria51/react`](packages/react) | Component attribution: maps violations to framework components (React; Vue/Svelte/Solid ready) |
+| [`@aria51/ai-auditor`](packages/ai-auditor) | AI-powered auditing via Stagehand/Browserbase |
+| [`@aria51/agent`](packages/agent) | Autonomous auditing agent: planning, verification, voting, remediation |
+| [`@aria51/cli`](packages/cli) | Terminal UI (Ink). Binary: `aria51` |
+| [`@aria51/web`](packages/web) | Web dashboard (Hono). Port 3847 |
+| [`@aria51/mcp`](packages/mcp) | MCP server for MCP. Tools: `scan_url`, `scan_urls` |
 
 ## Quick Start
 
@@ -22,32 +26,43 @@ pnpm install
 pnpm build
 
 # Scan a URL
-pnpm start http://localhost:3000
+pnpm start https://your-site.com
 
-# Scan with React component attribution
-pnpm start http://localhost:3000 -- --react
+# With React component attribution
+pnpm start https://your-site.com -- --react
+
+# Run the autonomous agent
+pnpm tsx packages/agent/scripts/smoke-test.ts
 ```
 
 ## Development
 
 ```bash
-# Watch mode (TypeScript, all packages)
+# Watch mode (all packages)
 pnpm dev
 
 # Run tests
 pnpm test
 
-# Run a single test file
-pnpm test src/path/to/file.test.ts
-
-# Tests for a specific package
-pnpm --filter @accessibility-toolkit/core test
+# Test with coverage
+pnpm test:coverage
 
 # Build a specific package
-pnpm --filter @accessibility-toolkit/core build
+pnpm --filter @aria51/core build
+
+# Test a specific package
+pnpm --filter @aria51/core test
 ```
 
 ## Requirements
 
 - Node.js 18+
 - pnpm 8+
+- Playwright browsers (`npx playwright install chromium`)
+
+## Documentation
+
+- [Introduction](docs/introduction.md) — What aria-51 is and how the pieces fit together
+- [Agent](packages/agent/docs/introduction.md) — The autonomous auditing agent
+- [WCAG 2.2 Reference](docs/WCAG-2.2.md) — All 86 success criteria
+- [Effect Architecture](docs/effect-service-breakdown.md) — Core scanning engine internals

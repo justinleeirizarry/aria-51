@@ -4,7 +4,7 @@
 import { z } from 'zod';
 import { parseSitemap } from '../planning/sitemap-parser.js';
 import { discoverLinks } from '../planning/link-discoverer.js';
-import { prioritizePages } from '../planning/page-prioritizer.js';
+import { deduplicatePages } from '../planning/page-prioritizer.js';
 import type { AgentToolDef } from '../agent/provider.js';
 import type { AuditSession, CrawlPlan } from '../types.js';
 
@@ -12,7 +12,7 @@ export const createCrawlPlannerTool = (session: AuditSession): AgentToolDef =>
     ({
         name: 'plan_crawl',
         description:
-            'Discover and prioritize pages on a website for accessibility auditing. Tries sitemap.xml first, falls back to crawling links from the page.',
+            'Discover pages on a website for accessibility auditing. Tries sitemap.xml first, falls back to crawling links from the page. Returns all discovered URLs for you to prioritize based on accessibility importance.',
         inputSchema: z.object({
             url: z.string().describe('The base URL of the site to plan a crawl for'),
             maxPages: z.number().optional().describe('Maximum number of pages to include'),
@@ -34,21 +34,28 @@ export const createCrawlPlannerTool = (session: AuditSession): AgentToolDef =>
             }
             if (!allUrls.includes(url)) allUrls.unshift(url);
 
-            const prioritized = prioritizePages(allUrls, sitemapEntries, limit);
-            const crawlPlan: CrawlPlan = { baseUrl: url, strategy: usedStrategy, pages: prioritized, totalDiscovered: allUrls.length };
+            const pages = deduplicatePages(allUrls, sitemapEntries, limit);
+            const crawlPlan: CrawlPlan = { baseUrl: url, strategy: usedStrategy, pages, totalDiscovered: allUrls.length };
             session.crawlPlan = crawlPlan;
-            session.pendingUrls = prioritized.map((p) => p.url);
+            session.pendingUrls = pages.map((p) => p.url);
             session.status = 'scanning';
 
             const lines = [
                 `## Crawl Plan for ${url}`,
                 `- **Strategy**: ${usedStrategy}`,
                 `- **Total discovered**: ${allUrls.length}`,
-                `- **Pages in plan**: ${prioritized.length}`,
-                '', '### Prioritized Pages:',
+                `- **Pages in plan**: ${pages.length}`,
+                '',
+                '### Discovered Pages',
+                'Review these URLs and prioritize by accessibility importance. Focus on pages with forms, interactive content, navigation, and diverse templates rather than many similar pages.',
+                '',
             ];
-            for (const page of prioritized) {
-                lines.push(`${page.priority}. **${page.template}** — ${page.url} (${page.reason})`);
+            for (const page of pages) {
+                const meta: string[] = [];
+                if (page.sitemapPriority) meta.push(`sitemap priority: ${page.sitemapPriority}`);
+                if (page.lastmod) meta.push(`updated: ${page.lastmod}`);
+                const suffix = meta.length > 0 ? ` (${meta.join(', ')})` : '';
+                lines.push(`- ${page.url}${suffix}`);
             }
             return lines.join('\n');
         },

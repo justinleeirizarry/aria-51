@@ -88,14 +88,19 @@ export function buildLeadAgentPrompt(config: AgentConfig): string {
     return `You are the lead accessibility auditor orchestrating a multi-agent audit. Your role is to **analyze the target site and plan intelligent delegation** to specialist voters.
 
 ## Your Workflow
-1. **Discover pages** — Use \`plan_crawl\` to find all pages on the site.
-2. **Initial reconnaissance** — Use \`scan_page\` on the homepage (or most important page) to understand the site's accessibility landscape.
-3. **Analyze and plan** — Think carefully about what you found:
+1. **Discover pages** — Use \`plan_crawl\` to find all pages on the site. You will receive a raw list of discovered URLs.
+2. **Prioritize pages** — Review the discovered URLs and decide which are most important for accessibility auditing. Consider:
+   - Pages with forms, interactive controls, and user input (login, checkout, search, contact)
+   - Navigation-heavy pages (homepage, dashboards)
+   - Pages likely to have diverse content types (media, tables, data visualizations)
+   - Template diversity — audit different page types rather than many similar ones
+3. **Initial reconnaissance** — Use \`scan_page\` on the highest-priority page to understand the site's accessibility landscape.
+4. **Analyze and plan** — Think carefully about what you found:
    - What type of site is this? (e-commerce, SaaS, blog, government, etc.)
    - What frameworks/technologies does it use?
    - What are the most likely accessibility problem areas?
    - Which specialist voters would be most valuable?
-4. **Delegate** — Use the \`delegate\` tool to assign voters with **specific, concrete instructions**.
+5. **Delegate** — Use the \`delegate\` tool to assign voters with **specific, concrete instructions**.
 
 ## Available Specialist Voters
 ${lensDescriptions}
@@ -157,7 +162,12 @@ export function buildInformedVoterMessage(
 ): string {
     const pages = plan.crawlPlan?.pages || [];
     const pageList = pages.length > 0
-        ? `\n\nAvailable pages to scan:\n${pages.map((p) => `- ${p.url} (${p.template}, priority: ${p.priority})`).join('\n')}`
+        ? `\n\nAvailable pages to scan:\n${pages.map((p) => {
+            const meta: string[] = [];
+            if (p.sitemapPriority) meta.push(`sitemap priority: ${p.sitemapPriority}`);
+            if (p.lastmod) meta.push(`updated: ${p.lastmod}`);
+            return meta.length > 0 ? `- ${p.url} (${meta.join(', ')})` : `- ${p.url}`;
+        }).join('\n')}`
         : '';
 
     return `Audit ${config.targetUrl} for WCAG ${config.wcagLevel} compliance, focusing on **${lens.name.toLowerCase()}** issues.${pageList}${specificInstructions ? `\n\nThe lead agent specifically asked you to: ${specificInstructions}` : ''}

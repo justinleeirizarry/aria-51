@@ -34,17 +34,16 @@ export const VerifiedFindingSchema = z.object({
     evidence: z.string(),
 });
 
-export const PrioritizedPageSchema = z.object({
+export const DiscoveredPageSchema = z.object({
     url: z.string(),
-    priority: z.number(),
-    reason: z.string(),
-    template: z.string(),
+    sitemapPriority: z.number().optional(),
+    lastmod: z.string().optional(),
 });
 
 export const CrawlPlanSchema = z.object({
     baseUrl: z.string(),
     strategy: z.enum(['sitemap', 'crawl', 'manual']),
-    pages: z.array(PrioritizedPageSchema),
+    pages: z.array(DiscoveredPageSchema),
     totalDiscovered: z.number(),
 });
 

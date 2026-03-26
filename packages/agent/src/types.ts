@@ -117,15 +117,16 @@ export interface SitemapEntry {
 export interface CrawlPlan {
     baseUrl: string;
     strategy: 'sitemap' | 'crawl' | 'manual';
-    pages: PrioritizedPage[];
+    pages: DiscoveredPage[];
     totalDiscovered: number;
 }
 
-export interface PrioritizedPage {
+export interface DiscoveredPage {
     url: string;
-    priority: number;
-    reason: string;
-    template: string;
+    /** Sitemap priority (0.0–1.0), if available */
+    sitemapPriority?: number;
+    /** Sitemap lastmod, if available */
+    lastmod?: string;
 }
 
 // =============================================================================

@@ -51,7 +51,7 @@ export type {
     DiffReport,
     FindingSource,
     ImpactLevel,
-    PrioritizedPage,
+    DiscoveredPage,
     RemediationItem,
     RemediationPhase,
     RemediationPlan,
@@ -81,7 +81,7 @@ export { createAuditSession, createSnapshot } from './state/audit-session.js';
 
 export { parseSitemap } from './planning/sitemap-parser.js';
 export { discoverLinks, type LinkDiscoveryOptions } from './planning/link-discoverer.js';
-export { prioritizePages } from './planning/page-prioritizer.js';
+export { deduplicatePages } from './planning/page-prioritizer.js';
 
 // =============================================================================
 // Verification (for advanced usage / custom harnesses)
