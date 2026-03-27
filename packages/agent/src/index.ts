@@ -25,7 +25,7 @@
 // Agent — Main API
 // =============================================================================
 
-export { runAgent, runAgentWithVoting, type RunAgentOptions } from './agent/agent-loop.js';
+export { runAgent, runAgentWithSpecialists, type RunAgentOptions } from './agent/agent-loop.js';
 export {
     createProvider,
     createAnthropicProvider,
@@ -97,12 +97,12 @@ export { scoreFinding, sortByScore, filterHighConfidence } from './verification/
 export { generateRemediationPlan } from './remediation/prioritizer.js';
 
 // =============================================================================
-// Voting (consensus pattern)
+// Multi-Specialist (coordinator pattern)
 // =============================================================================
 
-export { VOTER_LENSES, type VoterLens } from './agent/voter-lenses.js';
-export { mergeVoterReports, type VotingResult, type VoteDetail } from './agent/voting-merger.js';
-export { runLeadAgentWithVoting, type LeadAgentPlan } from './agent/lead-agent.js';
+export { SPECIALIST_LENSES, type SpecialistLens } from './agent/specialist-lenses.js';
+export { mergeSpecialistReports, type MultiAgentResult } from './agent/specialist-merger.js';
+export { runLeadAgentWithSpecialists, type LeadAgentPlan } from './agent/lead-agent.js';
 export { resilientToolRunner, type ResilientClientOptions } from './agent/resilient-client.js';
 
 // =============================================================================

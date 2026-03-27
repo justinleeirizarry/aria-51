@@ -131,7 +131,7 @@ The agent:
 3. **Verifies** its findings by cross-referencing AI observations against axe-core's deterministic results — every finding gets a confidence level (confirmed, corroborated, ai-only, or contradicted)
 4. **Generates** a prioritized remediation plan grouped into immediate, short-term, and long-term phases
 
-For higher-confidence audits, the agent supports **voting mode** — four specialist voters (keyboard, visual, forms, structure) audit independently and merge via consensus. Findings that multiple voters agree on get boosted confidence.
+For comprehensive audits, the agent supports **multi-specialist mode** — four specialist auditors (keyboard, visual, forms, structure) audit independently through different lenses and their findings are merged and deduplicated. Confidence comes from cross-referencing with axe-core, not vote counting.
 
 The agent defaults to Claude (Opus 4.6) via the native Anthropic SDK, with automatic model fallback on overload. It also supports any LLM via the Vercel AI SDK — OpenAI, Google, Ollama, or anything else with tool calling support.
 
@@ -161,7 +161,7 @@ This is built on a generic `FrameworkPlugin` interface that supports any UI fram
 | [`@aria51/core`](../packages/core) | Scanning engine: axe-core, keyboard tests, WCAG 2.2 checks, fix suggestions | — |
 | [`@aria51/components`](../packages/components) | Component attribution via element-source (React, Preact, Vue, Svelte, Solid) | core |
 | [`@aria51/ai-auditor`](../packages/ai-auditor) | Stagehand/Browserbase AI testing: keyboard nav, tree analysis, screen reader, WCAG audit | core |
-| [`@aria51/agent`](../packages/agent) | Autonomous auditing agent: planning, scanning, verification, voting, remediation | core, ai-auditor |
+| [`@aria51/agent`](../packages/agent) | Autonomous auditing agent: planning, scanning, verification, multi-specialist coordination, remediation | core, ai-auditor |
 | [`@aria51/cli`](../packages/cli) | Terminal UI (Ink). Binary: `aria51` | core, react, ai-auditor |
 | [`@aria51/web`](../packages/web) | Web dashboard (Hono). Port 3847 | core, react, ai-auditor |
 | [`@aria51/mcp`](../packages/mcp) | MCP server for MCP. Tools: `scan_url`, `scan_urls` | core, react, ai-auditor |

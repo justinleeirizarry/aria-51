@@ -68,10 +68,10 @@ export interface AgentConfig {
     enableStagehand: boolean;
     /** Directory for file-backed session persistence */
     sessionDir?: string;
-    /** Enable voting mode — run multiple specialized voters and merge results */
-    voting?: boolean;
-    /** Number of voter lenses to use (default: 4, all lenses) */
-    voterCount?: number;
+    /** Enable specialist mode — run multiple specialized auditors and merge results */
+    specialists?: boolean;
+    /** Number of specialist lenses to use (default: 4, all lenses) */
+    specialistCount?: number;
     /** Event callback for streaming progress */
     onEvent?: (event: AgentEvent) => void;
 }
@@ -99,8 +99,8 @@ export type AgentEvent =
     | { type: 'scan_progress'; url: string; step: ScanProgressStep }
     | { type: 'finding'; finding: VerifiedFinding }
     | { type: 'step_complete'; stepIndex: number; toolCalls: number }
-    | { type: 'voter_complete'; voterId: string; findings: number }
-    | { type: 'consensus'; unanimousFindings: number; totalFindings: number }
+    | { type: 'specialist_complete'; specialistId: string; findings: number }
+    | { type: 'merge_complete'; totalFindings: number; deduplicatedCount: number; coverageMap: Record<string, string[]> }
     | { type: 'complete'; report: AuditReport };
 
 // =============================================================================

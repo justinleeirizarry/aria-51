@@ -4,11 +4,11 @@ import type { AgentEvent } from '@aria51/agent';
 
 export const agentHandler = async (c: Context) => {
     const body = await c.req.json();
-    const { url, wcagLevel = 'AA', maxPages = 10, voting = false } = body as {
+    const { url, wcagLevel = 'AA', maxPages = 10, specialists = false } = body as {
         url: string;
         wcagLevel?: 'A' | 'AA' | 'AAA';
         maxPages?: number;
-        voting?: boolean;
+        specialists?: boolean;
     };
 
     if (!url) {
@@ -35,7 +35,7 @@ export const agentHandler = async (c: Context) => {
                 targetUrl: url,
                 wcagLevel,
                 maxPages,
-                voting,
+                specialists,
                 headless: true,
                 onEvent: (event: AgentEvent) => {
                     send(event.type, event);

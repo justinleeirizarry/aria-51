@@ -121,42 +121,38 @@ The Anthropic provider includes resilience features that the AI SDK path doesn't
 - **Retry with backoff**: Exponential backoff on rate limits (429) and overload (529)
 - **Adaptive thinking**: Claude thinks through complex decisions before acting
 
-## Voting mode
+## Multi-specialist mode
 
-For higher-confidence audits, the agent can run multiple specialized voters in parallel and merge results via consensus.
+For comprehensive audits, the agent can run multiple specialist auditors in parallel, each focused on a different accessibility domain, then merge and deduplicate their findings.
 
 ```typescript
 const report = await runAgent({
   targetUrl: 'https://your-site.com',
-  voting: true,
+  specialists: true,
 });
 ```
 
-Four specialist voters each audit the site through a different lens:
+Four specialists each audit the site through a different lens:
 
-| Voter | Focus area |
+| Specialist | Focus area |
 |---|---|
 | **Keyboard & Navigation** | Tab order, focus indicators, keyboard traps, skip links |
 | **Visual & Content** | Alt text, color contrast, reflow, media captions |
 | **Forms & Interaction** | Labels, error messages, validation, autocomplete |
 | **Structure & Semantics** | Heading hierarchy, landmarks, ARIA, reading order |
 
-Findings that multiple voters independently flag get their confidence boosted:
-
-- 1 voter flags it → keep original confidence
-- 2 voters agree → `ai-only` upgrades to `corroborated`
-- 3+ voters agree → `corroborated` upgrades to `confirmed`
+Findings are assigned confidence based on cross-referencing with axe-core and WCAG 2.2 checks. If multiple specialists independently identify the same issue, this is noted in the evidence but does not artificially boost confidence — each specialist covers a distinct WCAG domain, so overlap is the exception, not the rule.
 
 ### Lead agent orchestrator
 
-By default, voting mode uses a lead agent that analyzes the site first, then delegates to voters with specific instructions. The lead agent:
+By default, multi-specialist mode uses a lead agent that analyzes the site first, then delegates to specialists with specific instructions. The lead agent:
 
 1. Crawls the site and runs an initial scan
-2. Decides which voters to use based on what it finds (a simple blog might only need 2 voters; a complex e-commerce site gets all 4)
-3. Gives each voter specific instructions ("focus on the checkout flow forms" rather than generic "check forms")
-4. Shares the crawl plan so voters don't waste time re-discovering pages
+2. Decides which specialists to use based on what it finds (a simple blog might only need 2; a complex e-commerce site gets all 4)
+3. Gives each specialist specific instructions ("focus on the checkout flow forms" rather than generic "check forms")
+4. Shares the crawl plan so specialists don't waste time re-discovering pages
 
-This is the orchestrator-workers pattern — the lead agent plans the work, voters execute it in parallel, and the merger produces a consensus report.
+This is the coordinator-workers pattern — the lead agent plans the work, specialists execute it in parallel, and the merger deduplicates overlapping findings.
 
 ## Relationship to the rest of aria-51
 
@@ -193,8 +189,8 @@ await runAgent({
       case 'thinking':       // Agent reasoning
       case 'tool_call':      // Tool invocation
       case 'step_complete':  // Loop iteration done
-      case 'voter_complete': // Voter finished (voting mode)
-      case 'consensus':      // Vote merge stats (voting mode)
+      case 'specialist_complete': // Specialist finished (multi-specialist mode)
+      case 'merge_complete':     // Merge stats (multi-specialist mode)
       case 'complete':       // Final report ready
     }
   },
@@ -206,6 +202,6 @@ await runAgent({
 - [Configuration Reference](./configuration.md) — All options with defaults and examples
 - [API Reference](./api-reference.md) — Exported functions, types, and interfaces
 - [Tools Deep Dive](./tools.md) — How each tool works and what it returns
-- [Voting & Consensus](./voting.md) — The voting pattern, voter lenses, and confidence boosting
+- [Multi-Specialist Mode](./specialists.md) — The specialist pattern, lenses, and the coordinator
 - [Provider Guide](./providers.md) — Using different LLMs and configuring fallback
 - [Architecture](./architecture.md) — Internal design decisions and patterns

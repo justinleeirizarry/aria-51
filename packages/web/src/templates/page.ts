@@ -47,8 +47,8 @@ export function ScannerPage() {
                 <input type="number" id="agent-pages" value="10" min="1" max="50" class="input-sm">
             </label>
             <label class="option-label">
-                <input type="checkbox" id="agent-voting">
-                Voting Mode
+                <input type="checkbox" id="agent-specialists">
+                Multi-Specialist Mode
             </label>
         </div>
         <div class="status" id="agent-status"></div>

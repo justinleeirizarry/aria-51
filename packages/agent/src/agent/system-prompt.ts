@@ -4,9 +4,9 @@
  * Builds the system prompt that defines the agent's role, constraints,
  * and behavioral guidelines.
  */
-import type { AgentConfig, AuditSession } from '../types.js';
-import type { VoterLens } from './voter-lenses.js';
-import { VOTER_LENSES } from './voter-lenses.js';
+import type { AgentConfig } from '../types.js';
+import type { SpecialistLens } from './specialist-lenses.js';
+import { SPECIALIST_LENSES } from './specialist-lenses.js';
 import type { LeadAgentPlan } from './lead-agent.js';
 
 export function buildSystemPrompt(config: AgentConfig): string {
@@ -49,10 +49,10 @@ Follow this general workflow, adapting as needed:
 }
 
 /**
- * Build a lens-augmented system prompt for voting mode.
- * Appends the voter's specialized focus to the base system prompt.
+ * Build a lens-augmented system prompt for multi-specialist mode.
+ * Appends the specialist's focus to the base system prompt.
  */
-export function buildVoterSystemPrompt(config: AgentConfig, lens: VoterLens): string {
+export function buildSpecialistSystemPrompt(config: AgentConfig, lens: SpecialistLens): string {
     const base = buildSystemPrompt(config);
     return `${base}
 
@@ -60,10 +60,10 @@ export function buildVoterSystemPrompt(config: AgentConfig, lens: VoterLens): st
 
 ${lens.focus}
 
-## Important for Voting Mode
-You are one of several independent auditors examining this site. Focus deeply on your area of expertise. Don't try to be comprehensive across all WCAG criteria — focus on the criteria most relevant to your specialization. Other voters will cover other areas.
+## Important for Multi-Specialist Mode
+You are one of several independent specialist auditors examining this site. Focus deeply on your area of expertise. Don't try to be comprehensive across all WCAG criteria — focus on the criteria most relevant to your specialization. Other specialists will cover other areas.
 
-Be thorough in your domain. Flag issues even if you're not 100% certain — it's better to flag a potential issue (which consensus will validate) than to miss a real one.
+Be thorough in your domain. Flag issues even if you're not 100% certain — it's better to flag a potential issue for comprehensive coverage than to miss a real one.
 
 When using verify_findings, focus on criteria: ${lens.wcagFocus.join(', ')}`;
 }
@@ -72,7 +72,7 @@ export function buildInitialMessage(config: AgentConfig): string {
     return `Audit the website at ${config.targetUrl} for WCAG ${config.wcagLevel} accessibility compliance. Discover pages, scan them, verify findings, and produce a prioritized remediation plan.`;
 }
 
-export function buildVoterInitialMessage(config: AgentConfig, lens: VoterLens): string {
+export function buildSpecialistInitialMessage(config: AgentConfig, lens: SpecialistLens): string {
     return `Audit the website at ${config.targetUrl} for WCAG ${config.wcagLevel} accessibility compliance, with a focus on **${lens.name.toLowerCase()}** issues. Discover pages, scan key pages, verify findings in your area of expertise, and summarize what you found.`;
 }
 
@@ -81,11 +81,11 @@ export function buildVoterInitialMessage(config: AgentConfig, lens: VoterLens): 
 // =============================================================================
 
 export function buildLeadAgentPrompt(config: AgentConfig): string {
-    const lensDescriptions = VOTER_LENSES.map(
+    const lensDescriptions = SPECIALIST_LENSES.map(
         (l) => `- **${l.id}**: ${l.name} — focuses on WCAG criteria ${l.wcagFocus.slice(0, 5).join(', ')}...`
     ).join('\n');
 
-    return `You are the lead accessibility auditor orchestrating a multi-agent audit. Your role is to **analyze the target site and plan intelligent delegation** to specialist voters.
+    return `You are the lead accessibility auditor orchestrating a multi-agent audit. Your role is to **analyze the target site and plan intelligent delegation** to specialist auditors.
 
 ## Your Workflow
 1. **Discover pages** — Use \`plan_crawl\` to find all pages on the site. You will receive a raw list of discovered URLs.
@@ -99,18 +99,18 @@ export function buildLeadAgentPrompt(config: AgentConfig): string {
    - What type of site is this? (e-commerce, SaaS, blog, government, etc.)
    - What frameworks/technologies does it use?
    - What are the most likely accessibility problem areas?
-   - Which specialist voters would be most valuable?
-5. **Delegate** — Use the \`delegate\` tool to assign voters with **specific, concrete instructions**.
+   - Which specialists would be most valuable?
+5. **Delegate** — Use the \`delegate\` tool to assign specialists with **specific, concrete instructions**.
 
-## Available Specialist Voters
+## Available Specialists
 ${lensDescriptions}
 
 ## Scaling Guidelines
-- **Simple sites** (blog, landing page): 2 voters, 1-2 pages each
-- **Medium sites** (SaaS, business): 3 voters, 3-5 pages each
-- **Complex sites** (e-commerce, government, forms-heavy): 4 voters, 5-10 pages each
+- **Simple sites** (blog, landing page): 2 specialists, 1-2 pages each
+- **Medium sites** (SaaS, business): 3 specialists, 3-5 pages each
+- **Complex sites** (e-commerce, government, forms-heavy): 4 specialists, 5-10 pages each
 
-Don't spawn all 4 voters for a simple blog. Match effort to complexity.
+Don't spawn all 4 specialists for a simple blog. Match effort to complexity.
 
 ## Constraints
 - Maximum pages: ${config.maxPages}
@@ -118,9 +118,9 @@ Don't spawn all 4 voters for a simple blog. Match effort to complexity.
 - Be efficient — your job is reconnaissance and planning, not deep analysis.`;
 }
 
-export function buildInformedVoterPrompt(
+export function buildInformedSpecialistPrompt(
     config: AgentConfig,
-    lens: VoterLens,
+    lens: SpecialistLens,
     plan: LeadAgentPlan,
     specificInstructions: string
 ): string {
@@ -151,12 +151,12 @@ Since the lead agent already discovered pages, skip crawling and go straight to 
 
 ## Constraints
 - WCAG level: ${config.wcagLevel}
-- Focus on YOUR area of expertise. Other voters cover other areas.`;
+- Focus on YOUR area of expertise. Other specialists cover other areas.`;
 }
 
-export function buildInformedVoterMessage(
+export function buildInformedSpecialistMessage(
     config: AgentConfig,
-    lens: VoterLens,
+    lens: SpecialistLens,
     plan: LeadAgentPlan,
     specificInstructions: string
 ): string {

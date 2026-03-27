@@ -5,10 +5,10 @@
  *
  * The lead agent:
  * 1. Analyzes the target site (crawl + initial scan) with adaptive thinking
- * 2. Plans which voters to spawn and writes specific instructions for each
- * 3. Shares crawl data + scan results with voters so they don't re-discover
- * 4. Runs voters in parallel
- * 5. Merges results via consensus
+ * 2. Plans which specialists to spawn and writes specific instructions for each
+ * 3. Shares crawl data + scan results with specialists so they don't re-discover
+ * 4. Runs specialists in parallel
+ * 5. Merges results by deduplication
  */
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
@@ -26,11 +26,11 @@ import type {
 import { DEFAULT_AGENT_CONFIG } from '../types.js';
 import { createAuditSession } from '../state/audit-session.js';
 import { createToolRegistry } from './tool-registry.js';
-import { VOTER_LENSES, type VoterLens } from './voter-lenses.js';
-import { mergeVoterReports, type VotingResult } from './voting-merger.js';
+import { SPECIALIST_LENSES, type SpecialistLens } from './specialist-lenses.js';
+import { mergeSpecialistReports, type MultiAgentResult } from './specialist-merger.js';
 import {
-    buildInformedVoterPrompt,
-    buildInformedVoterMessage,
+    buildInformedSpecialistPrompt,
+    buildInformedSpecialistMessage,
     buildLeadAgentPrompt,
 } from './system-prompt.js';
 
@@ -41,8 +41,8 @@ import {
 
 export interface LeadAgentPlan {
     siteAnalysis: string;
-    selectedLenses: VoterLens[];
-    voterInstructions: Record<string, string>;
+    selectedLenses: SpecialistLens[];
+    specialistInstructions: Record<string, string>;
     crawlPlan: CrawlPlan | null;
     initialScanSummary: string;
 }
@@ -51,13 +51,13 @@ export interface LeadAgentPlan {
 // Lead Agent Orchestration
 // =============================================================================
 
-export async function runLeadAgentWithVoting(
+export async function runLeadAgentWithSpecialists(
     options: Partial<AgentConfig> & { targetUrl: string }
-): Promise<VotingResult> {
+): Promise<MultiAgentResult> {
     const config: AgentConfig = {
         ...DEFAULT_AGENT_CONFIG,
         ...options,
-        voting: true,
+        specialists: true,
     };
 
     const emit = (event: AgentEvent) => config.onEvent?.(event);
@@ -69,53 +69,57 @@ export async function runLeadAgentWithVoting(
 
     emit({
         type: 'thinking',
-        message: `Lead agent selected ${plan.selectedLenses.length} voters: ${plan.selectedLenses.map((l) => l.name).join(', ')}`,
+        message: `Lead agent selected ${plan.selectedLenses.length} specialists: ${plan.selectedLenses.map((l) => l.name).join(', ')}`,
     });
 
-    // Phase 2: Run voters in parallel with shared context
-    emit({ type: 'thinking', message: `Spawning ${plan.selectedLenses.length} voters in parallel...` });
+    // Phase 2: Run specialists in parallel with shared context
+    emit({ type: 'thinking', message: `Spawning ${plan.selectedLenses.length} specialists in parallel...` });
 
-    const voterPromises = plan.selectedLenses.map((lens) =>
-        runInformedVoter(config, lens, plan, emit).catch((error) => {
+    const specialistPromises = plan.selectedLenses.map((lens) =>
+        runInformedSpecialist(config, lens, plan, emit).catch((error) => {
             emit({
                 type: 'thinking',
-                message: `Voter ${lens.id} failed: ${error instanceof Error ? error.message : String(error)}`,
+                message: `Specialist ${lens.id} failed: ${error instanceof Error ? error.message : String(error)}`,
             });
             return null;
         })
     );
 
-    const voterResults = await Promise.all(voterPromises);
+    const specialistResults = await Promise.all(specialistPromises);
 
     const successfulReports: AuditReport[] = [];
     const successfulIds: string[] = [];
-    for (let i = 0; i < voterResults.length; i++) {
-        if (voterResults[i]) {
-            successfulReports.push(voterResults[i]!);
+    for (let i = 0; i < specialistResults.length; i++) {
+        if (specialistResults[i]) {
+            successfulReports.push(specialistResults[i]!);
             successfulIds.push(plan.selectedLenses[i].id);
         }
     }
 
     if (successfulReports.length === 0) {
-        throw new Error('All voters failed. Cannot produce a consensus report.');
+        throw new Error('All specialists failed. Cannot produce a report.');
     }
 
-    // Phase 3: Merge via consensus
-    emit({ type: 'thinking', message: `Merging results from ${successfulReports.length} voters...` });
-    const votingResult = mergeVoterReports(successfulReports, successfulIds);
+    // Phase 3: Merge specialist reports
+    emit({ type: 'thinking', message: `Merging results from ${successfulReports.length} specialists...` });
+    const result = mergeSpecialistReports(successfulReports, successfulIds, plan.selectedLenses);
 
-    votingResult.report.agentSummary =
-        `## Lead Agent Site Analysis\n${plan.siteAnalysis}\n\n${votingResult.report.agentSummary}`;
+    result.report.agentSummary =
+        `## Lead Agent Site Analysis\n${plan.siteAnalysis}\n\n${result.report.agentSummary}`;
 
-    const unanimousCount = votingResult.voteDetails.filter(
-        (v) => v.votes === successfulReports.length
-    ).length;
-    emit({ type: 'consensus', unanimousFindings: unanimousCount, totalFindings: votingResult.report.totalFindings });
+    const totalRawFindings = successfulReports.reduce((sum, r) => sum + r.totalFindings, 0);
+    const deduplicatedCount = totalRawFindings - result.report.totalFindings;
+    emit({
+        type: 'merge_complete',
+        totalFindings: result.report.totalFindings,
+        deduplicatedCount,
+        coverageMap: result.coverageMap,
+    });
 
-    votingResult.report.scanDurationMs = Date.now() - startTime;
-    emit({ type: 'complete', report: votingResult.report });
+    result.report.scanDurationMs = Date.now() - startTime;
+    emit({ type: 'complete', report: result.report });
 
-    return votingResult;
+    return result;
 }
 
 // =============================================================================
@@ -135,33 +139,33 @@ async function planDelegation(
     const delegateToolDef: import('./provider.js').AgentToolDef = {
         name: 'delegate',
         description:
-            'After analyzing the site, use this tool to delegate work to specialized voter agents. Specify which voters to use and give each voter specific instructions based on what you found during reconnaissance.',
+            'After analyzing the site, use this tool to delegate work to specialist auditors. Specify which specialists to use and give each one specific instructions based on what you found during reconnaissance.',
         inputSchema: z.object({
             siteAnalysis: z
                 .string()
                 .describe('Your analysis of the site'),
-            selectedVoterIds: z
+            selectedSpecialistIds: z
                 .array(z.enum(['keyboard-navigation', 'visual-content', 'forms-interaction', 'structure-semantics']))
-                .describe('Which specialized voters to spawn.'),
-            voterInstructions: z
+                .describe('Which specialists to spawn.'),
+            specialistInstructions: z
                 .record(z.string(), z.string())
-                .describe('Specific instructions for each voter.'),
+                .describe('Specific instructions for each specialist.'),
         }),
         run: async (input: any) => {
-            const { siteAnalysis, selectedVoterIds, voterInstructions } = input;
-            const selectedLenses = selectedVoterIds
-                .map((id: string) => VOTER_LENSES.find((l) => l.id === id))
-                .filter((l: VoterLens | undefined): l is VoterLens => l !== undefined);
+            const { siteAnalysis, selectedSpecialistIds, specialistInstructions } = input;
+            const selectedLenses = selectedSpecialistIds
+                .map((id: string) => SPECIALIST_LENSES.find((l) => l.id === id))
+                .filter((l: SpecialistLens | undefined): l is SpecialistLens => l !== undefined);
 
             delegationPlan = {
                 siteAnalysis,
                 selectedLenses,
-                voterInstructions,
+                specialistInstructions,
                 crawlPlan: session.crawlPlan,
-                initialScanSummary: buildScanSummaryForVoters(session),
+                initialScanSummary: buildScanSummaryForSpecialists(session),
             };
 
-            return `Delegation plan created. ${selectedLenses.length} voters will be spawned: ${selectedLenses.map((l: VoterLens) => l.name).join(', ')}`;
+            return `Delegation plan created. ${selectedLenses.length} specialists will be spawned: ${selectedLenses.map((l: SpecialistLens) => l.name).join(', ')}`;
         },
     };
 
@@ -179,18 +183,18 @@ async function planDelegation(
         tools: leadTools,
         messages: [{
             role: 'user',
-            content: `Analyze the website at ${config.targetUrl} and plan the accessibility audit delegation. First discover pages and run an initial scan of the homepage, then decide which specialist voters to assign and what each should focus on.`,
+            content: `Analyze the website at ${config.targetUrl} and plan the accessibility audit delegation. First discover pages and run an initial scan of the homepage, then decide which specialist auditors to assign and what each should focus on.`,
         }],
     }, { onEvent: emit });
 
     // Fallback if the lead agent didn't call delegate
     if (!delegationPlan) {
         delegationPlan = {
-            siteAnalysis: 'Lead agent did not produce an explicit delegation plan. Using all voters.',
-            selectedLenses: VOTER_LENSES.slice(0, config.voterCount || VOTER_LENSES.length),
-            voterInstructions: {},
+            siteAnalysis: 'Lead agent did not produce an explicit delegation plan. Using all specialists.',
+            selectedLenses: SPECIALIST_LENSES.slice(0, config.specialistCount || SPECIALIST_LENSES.length),
+            specialistInstructions: {},
             crawlPlan: session.crawlPlan,
-            initialScanSummary: buildScanSummaryForVoters(session),
+            initialScanSummary: buildScanSummaryForSpecialists(session),
         };
     }
 
@@ -198,25 +202,25 @@ async function planDelegation(
 }
 
 // =============================================================================
-// Phase 2: Informed Voter
+// Phase 2: Informed Specialist
 // =============================================================================
 
-async function runInformedVoter(
+async function runInformedSpecialist(
     config: AgentConfig,
-    lens: VoterLens,
+    lens: SpecialistLens,
     plan: LeadAgentPlan,
     emit: (event: AgentEvent) => void
 ): Promise<AuditReport> {
     const startTime = Date.now();
 
-    emit({ type: 'thinking', message: `Voter "${lens.name}" starting with shared context...` });
+    emit({ type: 'thinking', message: `Specialist "${lens.name}" starting with shared context...` });
 
-    const voterConfig: AgentConfig = {
+    const specialistConfig: AgentConfig = {
         ...config,
         maxSteps: Math.max(10, Math.floor(config.maxSteps / 2)),
     };
 
-    const session = createAuditSession(voterConfig);
+    const session = createAuditSession(specialistConfig);
 
     // Pre-populate session with lead agent's crawl plan
     if (plan.crawlPlan) {
@@ -228,14 +232,14 @@ async function runInformedVoter(
     const rawTools = Object.values(createToolRegistry(session));
     const tools = toNativeAnthropicTools(rawTools);
 
-    const specificInstructions = plan.voterInstructions[lens.id] || '';
-    const voterPrompt = buildInformedVoterPrompt(config, lens, plan, specificInstructions);
-    const initialMessage = buildInformedVoterMessage(config, lens, plan, specificInstructions);
+    const specificInstructions = plan.specialistInstructions[lens.id] || '';
+    const specialistPrompt = buildInformedSpecialistPrompt(config, lens, plan, specificInstructions);
+    const initialMessage = buildInformedSpecialistMessage(config, lens, plan, specificInstructions);
 
     const finalMessage = await resilientToolRunner({
         model: config.model,
         max_tokens: 16000,
-        system: voterPrompt,
+        system: specialistPrompt,
         thinking: { type: 'adaptive' },
         tools,
         messages: [{ role: 'user', content: initialMessage }],
@@ -270,7 +274,7 @@ async function runInformedVoter(
         scanDurationMs: Date.now() - startTime,
     };
 
-    emit({ type: 'voter_complete', voterId: lens.id, findings: report.totalFindings });
+    emit({ type: 'specialist_complete', specialistId: lens.id, findings: report.totalFindings });
     return report;
 }
 
@@ -278,7 +282,7 @@ async function runInformedVoter(
 // Helpers
 // =============================================================================
 
-function buildScanSummaryForVoters(session: AuditSession): string {
+function buildScanSummaryForSpecialists(session: AuditSession): string {
     if (session.scannedUrls.length === 0) return '';
 
     const lines: string[] = ['Initial scan results from lead agent:'];

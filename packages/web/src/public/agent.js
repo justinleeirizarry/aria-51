@@ -29,7 +29,7 @@ async function runAgent() {
 
     const wcagLevel = document.getElementById('agent-wcag')?.value || 'AA';
     const maxPages = parseInt(document.getElementById('agent-pages')?.value) || 10;
-    const voting = document.getElementById('agent-voting')?.checked || false;
+    const specialists = document.getElementById('agent-specialists')?.checked || false;
 
     document.getElementById('topbar-url').textContent = url;
     agentRunBtn.disabled = true;
@@ -46,7 +46,7 @@ async function runAgent() {
         const res = await fetch('/api/agent', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url, wcagLevel, maxPages, voting }),
+            body: JSON.stringify({ url, wcagLevel, maxPages, specialists }),
         });
 
         const reader = res.body.getReader();
@@ -121,11 +121,11 @@ function handleAgentEvent(event) {
         case 'step_complete':
             logEntry('step', 'Step ' + event.stepIndex + ' \u2014 ' + event.toolCalls + ' tool call(s)');
             break;
-        case 'voter_complete':
-            logEntry('voter', 'Voter "' + event.voterId + '" finished: ' + event.findings + ' findings');
+        case 'specialist_complete':
+            logEntry('specialist', 'Specialist "' + event.specialistId + '" finished: ' + event.findings + ' findings');
             break;
-        case 'consensus':
-            logEntry('voter', 'Consensus: ' + event.unanimousFindings + ' unanimous / ' + event.totalFindings + ' total');
+        case 'merge_complete':
+            logEntry('specialist', 'Merged: ' + event.totalFindings + ' findings (' + event.deduplicatedCount + ' deduplicated)');
             break;
     }
 }
@@ -134,7 +134,7 @@ function logEntry(type, message) {
     const elapsed = ((Date.now() - agentStartTime) / 1000).toFixed(1);
     const cls = type === 'thinking' ? 'log-thinking'
         : type === 'tool' ? 'log-tool'
-        : type === 'voter' ? 'log-voter'
+        : type === 'specialist' ? 'log-specialist'
         : type === 'error' ? 'log-error'
         : '';
     agentLogEl.innerHTML += '<div class="log-entry"><span class="log-time">' + elapsed + 's</span><span class="' + cls + '">' + esc(message) + '</span></div>';

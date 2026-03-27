@@ -11,7 +11,7 @@ See the [full introduction](docs/introduction.md) for a detailed walkthrough of 
 | [`@aria51/core`](packages/core) | Scanning engine: axe-core, keyboard tests, WCAG 2.2 checks, fix suggestions |
 | [`@aria51/components`](packages/components) | Component attribution via element-source (React, Preact, Vue, Svelte, Solid) |
 | [`@aria51/ai-auditor`](packages/ai-auditor) | AI-powered auditing via Stagehand/Browserbase |
-| [`@aria51/agent`](packages/agent) | Autonomous auditing agent: planning, verification, voting, remediation |
+| [`@aria51/agent`](packages/agent) | Autonomous auditing agent: planning, verification, multi-specialist coordination, remediation |
 | [`@aria51/cli`](packages/cli) | Terminal UI (Ink). Binary: `aria51` |
 | [`@aria51/web`](packages/web) | Web dashboard (Hono). Port 3847 |
 | [`@aria51/mcp`](packages/mcp) | MCP server for MCP. Tools: `scan_url`, `scan_urls` |

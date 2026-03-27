@@ -221,7 +221,7 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   .agent-log .log-time { color: var(--muted); margin-right: 0.5rem; }
   .agent-log .log-thinking { color: var(--blue); }
   .agent-log .log-tool { color: var(--accent); font-weight: 600; }
-  .agent-log .log-voter { color: var(--green); }
+  .agent-log .log-specialist { color: var(--green); }
   .agent-log .log-error { color: var(--red); }
 
   /* Remediation plan */

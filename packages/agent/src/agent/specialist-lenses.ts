@@ -1,23 +1,23 @@
 /**
- * Voter Lenses
+ * Specialist Lenses
  *
- * Each lens defines a specialized perspective for the voting pattern.
- * Voters share scan data but analyze independently through different lenses,
+ * Each lens defines a specialized perspective for the multi-specialist pattern.
+ * Specialists share scan data but analyze independently through different lenses,
  * catching issues that a single generalist pass might miss.
  */
 
-export interface VoterLens {
+export interface SpecialistLens {
     /** Unique identifier for this lens */
     id: string;
     /** Human-readable name */
     name: string;
-    /** System prompt addendum that focuses the voter's attention */
+    /** System prompt addendum that focuses the specialist's attention */
     focus: string;
     /** WCAG criteria this lens is most concerned with */
     wcagFocus: string[];
 }
 
-export const VOTER_LENSES: VoterLens[] = [
+export const SPECIALIST_LENSES: SpecialistLens[] = [
     {
         id: 'keyboard-navigation',
         name: 'Keyboard & Navigation Specialist',

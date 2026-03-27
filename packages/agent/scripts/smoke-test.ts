@@ -44,11 +44,11 @@ try {
                 case 'step_complete':
                     console.log(`[${elapsed}s] ✓ Step ${event.stepIndex} complete (${event.toolCalls} tool calls)`);
                     break;
-                case 'voter_complete':
-                    console.log(`[${elapsed}s] 🗳️ Voter ${event.voterId}: ${event.findings} findings`);
+                case 'specialist_complete':
+                    console.log(`[${elapsed}s] 🔍 Specialist ${event.specialistId}: ${event.findings} findings`);
                     break;
-                case 'consensus':
-                    console.log(`[${elapsed}s] 🤝 Consensus: ${event.unanimousFindings} unanimous / ${event.totalFindings} total`);
+                case 'merge_complete':
+                    console.log(`[${elapsed}s] 🔗 Merged: ${event.totalFindings} findings (${event.deduplicatedCount} deduplicated)`);
                     break;
                 case 'complete':
                     console.log(`[${elapsed}s] ✅ Complete!`);
