@@ -16,13 +16,14 @@ export class StagehandScanner {
     async init(url: string): Promise<void> {
         if (!this.config.enabled) return;
 
-        logger.info('Initializing Stagehand AI scanner...');
+        logger.debug('Initializing Stagehand AI scanner...');
 
         try {
             const options = {
                 env: "LOCAL" as const,
                 model: this.config.model || "openai/gpt-4o-mini",
                 verbose: (this.config.verbose ? 2 : 0) as 0 | 2,
+                headless: true,
             };
 
             this.stagehand = new Stagehand(options);
@@ -38,7 +39,7 @@ export class StagehandScanner {
             throw new Error("Stagehand not initialized");
         }
 
-        logger.info('Running AI element discovery...');
+        logger.debug('Running AI element discovery...');
 
         try {
             // Use observe to find elements without interacting

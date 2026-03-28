@@ -78,18 +78,19 @@ export class StagehandWcagAuditAgent {
     }
 
     async init(): Promise<void> {
-        logger.info('Initializing Stagehand WCAG audit agent...');
+        logger.debug('Initializing Stagehand WCAG audit agent...');
 
         try {
             const options = {
                 env: "LOCAL" as const,
                 modelName: this.options.model || "gpt-4o-mini",
                 verbose: (this.options.verbose ? 2 : 0) as 0 | 2,
+                headless: true,
             };
 
             this.stagehand = new Stagehand(options);
             await this.stagehand.init();
-            logger.info('Stagehand WCAG audit agent initialized');
+            logger.debug('Stagehand WCAG audit agent initialized');
         } catch (error) {
             logger.error(`Failed to initialize Stagehand: ${error instanceof Error ? error.message : String(error)}`);
             throw error;
@@ -101,7 +102,7 @@ export class StagehandWcagAuditAgent {
             throw new Error("Stagehand not initialized");
         }
 
-        logger.info(`Starting WCAG ${this.options.targetLevel} audit for ${url}...`);
+        logger.debug(`Starting WCAG ${this.options.targetLevel} audit for ${url}...`);
 
         const page = this.page;
         if (!page) {
@@ -123,11 +124,11 @@ export class StagehandWcagAuditAgent {
         );
 
         // Run the audit using the agent
-        logger.info('Running autonomous WCAG audit...');
+        logger.debug('Running autonomous WCAG audit...');
         const findings = await this.runAuditAgent(systemPrompt);
 
         // Extract final summary
-        logger.info('Generating audit summary...');
+        logger.debug('Generating audit summary...');
         const summary = await this.extractSummary(findings);
 
         // Convert findings to result format

@@ -71,10 +71,10 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   select.select-sm { padding: 0.625rem 0.75rem; font-size: 0.6875rem; font-family: inherit; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: var(--bg); color: var(--fg); border: 2px solid var(--border); border-radius: 0; outline: none; cursor: pointer; }
 
   /* Summary grid */
-  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0; margin-bottom: 4rem; border: 2px solid var(--border); }
-  .stat { padding: 2rem; border-right: 2px solid var(--border); }
+  .summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0; margin-bottom: 2rem; border: 2px solid var(--border); }
+  .stat { padding: 1.25rem 1rem; border-right: 2px solid var(--border); border-bottom: 2px solid var(--border); }
   .stat:last-child { border-right: none; }
-  .stat-value { font-size: 3rem; font-weight: 700; line-height: 1; }
+  .stat-value { font-size: 2rem; font-weight: 700; line-height: 1; }
   .stat-label { font-size: 0.625rem; color: var(--muted); margin-top: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 700; }
   .stat.critical .stat-value { color: var(--red); }
   .stat.serious .stat-value { color: var(--orange); }
@@ -225,13 +225,28 @@ export function Layout({ children }: { children: HtmlEscapedString | Promise<Htm
   .agent-log .log-error { color: var(--red); }
 
   /* Remediation plan */
-  .remediation-phase { margin-bottom: 2rem; }
-  .phase-header { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.75rem; border: 2px solid var(--border); margin-bottom: 0.5rem; }
-  .phase-item { padding: 0.5rem 0.75rem; font-size: 0.85rem; border-bottom: 1px solid var(--surface); }
-  .phase-item .effort { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-left: 0.5rem; }
+  .remediation-summary { font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem; padding: 1rem; border-left: 3px solid var(--fg); }
+  .remediation-phase { margin-bottom: 2.5rem; }
+  .phase-header { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 0.75rem 1rem; border: 2px solid var(--border); margin-bottom: 0.25rem; }
+  .phase-description { font-size: 0.8rem; color: var(--muted); padding: 0.5rem 1rem; margin-bottom: 0.5rem; }
+  .phase-item-card { padding: 1rem; border: 1px solid var(--surface); margin-bottom: 0.5rem; }
+  .phase-item-header { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+  .phase-item-title { color: var(--muted); font-size: 0.8rem; }
+  .phase-item-fix { font-size: 0.85rem; line-height: 1.5; }
+  .phase-item-pages { font-size: 0.75rem; color: var(--muted); margin-top: 0.4rem; }
+  .phase-item-card .effort { font-size: 0.625rem; font-weight: 700; text-transform: uppercase; color: var(--muted); }
 
-  /* Agent summary (markdown-ish) */
-  .agent-summary { padding: 1.5rem; border: 2px solid var(--border); margin-top: 2rem; font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; }
+  /* Agent summary — rendered markdown */
+  .agent-summary { padding: 2rem; border: 2px solid var(--border); margin-top: 1rem; font-size: 0.85rem; line-height: 1.7; }
+  .agent-summary .md-h1 { font-size: 1.3rem; font-weight: 700; margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border); }
+  .agent-summary .md-h2 { font-size: 1.1rem; font-weight: 700; margin: 1.5rem 0 0.75rem 0; }
+  .agent-summary .md-h3 { font-size: 0.9rem; font-weight: 700; margin: 1.25rem 0 0.5rem 0; text-transform: uppercase; letter-spacing: 0.04em; }
+  .agent-summary .md-h4 { font-size: 0.85rem; font-weight: 700; margin: 1rem 0 0.5rem 0; }
+  .agent-summary .md-p { margin: 0.5rem 0; }
+  .agent-summary .md-list { margin: 0.5rem 0; padding-left: 1.5rem; }
+  .agent-summary .md-list li { margin: 0.3rem 0; }
+  .agent-summary .md-code { font-family: monospace; font-size: 0.8rem; padding: 0.15rem 0.4rem; border: 1px solid var(--surface); background: var(--surface); }
+  .agent-summary hr { border: none; border-top: 2px solid var(--border); margin: 1.5rem 0; }
 </style>
 </head>
 <body>

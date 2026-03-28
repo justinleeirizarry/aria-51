@@ -33,7 +33,7 @@ export async function runStagehandTests(
         allResults.push(...auditor.keyboardResultsToSupplemental(results));
         logger.info(`Keyboard tests: ${results.issues.length} issues found`);
     } catch (err) {
-        logger.warn(`Keyboard tests failed: ${err}`);
+        logger.warn(`Keyboard tests failed: ${extractErrorMessage(err)}`);
     }
 
     // Run tree analysis
@@ -46,7 +46,7 @@ export async function runStagehandTests(
         allResults.push(...auditor.treeResultsToSupplemental(results));
         logger.info(`Tree analysis: ${results.issues.length} issues found`);
     } catch (err) {
-        logger.warn(`Tree analysis failed: ${err}`);
+        logger.warn(`Tree analysis failed: ${extractErrorMessage(err)}`);
     }
 
     // Run screen reader navigation
@@ -59,7 +59,7 @@ export async function runStagehandTests(
         allResults.push(...auditor.screenReaderResultsToSupplemental(results));
         logger.info(`Screen reader: ${results.issues.length} issues found`);
     } catch (err) {
-        logger.warn(`Screen reader tests failed: ${err}`);
+        logger.warn(`Screen reader tests failed: ${extractErrorMessage(err)}`);
     }
 
     // Deduplicate Stagehand results among themselves first
@@ -105,4 +105,15 @@ export async function runStagehandTests(
     }
 
     return Array.from(merged.values());
+}
+
+/** Extract a clean error message from Effect FiberFailure or plain Error */
+function extractErrorMessage(err: unknown): string {
+    if (err instanceof Error) {
+        // Effect FiberFailure wraps the real error — dig it out
+        const cause = (err as any).cause;
+        if (cause?._tag) return `${cause._tag}: ${cause.reason || cause.message || cause.operation || 'unknown'}`;
+        return err.message;
+    }
+    return String(err);
 }

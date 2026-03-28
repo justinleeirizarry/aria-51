@@ -183,9 +183,9 @@ function renderAgentReport(report) {
     html += renderRemediationPlan(report.remediationPlan);
     html += '</div>';
 
-    // Summary tab
+    // Summary tab — render markdown
     html += '<div class="tab-content" id="tab-agent-summary">';
-    html += '<div class="agent-summary">' + esc(report.agentSummary || 'No summary available.') + '</div>';
+    html += '<div class="agent-summary">' + renderMarkdown(report.agentSummary || 'No summary available.') + '</div>';
     html += '</div>';
 
     agentResultsEl.innerHTML = html;
@@ -257,20 +257,29 @@ function renderFindingsByConfidence(findings) {
 function renderRemediationPlan(plan) {
     if (!plan) return '<div style="padding:3rem;text-align:center;color:var(--muted)">No remediation plan generated.</div>';
 
-    let html = '<div style="margin-bottom:1.5rem;font-size:0.85rem;">' + esc(plan.summary) + '</div>';
+    let html = '<div class="remediation-summary">' + esc(plan.summary) + '</div>';
 
     for (const phase of (plan.phases || [])) {
         html += '<div class="remediation-phase">';
         html += '<div class="phase-header">Phase ' + phase.priority + ': ' + esc(phase.title) + '</div>';
+        if (phase.description) {
+            html += '<div class="phase-description">' + esc(phase.description) + '</div>';
+        }
         for (const item of (phase.items || [])) {
             const criterion = item.finding?.criterion?.id || '';
             const impact = item.finding?.impact || '';
-            html += '<div class="phase-item">';
+            const title = item.finding?.criterion?.title || '';
+            html += '<div class="phase-item-card">';
+            html += '<div class="phase-item-header">';
             html += '<strong>' + esc(criterion) + '</strong>';
+            if (title) html += ' <span class="phase-item-title">' + esc(title) + '</span>';
             if (impact) html += ' <span class="badge ' + impact + '">' + impact + '</span>';
             html += ' <span class="effort">' + esc(item.estimatedEffort) + ' effort</span>';
-            html += ' \u2014 ' + esc(item.fix);
-            if (item.affectedPages?.length > 1) html += ' <span style="color:var(--muted)">(' + item.affectedPages.length + ' pages)</span>';
+            html += '</div>';
+            html += '<div class="phase-item-fix">' + esc(item.fix) + '</div>';
+            if (item.affectedPages?.length > 1) {
+                html += '<div class="phase-item-pages">' + item.affectedPages.length + ' pages affected</div>';
+            }
             html += '</div>';
         }
         html += '</div>';
@@ -294,4 +303,66 @@ window.copyAgentJSON = async function() {
 
 function truncate(str, max) {
     return str.length > max ? str.slice(0, max) + '...' : str;
+}
+
+/**
+ * Lightweight markdown → HTML renderer.
+ * Handles: headings, bold, lists, horizontal rules, paragraphs.
+ * No external deps.
+ */
+function renderMarkdown(md) {
+    if (!md) return '';
+    const lines = md.split('\n');
+    let html = '';
+    let inList = false;
+
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+
+        // Horizontal rule
+        if (/^---+$/.test(line.trim())) {
+            if (inList) { html += '</ul>'; inList = false; }
+            html += '<hr>';
+            continue;
+        }
+
+        // Headings
+        const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
+        if (headingMatch) {
+            if (inList) { html += '</ul>'; inList = false; }
+            const level = headingMatch[1].length;
+            html += '<h' + level + ' class="md-h' + level + '">' + inlineMd(headingMatch[2]) + '</h' + level + '>';
+            continue;
+        }
+
+        // List item
+        if (/^\s*[-*]\s+/.test(line)) {
+            if (!inList) { html += '<ul class="md-list">'; inList = true; }
+            html += '<li>' + inlineMd(line.replace(/^\s*[-*]\s+/, '')) + '</li>';
+            continue;
+        }
+
+        // Empty line — close list, add spacing
+        if (line.trim() === '') {
+            if (inList) { html += '</ul>'; inList = false; }
+            continue;
+        }
+
+        // Paragraph
+        if (inList) { html += '</ul>'; inList = false; }
+        html += '<p class="md-p">' + inlineMd(line) + '</p>';
+    }
+
+    if (inList) html += '</ul>';
+    return html;
+}
+
+/** Inline markdown: bold, code, links */
+function inlineMd(text) {
+    let s = esc(text);
+    // Bold: **text**
+    s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    // Code: `text`
+    s = s.replace(/`(.+?)`/g, '<code class="md-code">$1</code>');
+    return s;
 }

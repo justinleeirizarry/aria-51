@@ -38,7 +38,7 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
                 this.navigator = new ScreenReaderNavigator(this.config);
                 await this.navigator.init();
 
-                logger.info('ScreenReaderNavService initialized');
+                logger.debug('ScreenReaderNavService initialized');
             },
             catch: (error) => new EffectScreenReaderNavInitError({
                 reason: error instanceof Error ? error.message : String(error),

@@ -125,11 +125,12 @@ export class StagehandKeyboardTester {
                 env: "LOCAL" as const,
                 modelName: this.config.model || "gpt-4o-mini",
                 verbose: (this.config.verbose ? 2 : 0) as 0 | 2,
+                headless: true,
             };
 
             this.stagehand = new Stagehand(options);
             await this.stagehand.init();
-            logger.info('Stagehand keyboard tester initialized');
+            logger.debug('Stagehand keyboard tester initialized');
         } catch (error) {
             logger.error(`Failed to initialize Stagehand: ${error instanceof Error ? error.message : String(error)}`);
             throw error;
@@ -141,7 +142,7 @@ export class StagehandKeyboardTester {
             throw new Error("Stagehand not initialized");
         }
 
-        logger.info(`Testing keyboard navigation for ${url}...`);
+        logger.debug(`Testing keyboard navigation for ${url}...`);
 
         const page = this.page;
         if (!page) {
@@ -156,30 +157,30 @@ export class StagehandKeyboardTester {
         const tabOrder: TabOrderEntry[] = [];
 
         // Test tab navigation
-        logger.info('Testing tab navigation...');
+        logger.debug('Testing tab navigation...');
         const tabResults = await this.testTabNavigation();
         tabOrder.push(...tabResults.tabOrder);
         issues.push(...tabResults.issues);
 
         // Test focus indicators
-        logger.info('Testing focus indicators...');
+        logger.debug('Testing focus indicators...');
         const focusIssues = await this.testFocusIndicators(tabResults.tabOrder);
         issues.push(...focusIssues);
 
         // Test skip links
         if (this.config.testSkipLinks) {
-            logger.info('Testing skip links...');
+            logger.debug('Testing skip links...');
             const skipLinkIssues = await this.testSkipLinks();
             issues.push(...skipLinkIssues);
         }
 
         // Test focus traps
-        logger.info('Testing for focus traps...');
+        logger.debug('Testing for focus traps...');
         const focusTrapIssues = await this.testFocusTraps();
         issues.push(...focusTrapIssues);
 
         // Get coverage statistics
-        logger.info('Calculating keyboard accessibility coverage...');
+        logger.debug('Calculating keyboard accessibility coverage...');
         const coverage = await this.calculateCoverage();
 
         // Build summary

@@ -158,7 +158,7 @@ export class BrowserService implements IBrowserService {
 
             const globalConfig = getConfig();
             const timeout = options?.timeout ?? this.config?.timeout ?? globalConfig.browser.timeout;
-            const waitUntil = options?.waitUntil ?? 'networkidle';
+            const waitUntil = options?.waitUntil ?? 'domcontentloaded';
 
             yield* Effect.tryPromise({
                 try: async () => {

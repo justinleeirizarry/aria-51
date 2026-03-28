@@ -99,18 +99,19 @@ export class StagehandTreeAnalyzer {
     }
 
     async init(): Promise<void> {
-        logger.info('Initializing Stagehand tree analyzer...');
+        logger.debug('Initializing Stagehand tree analyzer...');
 
         try {
             const options = {
                 env: "LOCAL" as const,
                 modelName: this.config.model || "gpt-4o-mini",
                 verbose: (this.config.verbose ? 2 : 0) as 0 | 2,
+                headless: true,
             };
 
             this.stagehand = new Stagehand(options);
             await this.stagehand.init();
-            logger.info('Stagehand tree analyzer initialized');
+            logger.debug('Stagehand tree analyzer initialized');
         } catch (error) {
             logger.error(`Failed to initialize Stagehand: ${error instanceof Error ? error.message : String(error)}`);
             throw error;
@@ -122,7 +123,7 @@ export class StagehandTreeAnalyzer {
             throw new Error("Stagehand not initialized");
         }
 
-        logger.info(`Analyzing accessibility tree for ${url}...`);
+        logger.debug(`Analyzing accessibility tree for ${url}...`);
 
         const page = this.page;
         if (!page) {
@@ -134,15 +135,15 @@ export class StagehandTreeAnalyzer {
         await new Promise(resolve => setTimeout(resolve, 2000));
 
         // Extract accessibility tree structure
-        logger.info('Extracting accessibility tree...');
+        logger.debug('Extracting accessibility tree...');
         const tree = await this.extractTree();
 
         // Extract tree statistics
-        logger.info('Extracting tree statistics...');
+        logger.debug('Extracting tree statistics...');
         const stats = await this.extractStats();
 
         // Analyze for issues
-        logger.info('Analyzing for accessibility issues...');
+        logger.debug('Analyzing for accessibility issues...');
         const issues = await this.analyzeIssues(tree, stats);
 
         // Build summary

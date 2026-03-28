@@ -41,7 +41,7 @@ export class WcagAuditService implements IWcagAuditService {
                 this.agent = new StagehandWcagAuditAgent(this.options);
                 await this.agent.init();
 
-                logger.info(`WcagAuditService initialized (target level: ${this.options.targetLevel})`);
+                logger.debug(`WcagAuditService initialized (target level: ${this.options.targetLevel})`);
             },
             catch: (error) => new EffectWcagAuditInitError({
                 reason: error instanceof Error ? error.message : String(error),

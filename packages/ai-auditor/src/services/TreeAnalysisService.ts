@@ -41,7 +41,7 @@ export class TreeAnalysisService implements ITreeAnalysisService {
                 this.analyzer = new StagehandTreeAnalyzer(this.config);
                 await this.analyzer.init();
 
-                logger.info('TreeAnalysisService initialized');
+                logger.debug('TreeAnalysisService initialized');
             },
             catch: (error) => new EffectTreeAnalysisInitError({
                 reason: error instanceof Error ? error.message : String(error),

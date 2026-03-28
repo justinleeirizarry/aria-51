@@ -91,7 +91,7 @@ export class ScreenReaderNavigator {
     }
 
     async init(): Promise<void> {
-        logger.info('Initializing Screen Reader Navigator...');
+        logger.debug('Initializing Screen Reader Navigator...');
 
         const options: any = this.config.browserbaseSessionId
             ? {
@@ -104,11 +104,12 @@ export class ScreenReaderNavigator {
                 env: 'LOCAL' as const,
                 modelName: this.config.model || 'gpt-4o-mini',
                 verbose: (this.config.verbose ? 2 : 0) as 0 | 2,
+                headless: true,
             };
 
         this.stagehand = new Stagehand(options);
         await this.stagehand.init();
-        logger.info('Screen Reader Navigator initialized');
+        logger.debug('Screen Reader Navigator initialized');
     }
 
     async navigate(url: string): Promise<ScreenReaderNavigationResults> {
@@ -116,7 +117,7 @@ export class ScreenReaderNavigator {
             throw new Error("Navigator not initialized");
         }
 
-        logger.info(`Screen reader navigation test for ${url}...`);
+        logger.debug(`Screen reader navigation test for ${url}...`);
 
         await this.page.goto(url, { waitUntil: 'networkidle' });
         await new Promise(resolve => setTimeout(resolve, 1000));
@@ -137,14 +138,14 @@ export class ScreenReaderNavigator {
         }
 
         // 2. Get accessibility snapshot (for headings and interactive elements)
-        logger.info('Taking accessibility snapshot...');
+        logger.debug('Taking accessibility snapshot...');
         const snapshot = await this.page.accessibility.snapshot();
         if (!snapshot) {
             throw new Error("Could not get accessibility snapshot");
         }
 
         // 3. Navigate by landmarks (via DOM queries, since snapshots flatten landmarks)
-        logger.info('Navigating by landmarks...');
+        logger.debug('Navigating by landmarks...');
         const landmarks = await this.extractLandmarksFromDOM();
         steps.push({ action: 'list-landmarks', description: `Found ${landmarks.length} landmarks`, timestamp: Date.now() });
         const landmarkIssues = this.analyzeLandmarks(landmarks);
@@ -160,7 +161,7 @@ export class ScreenReaderNavigator {
         }
 
         // 4. Navigate by headings (from snapshot)
-        logger.info('Navigating by headings...');
+        logger.debug('Navigating by headings...');
         const headings = this.extractHeadings(snapshot as SnapshotNode);
         steps.push({ action: 'list-headings', description: `Found ${headings.length} headings`, timestamp: Date.now() });
         const headingIssues = this.analyzeHeadings(headings);
@@ -176,7 +177,7 @@ export class ScreenReaderNavigator {
         }
 
         // 5. Check interactive elements (via DOM for images/inputs, snapshot for buttons/links)
-        logger.info('Checking interactive elements...');
+        logger.debug('Checking interactive elements...');
         const interactiveIssues = [
             ...this.checkInteractiveElements(snapshot as SnapshotNode),
             ...(await this.checkDOMElements()),
@@ -184,13 +185,13 @@ export class ScreenReaderNavigator {
         issues.push(...interactiveIssues);
 
         // 6. Test skip link
-        logger.info('Testing skip link...');
+        logger.debug('Testing skip link...');
         const skipLinkIssues = await this.testSkipLink();
         issues.push(...skipLinkIssues);
 
         // 7. Test keyboard navigation between landmarks
         if (this.config.testKeyboardNav) {
-            logger.info('Testing keyboard navigation...');
+            logger.debug('Testing keyboard navigation...');
             const keyboardSteps = await this.testKeyboardNavigation();
             steps.push(...keyboardSteps.steps);
             issues.push(...keyboardSteps.issues);

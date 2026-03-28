@@ -41,7 +41,7 @@ export class KeyboardTestService implements IKeyboardTestService {
                 this.tester = new StagehandKeyboardTester(this.config);
                 await this.tester.init();
 
-                logger.info('KeyboardTestService initialized');
+                logger.debug('KeyboardTestService initialized');
             },
             catch: (error) => new EffectKeyboardTestInitError({
                 reason: error instanceof Error ? error.message : String(error),
