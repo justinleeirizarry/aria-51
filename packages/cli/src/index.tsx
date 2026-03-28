@@ -10,20 +10,14 @@ configDotenv({ path: envPath, quiet: true });
 import React from 'react';
 import { render } from 'ink';
 import meow from 'meow';
-import { Effect } from 'effect';
 import App from './App.js';
-import { getComponentBundlePath } from '@aria51/components';
 import type { BrowserType, WcagLevel } from '@aria51/core';
 import {
     validateUrl,
     validateTags,
     validateThreshold,
     validateBrowser,
-    runScanAsPromise,
-    runMultiScanAsPromise,
-    AppLayer,
     EXIT_CODES,
-    setExitCode,
     exitWithCode,
     updateConfig,
     loadEnvConfig,
@@ -31,16 +25,15 @@ import {
     loadConfigFile,
     logger,
     LogLevel,
-    generateAndExport,
-    generatePrompt,
-    ScanError,
 } from '@aria51/core';
 import {
-    createTestGenerationService,
-    createKeyboardTestService,
-    createTreeAnalysisService,
-    createWcagAuditService,
-} from '@aria51/ai-auditor';
+    runAgentMode,
+    runKeyboardMode,
+    runTreeMode,
+    runWcagAuditMode,
+    runTestGenMode,
+    runScanMode,
+} from './modes/index.js';
 
 // Load configuration: config file first, then env vars override
 const configFileResult = await loadConfigFile();
@@ -72,17 +65,17 @@ const cli = meow(
     --tree             Show component hierarchy view
     --quiet, -q        Minimal output - show only summary line
 
-  Test Generation (mutually exclusive with scan options)
-    --generate-test    Enable test generation mode (skips accessibility scan)
-    --test-file        Output file for generated test [default: generated-tests/<domain>-<timestamp>.spec.ts]
-    --stagehand-model <model> AI model for test generation [default: openai/gpt-4o-mini]
-    --stagehand-verbose       Enable verbose Stagehand logging
-
   Autonomous Agent Mode (mutually exclusive with scan/test-gen)
     --agent               Run autonomous accessibility audit with AI agent
     --agent-model         Model for agent (default: claude-sonnet-4-6)
     --specialists         Use multi-specialist mode (4 parallel auditors)
     --max-pages           Max pages to scan in agent mode [default: 10]
+
+  Test Generation (mutually exclusive with scan options)
+    --generate-test    Enable test generation mode (skips accessibility scan)
+    --test-file        Output file for generated test [default: generated-tests/<domain>-<timestamp>.spec.ts]
+    --stagehand-model <model> AI model for test generation [default: openai/gpt-4o-mini]
+    --stagehand-verbose       Enable verbose Stagehand logging
 
   Stagehand Advanced Testing (mutually exclusive with scan/test-gen)
     --stagehand-keyboard      Test keyboard navigation using AI
@@ -106,14 +99,14 @@ const cli = meow(
     $ aria51 https://my-app.com --no-components
     $ aria51 https://my-app.com --ai --tree
 
-    # Test Generation
-    $ aria51 https://example.com --generate-test
-    $ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
-
     # Autonomous Agent Audit
     $ aria51 https://example.com --agent
     $ aria51 https://example.com --agent --specialists
     $ aria51 https://example.com --agent --max-pages 5
+
+    # Test Generation
+    $ aria51 https://example.com --generate-test
+    $ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
 
     # AI-Powered WCAG Audit
     $ aria51 https://example.com --wcag-audit --audit-level AA
@@ -123,124 +116,44 @@ const cli = meow(
     {
         importMeta: import.meta,
         flags: {
-            browser: {
-                type: 'string',
-                shortFlag: 'b',
-                default: 'chromium',
-            },
-            components: {
-                type: 'boolean',
-                default: true,
-            },
-            output: {
-                type: 'string',
-                shortFlag: 'o',
-            },
-            ci: {
-                type: 'boolean',
-                default: false,
-            },
-            threshold: {
-                type: 'number',
-                default: 0,
-            },
-            headless: {
-                type: 'boolean',
-                default: true,
-            },
-            ai: {
-                type: 'boolean',
-                default: false,
-            },
-            tags: {
-                type: 'string',
-                default: '',
-            },
-            disableRules: {
-                type: 'string',
-                default: '',
-            },
-            exclude: {
-                type: 'string',
-                default: '',
-            },
-            keyboardNav: {
-                type: 'boolean',
-                default: true,
-            },
-            tree: {
-                type: 'boolean',
-                default: false,
-            },
-            quiet: {
-                type: 'boolean',
-                shortFlag: 'q',
-                default: false,
-            },
-            stagehandModel: {
-                type: 'string',
-            },
-            stagehandVerbose: {
-                type: 'boolean',
-                default: false,
-            },
-            generateTest: {
-                type: 'boolean',
-                default: false,
-            },
-            testFile: {
-                type: 'string',
-            },
-            // Agent mode flags
-            agent: {
-                type: 'boolean',
-                default: false,
-            },
-            agentModel: {
-                type: 'string',
-            },
-            specialists: {
-                type: 'boolean',
-                default: false,
-            },
-            maxPages: {
-                type: 'number',
-                default: 10,
-            },
-            // Stagehand Advanced Testing flags
-            stagehandKeyboard: {
-                type: 'boolean',
-                default: false,
-            },
-            maxTabPresses: {
-                type: 'number',
-                default: 100,
-            },
-            stagehandTree: {
-                type: 'boolean',
-                default: false,
-            },
-            includeFullTree: {
-                type: 'boolean',
-                default: false,
-            },
-            wcagAudit: {
-                type: 'boolean',
-                default: false,
-            },
-            auditLevel: {
-                type: 'string',
-                default: 'AA',
-            },
-            maxSteps: {
-                type: 'number',
-                default: 30,
-            },
+            browser: { type: 'string', shortFlag: 'b', default: 'chromium' },
+            components: { type: 'boolean', default: true },
+            output: { type: 'string', shortFlag: 'o' },
+            ci: { type: 'boolean', default: false },
+            threshold: { type: 'number', default: 0 },
+            headless: { type: 'boolean', default: true },
+            ai: { type: 'boolean', default: false },
+            tags: { type: 'string', default: '' },
+            disableRules: { type: 'string', default: '' },
+            exclude: { type: 'string', default: '' },
+            keyboardNav: { type: 'boolean', default: true },
+            tree: { type: 'boolean', default: false },
+            quiet: { type: 'boolean', shortFlag: 'q', default: false },
+            // Agent mode
+            agent: { type: 'boolean', default: false },
+            agentModel: { type: 'string' },
+            specialists: { type: 'boolean', default: false },
+            maxPages: { type: 'number', default: 10 },
+            // Stagehand
+            stagehandModel: { type: 'string' },
+            stagehandVerbose: { type: 'boolean', default: false },
+            generateTest: { type: 'boolean', default: false },
+            testFile: { type: 'string' },
+            stagehandKeyboard: { type: 'boolean', default: false },
+            maxTabPresses: { type: 'number', default: 100 },
+            stagehandTree: { type: 'boolean', default: false },
+            includeFullTree: { type: 'boolean', default: false },
+            wcagAudit: { type: 'boolean', default: false },
+            auditLevel: { type: 'string', default: 'AA' },
+            maxSteps: { type: 'number', default: 30 },
         },
     }
 );
 
-// Validate URL argument(s)
+// =============================================================================
+// Validation
+// =============================================================================
+
 if (cli.input.length === 0) {
     console.error('Error: URL is required\n');
     cli.showHelp();
@@ -248,9 +161,8 @@ if (cli.input.length === 0) {
 }
 
 const urls = cli.input;
-const url = urls[0]; // Primary URL (used for single-page modes)
+const url = urls[0];
 
-// Validate all URL formats
 for (const u of urls) {
     const urlValidation = validateUrl(u);
     if (!urlValidation.valid) {
@@ -259,14 +171,12 @@ for (const u of urls) {
     }
 }
 
-// Validate browser type
 const browserValidation = validateBrowser(cli.flags.browser);
 if (!browserValidation.valid) {
     console.error(`Error: ${browserValidation.error}\n`);
     exitWithCode(EXIT_CODES.VALIDATION_ERROR);
 }
 
-// Validate tags if provided
 if (cli.flags.tags) {
     const tagsValidation = validateTags(cli.flags.tags);
     if (!tagsValidation.valid) {
@@ -275,22 +185,12 @@ if (cli.flags.tags) {
     }
 }
 
-// Validate threshold
 const thresholdValidation = validateThreshold(cli.flags.threshold);
 if (!thresholdValidation.valid) {
     console.error(`Error: ${thresholdValidation.error}\n`);
     exitWithCode(EXIT_CODES.VALIDATION_ERROR);
 }
 
-// Determine mode: agent, test generation, stagehand tests, or accessibility scan
-const isAgentMode = cli.flags.agent;
-const isTestGenerationMode = cli.flags.generateTest;
-const isStagehandKeyboardMode = cli.flags.stagehandKeyboard;
-const isStagehandTreeMode = cli.flags.stagehandTree;
-const isWcagAuditMode = cli.flags.wcagAudit;
-const isStagehandMode = isStagehandKeyboardMode || isStagehandTreeMode || isWcagAuditMode;
-
-// Validate WCAG level
 const validLevels = ['A', 'AA', 'AAA'];
 if (!validLevels.includes(cli.flags.auditLevel.toUpperCase())) {
     console.error(`Error: Invalid audit level "${cli.flags.auditLevel}". Must be A, AA, or AAA.\n`);
@@ -298,47 +198,21 @@ if (!validLevels.includes(cli.flags.auditLevel.toUpperCase())) {
 }
 const auditLevel = cli.flags.auditLevel.toUpperCase() as WcagLevel;
 
-// Helper to generate filename from URL with timestamp in generated-tests directory
-const getFilenameFromUrl = (urlStr: string): string => {
-    try {
-        const urlObj = new URL(urlStr);
-        const hostname = urlObj.hostname.replace(/^www\./, '');
-        const sanitized = hostname.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+// Determine mode
+const isAgentMode = cli.flags.agent;
+const isTestGenerationMode = cli.flags.generateTest;
+const isStagehandKeyboardMode = cli.flags.stagehandKeyboard;
+const isStagehandTreeMode = cli.flags.stagehandTree;
+const isWcagAuditMode = cli.flags.wcagAudit;
+const isStagehandMode = isStagehandKeyboardMode || isStagehandTreeMode || isWcagAuditMode;
 
-        // Generate timestamp: YYYY-MM-DD-HHmmss
-        const now = new Date();
-        const timestamp = now.toISOString()
-            .replace(/T/, '-')
-            .replace(/:/g, '')
-            .replace(/\..+/, '')
-            .slice(0, 17); // YYYY-MM-DD-HHmmss
-
-        return `generated-tests/${sanitized}-${timestamp}.spec.ts`;
-    } catch {
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        return `generated-tests/a11y-test-${timestamp}.spec.ts`;
-    }
-};
-
-// Determine output file for test generation
-const testOutputFile = cli.flags.testFile || getFilenameFromUrl(url);
-
-// Validate mutually exclusive modes
-const modeCount = [
-    isAgentMode,
-    isTestGenerationMode,
-    isStagehandKeyboardMode,
-    isStagehandTreeMode,
-    isWcagAuditMode
-].filter(Boolean).length;
-
+const modeCount = [isAgentMode, isTestGenerationMode, isStagehandKeyboardMode, isStagehandTreeMode, isWcagAuditMode].filter(Boolean).length;
 if (modeCount > 1) {
     console.error('Error: Only one mode can be active at a time.\n');
     console.error('Modes: --agent, --generate-test, --stagehand-keyboard, --stagehand-tree, --wcag-audit\n');
     exitWithCode(EXIT_CODES.VALIDATION_ERROR);
 }
 
-// Validate mutually exclusive flags for test generation
 if (isTestGenerationMode || isStagehandMode) {
     const scanOnlyFlags = [
         { flag: 'ai', name: '--ai' },
@@ -347,476 +221,83 @@ if (isTestGenerationMode || isStagehandMode) {
         { flag: 'ci', name: '--ci' },
         { flag: 'tags', name: '--tags' },
     ];
-
-    const conflictingFlags = scanOnlyFlags.filter(({ flag }) => {
+    const conflicting = scanOnlyFlags.filter(({ flag }) => {
         const value = cli.flags[flag as keyof typeof cli.flags];
         return flag === 'tags' ? value !== '' : !!value;
     });
-
-    if (conflictingFlags.length > 0) {
+    if (conflicting.length > 0) {
         const modeName = isTestGenerationMode ? '--generate-test' :
             isStagehandKeyboardMode ? '--stagehand-keyboard' :
             isStagehandTreeMode ? '--stagehand-tree' : '--wcag-audit';
-        console.error(`Error: Cannot use ${conflictingFlags.map(f => f.name).join(', ')} with ${modeName}\n`);
-        console.error('These modes are mutually exclusive with accessibility scan options.\n');
+        console.error(`Error: Cannot use ${conflicting.map(f => f.name).join(', ')} with ${modeName}\n`);
         exitWithCode(EXIT_CODES.VALIDATION_ERROR);
     }
 }
 
-// Check if stdout is a TTY (interactive terminal)
+// =============================================================================
+// Dispatch
+// =============================================================================
+
 const isTTY = process.stdout.isTTY === true;
 
-// Set logger to silent in quiet mode
 if (cli.flags.quiet) {
     logger.setLevel(LogLevel.SILENT);
 }
 
-// If not a TTY (non-interactive), use JSON output mode
-// Route all logger output to stderr so stdout stays clean for JSON
-if (!isTTY) {
+// Helper for test generation output file
+const getFilenameFromUrl = (urlStr: string): string => {
+    try {
+        const hostname = new URL(urlStr).hostname.replace(/^www\./, '');
+        const sanitized = hostname.replace(/[^a-z0-9]/gi, '-').toLowerCase();
+        const timestamp = new Date().toISOString().replace(/T/, '-').replace(/:/g, '').replace(/\..+/, '').slice(0, 17);
+        return `generated-tests/${sanitized}-${timestamp}.spec.ts`;
+    } catch {
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        return `generated-tests/a11y-test-${timestamp}.spec.ts`;
+    }
+};
+
+if (isAgentMode) {
+    // Agent mode works the same in TTY and non-TTY (handled internally)
+    if (!isTTY) logger.setUseStderr(true);
+    runAgentMode({
+        url,
+        maxPages: cli.flags.maxPages,
+        maxSteps: cli.flags.maxSteps,
+        specialists: cli.flags.specialists,
+        model: cli.flags.agentModel,
+        wcagLevel: auditLevel,
+        output: cli.flags.output,
+        isTTY,
+    });
+} else if (!isTTY) {
+    // Non-TTY: JSON output for all modes
     logger.setUseStderr(true);
     (async () => {
-        try {
-            if (isAgentMode) {
-                // Autonomous agent mode
-                const { runAgent } = await import('@aria51/agent');
-                try {
-                    const report = await runAgent({
-                        targetUrl: url,
-                        maxPages: cli.flags.maxPages,
-                        maxSteps: cli.flags.maxSteps,
-                        specialists: cli.flags.specialists,
-                        model: cli.flags.agentModel || 'claude-sonnet-4-6',
-                        wcagLevel: auditLevel,
-                        onEvent: (event: any) => {
-                            if (event.type === 'thinking') logger.info(event.message);
-                            else if (event.type === 'tool_call') logger.info(`Tool: ${event.message}`);
-                            else if (event.type === 'specialist_complete') logger.info(`Specialist ${event.specialistId}: ${event.findings} findings`);
-                            else if (event.type === 'merge_complete') logger.info(`Merged: ${event.totalFindings} findings (${event.deduplicatedCount} deduplicated)`);
-                        },
-                    });
-                    console.log(JSON.stringify(report, null, 2));
-                    setExitCode(EXIT_CODES.SUCCESS);
-                } catch (error) {
-                    console.log(JSON.stringify({
-                        url,
-                        timestamp: new Date().toISOString(),
-                        error: error instanceof Error ? error.message : String(error),
-                        success: false,
-                    }, null, 2));
-                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
-                }
-            } else if (isStagehandKeyboardMode) {
-                // Stagehand keyboard navigation testing mode
-                const keyboardService = createKeyboardTestService();
-                try {
-                    await Effect.runPromise(keyboardService.init({
-                        maxTabPresses: cli.flags.maxTabPresses,
-                        verbose: cli.flags.stagehandVerbose,
-                        model: cli.flags.stagehandModel,
-                    }));
-                    const results = await Effect.runPromise(keyboardService.test(url));
-                    console.log(JSON.stringify(results, null, 2));
-                    setExitCode(EXIT_CODES.SUCCESS);
-                } catch (error) {
-                    console.log(JSON.stringify({
-                        url,
-                        timestamp: new Date().toISOString(),
-                        error: error instanceof Error ? error.message : String(error),
-                        success: false,
-                    }, null, 2));
-                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
-                } finally {
-                    await Effect.runPromise(keyboardService.close());
-                }
-            } else if (isStagehandTreeMode) {
-                // Stagehand tree analysis mode
-                const treeService = createTreeAnalysisService();
-                try {
-                    await Effect.runPromise(treeService.init({
-                        verbose: cli.flags.stagehandVerbose,
-                        model: cli.flags.stagehandModel,
-                        includeFullTree: cli.flags.includeFullTree,
-                    }));
-                    const results = await Effect.runPromise(treeService.analyze(url));
-                    console.log(JSON.stringify(results, null, 2));
-                    setExitCode(EXIT_CODES.SUCCESS);
-                } catch (error) {
-                    console.log(JSON.stringify({
-                        url,
-                        timestamp: new Date().toISOString(),
-                        error: error instanceof Error ? error.message : String(error),
-                        success: false,
-                    }, null, 2));
-                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
-                } finally {
-                    await Effect.runPromise(treeService.close());
-                }
-            } else if (isWcagAuditMode) {
-                // WCAG audit mode
-                const auditService = createWcagAuditService();
-                try {
-                    await Effect.runPromise(auditService.init({
-                        targetLevel: auditLevel,
-                        maxSteps: cli.flags.maxSteps,
-                        verbose: cli.flags.stagehandVerbose,
-                        model: cli.flags.stagehandModel,
-                    }));
-                    const results = await Effect.runPromise(auditService.audit(url));
-                    console.log(JSON.stringify(results, null, 2));
-                    setExitCode(EXIT_CODES.SUCCESS);
-                } catch (error) {
-                    console.log(JSON.stringify({
-                        url,
-                        timestamp: new Date().toISOString(),
-                        targetLevel: auditLevel,
-                        error: error instanceof Error ? error.message : String(error),
-                        success: false,
-                    }, null, 2));
-                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
-                } finally {
-                    await Effect.runPromise(auditService.close());
-                }
-            } else if (isTestGenerationMode) {
-                // Test generation mode
-                const testGenService = createTestGenerationService();
-                try {
-                    await Effect.runPromise(testGenService.init({ model: cli.flags.stagehandModel, verbose: cli.flags.stagehandVerbose }));
-                    await Effect.runPromise(testGenService.navigateTo(url));
-                    const elements = await Effect.runPromise(testGenService.discoverElements());
-                    const testContent = await Effect.runPromise(testGenService.generateTest(url, elements));
-
-                    // Write test file
-                    const fs = await import('fs/promises');
-                    const path = await import('path');
-                    const dir = path.dirname(testOutputFile);
-                    if (dir !== '.') {
-                        await fs.mkdir(dir, { recursive: true }).catch(() => {});
-                    }
-                    await fs.writeFile(testOutputFile, testContent);
-
-                    const testResults = {
-                        url,
-                        timestamp: new Date().toISOString(),
-                        outputFile: testOutputFile,
-                        elementsDiscovered: elements.length,
-                        elements,
-                        success: true,
-                    };
-
-                    // Output JSON to stdout
-                    console.log(JSON.stringify(testResults, null, 2));
-                    setExitCode(EXIT_CODES.SUCCESS);
-                } catch (error) {
-                    const errorMsg = error instanceof Error ? error.message : String(error);
-                    const testResults = {
-                        url,
-                        timestamp: new Date().toISOString(),
-                        outputFile: testOutputFile,
-                        elementsDiscovered: 0,
-                        elements: [],
-                        success: false,
-                        error: errorMsg,
-                    };
-                    console.log(JSON.stringify(testResults, null, 2));
-                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
-                } finally {
-                    await Effect.runPromise(testGenService.close());
-                }
-            } else {
-                // Accessibility scan mode using Effect-based orchestration
-                const commonOptions = {
-                    browser: cli.flags.browser as BrowserType,
-                    headless: cli.flags.headless,
-                    tags: cli.flags.tags ? cli.flags.tags.split(',') : undefined,
-                    includeKeyboardTests: cli.flags.keyboardNav,
-                    outputFile: cli.flags.output,
-                    ciMode: cli.flags.ci,
-                    ciThreshold: cli.flags.threshold,
-                    componentBundlePath: cli.flags.components ? getComponentBundlePath() : undefined,
-                    disableRules: cli.flags.disableRules ? cli.flags.disableRules.split(',') : undefined,
-                    exclude: cli.flags.exclude ? cli.flags.exclude.split(',') : undefined,
-                };
-
-                const scanResults = urls.length > 1
-                    ? await runMultiScanAsPromise(urls, commonOptions, AppLayer)
-                    : [await runScanAsPromise({ ...commonOptions, url }, AppLayer)];
-
-                // Helper to output a single scan result
-                const outputResult = (scanUrl: string, { results, ciPassed }: { results: typeof scanResults[0]['results']; ciPassed?: boolean }) => {
-                    if (cli.flags.quiet) {
-                        const { summary, violations } = results;
-                        const statusIcon = summary.totalViolations > 0 ? 'x' : 'v';
-                        console.log(`${statusIcon} ${scanUrl} - ${summary.totalViolations} violations, ${summary.totalPasses} passes`);
-
-                        if (summary.totalViolations > 0) {
-                            const { violationsBySeverity } = summary;
-                            const severityParts = [];
-                            if (violationsBySeverity.critical > 0) severityParts.push(`${violationsBySeverity.critical} critical`);
-                            if (violationsBySeverity.serious > 0) severityParts.push(`${violationsBySeverity.serious} serious`);
-                            if (violationsBySeverity.moderate > 0) severityParts.push(`${violationsBySeverity.moderate} moderate`);
-                            if (violationsBySeverity.minor > 0) severityParts.push(`${violationsBySeverity.minor} minor`);
-                            if (severityParts.length > 0) console.log(severityParts.join(' '));
-                        }
-
-                        for (const violation of violations) {
-                            console.log(`[${violation.impact}] ${violation.id}: ${violation.description}`);
-                            for (const node of violation.nodes) {
-                                const label = node.userComponentPath?.length
-                                    ? node.userComponentPath[node.userComponentPath.length - 1]
-                                    : node.component || node.cssSelector || node.target?.[0] || node.html?.slice(0, 80) || 'element';
-                                console.log(`  - ${label}`);
-                            }
-                            if (violation.helpUrl) console.log(`  Docs: ${violation.helpUrl}`);
-                        }
-
-                        // WCAG 2.2 summary
-                        if (results.wcag22 && results.wcag22.summary.totalViolations > 0) {
-                            console.log(`WCAG 2.2: ${results.wcag22.summary.totalViolations} violations`);
-                        }
-
-                        // Supplemental test summary
-                        if (results.supplementalResults && results.supplementalResults.length > 0) {
-                            const passed = results.supplementalResults.filter(r => r.status === 'pass').length;
-                            const failed = results.supplementalResults.filter(r => r.status === 'fail').length;
-                            console.log(`Supplemental: ${results.supplementalResults.length} tests, ${passed} passed, ${failed} failed`);
-                        }
-
-                        // Keyboard issues
-                        if (summary.keyboardIssues && summary.keyboardIssues > 0) {
-                            console.log(`Keyboard: ${summary.keyboardIssues} issues`);
-                        }
-                    } else {
-                        // Minimal formatted output
-                        const { summary, violations, incomplete } = results;
-                        const sev = summary.violationsBySeverity;
-                        const sep = '─'.repeat(60);
-
-                        console.log(`aria51 / ${scanUrl}\n`);
-                        const sevParts = [];
-                        if (sev.critical > 0) sevParts.push(`${sev.critical} critical`);
-                        if (sev.serious > 0) sevParts.push(`${sev.serious} serious`);
-                        if (sev.moderate > 0) sevParts.push(`${sev.moderate} moderate`);
-                        if (sev.minor > 0) sevParts.push(`${sev.minor} minor`);
-                        const componentsPart = summary.totalComponents > 0 ? `  ${summary.totalComponents} components` : '';
-                        console.log(`${summary.totalViolations} violations  ${summary.totalPasses} passes${componentsPart}`);
-                        if (sevParts.length > 0) console.log(sevParts.join('  '));
-                        if (summary.keyboardIssues) console.log(`${summary.keyboardIssues} keyboard issues`);
-                        console.log(`\n${sep}\n`);
-
-                        if (violations.length === 0) {
-                            console.log('No violations found.\n');
-                        }
-
-                        for (const v of violations) {
-                            console.log(`${v.impact.toUpperCase()}  ${v.id}  ${v.nodes.length} instance${v.nodes.length !== 1 ? 's' : ''}`);
-                            console.log(v.description);
-                            if (v.fixSuggestion) console.log(`FIX: ${v.fixSuggestion.summary}`);
-                            console.log('');
-
-                            for (const n of v.nodes) {
-                                const src = (n as any).source;
-                                const sourceStack = (n as any).sourceStack as Array<{ filePath: string; lineNumber?: number | null; columnNumber?: number | null; componentName?: string | null }> | undefined;
-                                const fmtLoc = (s: any) => s?.filePath ? s.filePath + (s.lineNumber ? ':' + s.lineNumber : '') + (s.columnNumber ? ':' + s.columnNumber : '') : '';
-                                const loc = fmtLoc(src);
-                                const path = (n.userComponentPath || n.componentPath || []).filter(
-                                    (name: string) => name.length > 2 && name[0] === name[0].toUpperCase() && !/^(Provider|Context|Fragment|Suspense)/.test(name)
-                                );
-                                const comp = path.length > 0 ? path[path.length - 1] : (n.component && n.component.length > 2 ? n.component : null);
-
-                                // Source + component
-                                if (loc && comp) {
-                                    console.log(`  ${loc} in ${comp}`);
-                                } else if (loc) {
-                                    console.log(`  ${loc}`);
-                                } else if (comp) {
-                                    console.log(`  ${comp}`);
-                                }
-
-                                // Source stack
-                                if (sourceStack && sourceStack.length > 1) {
-                                    for (const frame of sourceStack.slice(0, 5)) {
-                                        const name = frame.componentName && frame.componentName.length > 2 ? frame.componentName : '';
-                                        const frameLoc = fmtLoc(frame);
-                                        console.log(`    ${name ? 'in ' + name + ' ' : ''}(${frameLoc})`);
-                                    }
-                                }
-
-                                console.log(`  ${(n.htmlSnippet || n.html || '').substring(0, 80)}`);
-                            }
-
-                            if (v.helpUrl) console.log(`\n  ${v.helpUrl}`);
-                            console.log(`\n${sep}\n`);
-                        }
-
-                        if (incomplete && incomplete.length > 0) {
-                            console.log(`REVIEW  ${incomplete.length} items need manual review\n`);
-                            for (const item of incomplete.slice(0, 5)) {
-                                console.log(`  ${item.id}`);
-                                console.log(`  ${item.description}`);
-                            }
-                        }
-
-                        // WCAG 2.2 custom check summary
-                        if (results.wcag22 && results.wcag22.summary.totalViolations > 0) {
-                            const w = results.wcag22;
-                            console.log(`\nWCAG 2.2 CHECKS  ${w.summary.totalViolations} violations\n`);
-                            for (const [key, arr] of Object.entries(w)) {
-                                if (key === 'summary') continue;
-                                const items = arr as any[];
-                                if (items && items.length > 0) {
-                                    const label = (items[0] as any).criterion || key;
-                                    console.log(`  ${label}: ${items.length}`);
-                                }
-                            }
-                            console.log('');
-                        }
-
-                        // Supplemental test results
-                        if (results.supplementalResults && results.supplementalResults.length > 0) {
-                            const passed = results.supplementalResults.filter(r => r.status === 'pass').length;
-                            const failed = results.supplementalResults.filter(r => r.status === 'fail');
-                            console.log(`SUPPLEMENTAL TESTS  ${results.supplementalResults.length} criteria  ${passed} passed  ${failed.length} failed\n`);
-                            for (const r of results.supplementalResults) {
-                                const icon = r.status === 'pass' ? 'PASS' : 'FAIL';
-                                const issueCount = r.issues.length > 0 ? ` (${r.issues.length} issues)` : '';
-                                console.log(`  [${icon}] ${r.criterionId}${issueCount}  ${r.source}`);
-                                if (r.status === 'fail') {
-                                    for (const issue of r.issues.slice(0, 3)) {
-                                        console.log(`         [${issue.severity}] ${issue.message}`);
-                                    }
-                                    if (r.issues.length > 3) {
-                                        console.log(`         ...and ${r.issues.length - 3} more`);
-                                    }
-                                }
-                            }
-                            console.log('');
-                        }
-                    }
-
-                    // Handle AI prompt generation
-                    if (cli.flags.ai) {
-                        const promptPath = generateAndExport(
-                            results,
-                            {
-                                template: 'fix-all',
-                                format: 'md',
-                                outputPath: undefined,
-                            }
-                        );
-                        console.error(`AI prompt written to: ${promptPath}`);
-                    }
-
-                    return ciPassed;
-                };
-
-                // Output each result
-                let allCiPassed = true;
-                for (let i = 0; i < scanResults.length; i++) {
-                    const ciPassed = outputResult(urls[i], scanResults[i]);
-                    if (ciPassed === false) allCiPassed = false;
-                }
-
-                // Handle CI mode
-                if (cli.flags.ci) {
-                    setExitCode(allCiPassed ? EXIT_CODES.SUCCESS : EXIT_CODES.VIOLATIONS_FOUND);
-                } else {
-                    setExitCode(EXIT_CODES.SUCCESS);
-                }
-            }
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            console.error(JSON.stringify({
-                error: errorMessage,
-                ...(error instanceof ScanError ? { tag: error.tag, details: error.details } : {}),
-                stack: error instanceof Error ? error.stack : undefined,
-            }, null, 2));
-            setExitCode(EXIT_CODES.RUNTIME_ERROR);
-        }
-    })();
-} else if (isAgentMode) {
-    // Agent mode — stream events to terminal
-    (async () => {
-        try {
-            const chalk = (await import('chalk')).default;
-            const { runAgent } = await import('@aria51/agent');
-
-            console.log(chalk.bold(`\naria51 agent / ${url}\n`));
-            console.log(chalk.dim(`Model: ${cli.flags.agentModel || 'claude-sonnet-4-6'} | WCAG ${auditLevel} | Max pages: ${cli.flags.maxPages}${cli.flags.specialists ? ' | Multi-specialist' : ''}\n`));
-
-            const startTime = Date.now();
-            const report = await runAgent({
-                targetUrl: url,
-                maxPages: cli.flags.maxPages,
-                maxSteps: cli.flags.maxSteps,
-                specialists: cli.flags.specialists,
-                model: cli.flags.agentModel || 'claude-sonnet-4-6',
-                wcagLevel: auditLevel,
-                onEvent: (event: any) => {
-                    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                    switch (event.type) {
-                        case 'thinking':
-                            console.log(chalk.dim(`[${elapsed}s]`), event.message);
-                            break;
-                        case 'tool_call':
-                            console.log(chalk.dim(`[${elapsed}s]`), chalk.cyan(event.message));
-                            break;
-                        case 'specialist_complete':
-                            console.log(chalk.dim(`[${elapsed}s]`), chalk.green(`Specialist ${event.specialistId}: ${event.findings} findings`));
-                            break;
-                        case 'merge_complete':
-                            console.log(chalk.dim(`[${elapsed}s]`), chalk.green(`Merged: ${event.totalFindings} findings (${event.deduplicatedCount} deduplicated)`));
-                            break;
-                        case 'complete':
-                            console.log(chalk.dim(`[${elapsed}s]`), chalk.bold.green('Audit complete'));
-                            break;
-                    }
-                },
+        if (isStagehandKeyboardMode) {
+            await runKeyboardMode({ url, model: cli.flags.stagehandModel, verbose: cli.flags.stagehandVerbose, maxTabPresses: cli.flags.maxTabPresses });
+        } else if (isStagehandTreeMode) {
+            await runTreeMode({ url, model: cli.flags.stagehandModel, verbose: cli.flags.stagehandVerbose, includeFullTree: cli.flags.includeFullTree });
+        } else if (isWcagAuditMode) {
+            await runWcagAuditMode({ url, model: cli.flags.stagehandModel, verbose: cli.flags.stagehandVerbose, auditLevel, maxSteps: cli.flags.maxSteps });
+        } else if (isTestGenerationMode) {
+            await runTestGenMode({ url, outputFile: cli.flags.testFile || getFilenameFromUrl(url), model: cli.flags.stagehandModel, verbose: cli.flags.stagehandVerbose });
+        } else {
+            await runScanMode({
+                urls,
+                browser: cli.flags.browser as BrowserType,
+                headless: cli.flags.headless,
+                tags: cli.flags.tags ? cli.flags.tags.split(',') : undefined,
+                keyboardNav: cli.flags.keyboardNav,
+                output: cli.flags.output,
+                ci: cli.flags.ci,
+                threshold: cli.flags.threshold,
+                components: cli.flags.components,
+                disableRules: cli.flags.disableRules ? cli.flags.disableRules.split(',') : undefined,
+                exclude: cli.flags.exclude ? cli.flags.exclude.split(',') : undefined,
+                quiet: cli.flags.quiet,
+                ai: cli.flags.ai,
             });
-
-            console.log(`\n${'─'.repeat(60)}\n`);
-            console.log(chalk.bold('AUDIT REPORT'));
-            console.log(`Pages scanned: ${report.pagesScanned}`);
-            console.log(`Total findings: ${report.totalFindings}`);
-            console.log(`Duration: ${(report.scanDurationMs / 1000).toFixed(1)}s\n`);
-
-            if (report.totalFindings > 0) {
-                const conf = report.findingsByConfidence;
-                const sev = report.findingsBySeverity;
-                console.log(`By confidence: ${conf.confirmed} confirmed, ${conf.corroborated} corroborated, ${conf['ai-only']} ai-only`);
-                console.log(`By severity: ${sev.critical} critical, ${sev.serious} serious, ${sev.moderate} moderate, ${sev.minor} minor\n`);
-
-                console.log(chalk.bold('Findings:'));
-                for (const f of report.findings) {
-                    const color = f.impact === 'critical' ? chalk.red : f.impact === 'serious' ? chalk.yellow : chalk.white;
-                    console.log(color(`  [${f.confidence}] ${f.criterion?.id || '?'} (${f.impact}): ${f.description}`));
-                }
-            }
-
-            if (report.remediationPlan) {
-                console.log(`\n${chalk.bold('Remediation Plan:')} ${report.remediationPlan.totalIssues} issues, ${report.remediationPlan.estimatedEffort}`);
-                for (const phase of report.remediationPlan.phases) {
-                    console.log(`  Phase ${phase.priority}: ${phase.title} (${phase.items.length} items)`);
-                }
-            }
-
-            if (report.agentSummary) {
-                console.log(`\n${chalk.bold('Agent Summary:')}`);
-                console.log(report.agentSummary.slice(0, 1000));
-                if (report.agentSummary.length > 1000) console.log(chalk.dim(`... (${report.agentSummary.length} chars total)`));
-            }
-
-            if (cli.flags.output) {
-                const fs = await import('fs/promises');
-                await fs.writeFile(cli.flags.output, JSON.stringify(report, null, 2));
-                console.log(`\nReport written to ${cli.flags.output}`);
-            }
-
-            setExitCode(EXIT_CODES.SUCCESS);
-            exitWithCode(EXIT_CODES.SUCCESS);
-        } catch (error) {
-            console.error('Agent failed:', error instanceof Error ? error.message : String(error));
-            exitWithCode(EXIT_CODES.RUNTIME_ERROR);
         }
     })();
 } else {
@@ -825,7 +306,7 @@ if (!isTTY) {
         console.error(`Note: Interactive mode only supports one URL. Scanning ${url} only.`);
         console.error('Use non-interactive mode (pipe output) for multi-URL scanning.\n');
     }
-    // Determine mode for App component
+
     const appMode = isTestGenerationMode ? 'generate-test' :
         isStagehandKeyboardMode ? 'stagehand-keyboard' :
         isStagehandTreeMode ? 'stagehand-tree' :
@@ -849,7 +330,7 @@ if (!isTTY) {
             tree={cli.flags.tree}
             quiet={cli.flags.quiet}
             generateTest={cli.flags.generateTest}
-            testFile={testOutputFile}
+            testFile={cli.flags.testFile || getFilenameFromUrl(url)}
             stagehandModel={cli.flags.stagehandModel}
             stagehandVerbose={cli.flags.stagehandVerbose}
             maxTabPresses={cli.flags.maxTabPresses}
@@ -859,17 +340,12 @@ if (!isTTY) {
         />
     );
 
-    // Wait for app to finish and handle exit code
     (async () => {
         try {
             await waitUntilExit();
-            // Exit code will be set by the App component
             exitWithCode((process.exitCode ?? EXIT_CODES.SUCCESS) as 0 | 1 | 2);
         } catch (error) {
             console.error('Fatal error:', error instanceof Error ? error.message : String(error));
-            if (error instanceof Error && error.stack) {
-                console.error('\nStack trace:', error.stack);
-            }
             exitWithCode(EXIT_CODES.RUNTIME_ERROR);
         }
     })();
