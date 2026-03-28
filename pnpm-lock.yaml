@@ -91,6 +91,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@aria51/agent':
+        specifier: workspace:*
+        version: link:../agent
       '@aria51/ai-auditor':
         specifier: workspace:*
         version: link:../ai-auditor

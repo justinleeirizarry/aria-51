@@ -33,6 +33,41 @@ export const fixAllTemplate: PromptTemplate = {
             ? `\n> ${summary.totalIncomplete} items need manual review (not included below).`
             : '';
 
+        // WCAG 2.2 custom check section
+        let wcag22Section = '';
+        if (context.wcag22 && context.wcag22.summary.totalViolations > 0) {
+            const lines: string[] = ['## WCAG 2.2 Custom Check Violations\n'];
+            for (const [criterion, count] of Object.entries(context.wcag22.summary.byCriterion)) {
+                if ((count as number) > 0) {
+                    lines.push(`- **${criterion}**: ${count} violation(s)`);
+                }
+            }
+            wcag22Section = '\n' + lines.join('\n') + '\n';
+        }
+
+        // Supplemental test section (keyboard + screen reader)
+        let supplementalSection = '';
+        if (context.supplementalResults && context.supplementalResults.length > 0) {
+            const failures = context.supplementalResults.filter(r => r.status === 'fail');
+            if (failures.length > 0) {
+                const lines: string[] = ['## Supplemental Test Failures\n'];
+                for (const f of failures) {
+                    lines.push(`### ${f.criterionId} (${f.source})\n`);
+                    for (const issue of f.issues) {
+                        lines.push(`- **[${issue.severity}]** ${issue.message}`);
+                    }
+                    lines.push('');
+                }
+                supplementalSection = '\n' + lines.join('\n');
+            }
+        }
+
+        // Keyboard test section
+        let keyboardSection = '';
+        if (context.keyboardTests && summary.keyboardIssues && summary.keyboardIssues > 0) {
+            keyboardSection = `\n## Keyboard Navigation Issues\n\n**${summary.keyboardIssues} keyboard issue(s) detected.**\n`;
+        }
+
         return `# Accessibility Fix Request
 
 You are an expert developer and accessibility specialist.
@@ -54,6 +89,7 @@ ${passesNote}${incompleteNote}
 
 ## Detailed Violations
 ${formatViolations(violations)}
+${wcag22Section}${supplementalSection}${keyboardSection}
 
 ## Requirements
 1. **Fix all violations** — use the source file locations to navigate to and edit the right files

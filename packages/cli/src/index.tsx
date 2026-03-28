@@ -78,6 +78,12 @@ const cli = meow(
     --stagehand-model <model> AI model for test generation [default: openai/gpt-4o-mini]
     --stagehand-verbose       Enable verbose Stagehand logging
 
+  Autonomous Agent Mode (mutually exclusive with scan/test-gen)
+    --agent               Run autonomous accessibility audit with AI agent
+    --agent-model         Model for agent (default: claude-sonnet-4-6)
+    --specialists         Use multi-specialist mode (4 parallel auditors)
+    --max-pages           Max pages to scan in agent mode [default: 10]
+
   Stagehand Advanced Testing (mutually exclusive with scan/test-gen)
     --stagehand-keyboard      Test keyboard navigation using AI
     --max-tab-presses         Max Tab presses for keyboard test [default: 100]
@@ -103,6 +109,11 @@ const cli = meow(
     # Test Generation
     $ aria51 https://example.com --generate-test
     $ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
+
+    # Autonomous Agent Audit
+    $ aria51 https://example.com --agent
+    $ aria51 https://example.com --agent --specialists
+    $ aria51 https://example.com --agent --max-pages 5
 
     # AI-Powered WCAG Audit
     $ aria51 https://example.com --wcag-audit --audit-level AA
@@ -180,6 +191,22 @@ const cli = meow(
             testFile: {
                 type: 'string',
             },
+            // Agent mode flags
+            agent: {
+                type: 'boolean',
+                default: false,
+            },
+            agentModel: {
+                type: 'string',
+            },
+            specialists: {
+                type: 'boolean',
+                default: false,
+            },
+            maxPages: {
+                type: 'number',
+                default: 10,
+            },
             // Stagehand Advanced Testing flags
             stagehandKeyboard: {
                 type: 'boolean',
@@ -255,7 +282,8 @@ if (!thresholdValidation.valid) {
     exitWithCode(EXIT_CODES.VALIDATION_ERROR);
 }
 
-// Determine mode: test generation, stagehand tests, or accessibility scan
+// Determine mode: agent, test generation, stagehand tests, or accessibility scan
+const isAgentMode = cli.flags.agent;
 const isTestGenerationMode = cli.flags.generateTest;
 const isStagehandKeyboardMode = cli.flags.stagehandKeyboard;
 const isStagehandTreeMode = cli.flags.stagehandTree;
@@ -297,6 +325,7 @@ const testOutputFile = cli.flags.testFile || getFilenameFromUrl(url);
 
 // Validate mutually exclusive modes
 const modeCount = [
+    isAgentMode,
     isTestGenerationMode,
     isStagehandKeyboardMode,
     isStagehandTreeMode,
@@ -305,7 +334,7 @@ const modeCount = [
 
 if (modeCount > 1) {
     console.error('Error: Only one mode can be active at a time.\n');
-    console.error('Modes: --generate-test, --stagehand-keyboard, --stagehand-tree, --wcag-audit\n');
+    console.error('Modes: --agent, --generate-test, --stagehand-keyboard, --stagehand-tree, --wcag-audit\n');
     exitWithCode(EXIT_CODES.VALIDATION_ERROR);
 }
 
@@ -348,7 +377,36 @@ if (!isTTY) {
     logger.setUseStderr(true);
     (async () => {
         try {
-            if (isStagehandKeyboardMode) {
+            if (isAgentMode) {
+                // Autonomous agent mode
+                const { runAgent } = await import('@aria51/agent');
+                try {
+                    const report = await runAgent({
+                        targetUrl: url,
+                        maxPages: cli.flags.maxPages,
+                        maxSteps: cli.flags.maxSteps,
+                        specialists: cli.flags.specialists,
+                        model: cli.flags.agentModel || 'claude-sonnet-4-6',
+                        wcagLevel: auditLevel,
+                        onEvent: (event: any) => {
+                            if (event.type === 'thinking') logger.info(event.message);
+                            else if (event.type === 'tool_call') logger.info(`Tool: ${event.message}`);
+                            else if (event.type === 'specialist_complete') logger.info(`Specialist ${event.specialistId}: ${event.findings} findings`);
+                            else if (event.type === 'merge_complete') logger.info(`Merged: ${event.totalFindings} findings (${event.deduplicatedCount} deduplicated)`);
+                        },
+                    });
+                    console.log(JSON.stringify(report, null, 2));
+                    setExitCode(EXIT_CODES.SUCCESS);
+                } catch (error) {
+                    console.log(JSON.stringify({
+                        url,
+                        timestamp: new Date().toISOString(),
+                        error: error instanceof Error ? error.message : String(error),
+                        success: false,
+                    }, null, 2));
+                    setExitCode(EXIT_CODES.RUNTIME_ERROR);
+                }
+            } else if (isStagehandKeyboardMode) {
                 // Stagehand keyboard navigation testing mode
                 const keyboardService = createKeyboardTestService();
                 try {
@@ -657,6 +715,91 @@ if (!isTTY) {
                 stack: error instanceof Error ? error.stack : undefined,
             }, null, 2));
             setExitCode(EXIT_CODES.RUNTIME_ERROR);
+        }
+    })();
+} else if (isAgentMode) {
+    // Agent mode — stream events to terminal
+    (async () => {
+        try {
+            const chalk = (await import('chalk')).default;
+            const { runAgent } = await import('@aria51/agent');
+
+            console.log(chalk.bold(`\naria51 agent / ${url}\n`));
+            console.log(chalk.dim(`Model: ${cli.flags.agentModel || 'claude-sonnet-4-6'} | WCAG ${auditLevel} | Max pages: ${cli.flags.maxPages}${cli.flags.specialists ? ' | Multi-specialist' : ''}\n`));
+
+            const startTime = Date.now();
+            const report = await runAgent({
+                targetUrl: url,
+                maxPages: cli.flags.maxPages,
+                maxSteps: cli.flags.maxSteps,
+                specialists: cli.flags.specialists,
+                model: cli.flags.agentModel || 'claude-sonnet-4-6',
+                wcagLevel: auditLevel,
+                onEvent: (event: any) => {
+                    const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                    switch (event.type) {
+                        case 'thinking':
+                            console.log(chalk.dim(`[${elapsed}s]`), event.message);
+                            break;
+                        case 'tool_call':
+                            console.log(chalk.dim(`[${elapsed}s]`), chalk.cyan(event.message));
+                            break;
+                        case 'specialist_complete':
+                            console.log(chalk.dim(`[${elapsed}s]`), chalk.green(`Specialist ${event.specialistId}: ${event.findings} findings`));
+                            break;
+                        case 'merge_complete':
+                            console.log(chalk.dim(`[${elapsed}s]`), chalk.green(`Merged: ${event.totalFindings} findings (${event.deduplicatedCount} deduplicated)`));
+                            break;
+                        case 'complete':
+                            console.log(chalk.dim(`[${elapsed}s]`), chalk.bold.green('Audit complete'));
+                            break;
+                    }
+                },
+            });
+
+            console.log(`\n${'─'.repeat(60)}\n`);
+            console.log(chalk.bold('AUDIT REPORT'));
+            console.log(`Pages scanned: ${report.pagesScanned}`);
+            console.log(`Total findings: ${report.totalFindings}`);
+            console.log(`Duration: ${(report.scanDurationMs / 1000).toFixed(1)}s\n`);
+
+            if (report.totalFindings > 0) {
+                const conf = report.findingsByConfidence;
+                const sev = report.findingsBySeverity;
+                console.log(`By confidence: ${conf.confirmed} confirmed, ${conf.corroborated} corroborated, ${conf['ai-only']} ai-only`);
+                console.log(`By severity: ${sev.critical} critical, ${sev.serious} serious, ${sev.moderate} moderate, ${sev.minor} minor\n`);
+
+                console.log(chalk.bold('Findings:'));
+                for (const f of report.findings) {
+                    const color = f.impact === 'critical' ? chalk.red : f.impact === 'serious' ? chalk.yellow : chalk.white;
+                    console.log(color(`  [${f.confidence}] ${f.criterion?.id || '?'} (${f.impact}): ${f.description}`));
+                }
+            }
+
+            if (report.remediationPlan) {
+                console.log(`\n${chalk.bold('Remediation Plan:')} ${report.remediationPlan.totalIssues} issues, ${report.remediationPlan.estimatedEffort}`);
+                for (const phase of report.remediationPlan.phases) {
+                    console.log(`  Phase ${phase.priority}: ${phase.title} (${phase.items.length} items)`);
+                }
+            }
+
+            if (report.agentSummary) {
+                console.log(`\n${chalk.bold('Agent Summary:')}`);
+                console.log(report.agentSummary.slice(0, 1000));
+                if (report.agentSummary.length > 1000) console.log(chalk.dim(`... (${report.agentSummary.length} chars total)`));
+            }
+
+            if (cli.flags.output) {
+                const fs = await import('fs/promises');
+                await fs.writeFile(cli.flags.output, JSON.stringify(report, null, 2));
+                console.log(`\nReport written to ${cli.flags.output}`);
+            }
+
+            setExitCode(EXIT_CODES.SUCCESS);
+            exitWithCode(EXIT_CODES.SUCCESS);
+        } catch (error) {
+            console.error('Agent failed:', error instanceof Error ? error.message : String(error));
+            exitWithCode(EXIT_CODES.RUNTIME_ERROR);
         }
     })();
 } else {

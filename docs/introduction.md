@@ -221,20 +221,37 @@ const report = await runAgent({
 
 ### Add to MCP
 
-Add to your MCP MCP config:
+#### Claude Desktop
+
+Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
 
 ```json
 {
     "mcpServers": {
         "aria51": {
             "command": "node",
-            "args": ["/path/to/aria-51/packages/mcp/bin/mcp-server.js"]
+            "args": ["/absolute/path/to/aria-51/packages/mcp/bin/mcp-server.js"]
         }
     }
 }
 ```
 
-Then ask Claude: *"Scan https://your-site.com for accessibility issues"*
+#### Claude Code
+
+Add to your project's `.claude/settings.json` or global `~/.claude/settings.json`:
+
+```json
+{
+    "mcpServers": {
+        "aria51": {
+            "command": "node",
+            "args": ["/absolute/path/to/aria-51/packages/mcp/bin/mcp-server.js"]
+        }
+    }
+}
+```
+
+After adding, restart Claude Desktop or Claude Code. Then ask: *"Scan https://your-site.com for accessibility issues"*
 
 ## Configuration
 

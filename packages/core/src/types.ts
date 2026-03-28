@@ -64,6 +64,9 @@ export interface PromptContext {
     summary: ScanResults['summary'];
     url: string;
     accessibilityTree?: any;
+    wcag22?: ScanResults['wcag22'];
+    supplementalResults?: ScanResults['supplementalResults'];
+    keyboardTests?: ScanResults['keyboardTests'];
 }
 
 export interface PromptExportOptions {

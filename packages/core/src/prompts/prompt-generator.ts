@@ -20,6 +20,9 @@ export function generatePrompt(
         violations: results.violations,
         summary: results.summary,
         url: results.url,
+        wcag22: results.wcag22,
+        supplementalResults: results.supplementalResults,
+        keyboardTests: results.keyboardTests,
     };
 
     return template.render(context);
