@@ -82,7 +82,7 @@ export const DEFAULT_AGENT_CONFIG: Omit<AgentConfig, 'targetUrl'> = {
     maxPages: 20,
     maxSteps: 50,
     concurrency: 3,
-    model: 'claude-sonnet-4-6',
+    model: 'gpt-4o-mini',
     browser: 'chromium',
     headless: true,
     enableStagehand: false,

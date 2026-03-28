@@ -15,7 +15,7 @@ export async function auditKeyboard(
     const browser = externalPage ? null : await chromium.launch({ headless });
 
     try {
-        const page = externalPage || await browser!.newPage();
+        const page = externalPage || await browser!.newPage({ bypassCSP: true });
         if (!externalPage) {
             await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
             await new Promise(resolve => setTimeout(resolve, 1000));

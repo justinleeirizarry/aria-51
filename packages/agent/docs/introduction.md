@@ -85,7 +85,7 @@ The session progresses through states: `planning` → `scanning` → `verifying`
 
 ## Providers
 
-The agent defaults to Anthropic's Claude (Sonnet 4.6) using the native Anthropic SDK with adaptive thinking. This gives the best results — Claude was trained for tool use, and the native SDK provides features like automatic retries, model fallback, and extended thinking.
+The agent defaults to OpenAI's gpt-4o-mini for low cost and easy setup. For best results, use Anthropic's Claude (e.g. `--agent-model claude-sonnet-4-6`) — Claude excels at tool use, and the native Anthropic SDK provides features like automatic retries, model fallback, and extended thinking.
 
 But the agent also supports any LLM that can do tool calling, via the Vercel AI SDK:
 

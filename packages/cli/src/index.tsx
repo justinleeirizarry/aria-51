@@ -77,7 +77,7 @@ const cli = meow(
 
   Autonomous Agent Mode (mutually exclusive with scan/test-gen)
     --agent               Run autonomous accessibility audit with AI agent
-    --agent-model         Model for agent (default: claude-sonnet-4-6)
+    --agent-model         Model for agent (default: gpt-4o-mini, use claude-sonnet-4-6 for best results)
     --specialists         Use multi-specialist mode (4 parallel auditors)
     --max-pages           Max pages to scan in agent mode [default: 10]
 
@@ -118,10 +118,14 @@ const cli = meow(
     $ aria51 https://example.com --generate-test
     $ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
 
-    # AI-Powered WCAG Audit
+    # Focused Audits (no API keys needed)
+    $ aria51 https://example.com --audit-keyboard
+    $ aria51 https://example.com --audit-structure
+    $ aria51 https://example.com --audit-screen-reader
+    $ aria51 https://example.com --audit-keyboard --deep  # AI-enhanced (requires OPENAI_API_KEY)
+
+    # AI-Powered WCAG Audit (deprecated — use --audit-* --deep)
     $ aria51 https://example.com --wcag-audit --audit-level AA
-    $ aria51 https://example.com --stagehand-keyboard
-    $ aria51 https://example.com --stagehand-tree
 `,
     {
         importMeta: import.meta,

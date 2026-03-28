@@ -85,6 +85,7 @@ export class BrowserService implements IBrowserService {
                     }
 
                     this.page = await this.browser.newPage({
+                        bypassCSP: true,
                         ...(config.viewport ? { viewport: config.viewport } : {}),
                         ...(config.isMobile !== undefined ? { isMobile: config.isMobile } : {}),
                         ...(config.hasTouch !== undefined ? { hasTouch: config.hasTouch } : {}),

@@ -438,20 +438,29 @@ server.registerTool(
 server.registerTool(
     "run_agent",
     {
-        description: "Run an autonomous AI accessibility audit on a website. The agent crawls pages, scans for violations, verifies findings against axe-core, and generates a prioritized remediation plan. More thorough than scan_url but takes longer (1-3 minutes). Requires ANTHROPIC_API_KEY.",
+        description: "Run an autonomous AI accessibility audit on a website. The agent crawls pages, scans for violations, verifies findings against axe-core, and generates a prioritized remediation plan. More thorough than scan_url but takes longer (1-3 minutes). Defaults to gpt-4o-mini (requires OPENAI_API_KEY). Use model='claude-sonnet-4-6' for best results (requires ANTHROPIC_API_KEY).",
         inputSchema: {
             url: z.string().url().describe("The target URL to audit"),
             max_pages: z.number().optional().default(5).describe("Maximum pages to scan (default: 5)"),
             max_steps: z.number().optional().default(10).describe("Maximum agent steps (default: 10)"),
             specialists: z.boolean().optional().default(false).describe("Use multi-specialist mode — 4 parallel auditors for deeper coverage"),
             wcag_level: z.enum(["A", "AA", "AAA"]).optional().default("AA").describe("Target WCAG conformance level"),
-            model: z.string().optional().describe("LLM model to use (default: claude-sonnet-4-6)"),
+            model: z.string().optional().describe("LLM model to use (default: gpt-4o-mini, use claude-sonnet-4-6 for best results)"),
         },
     },
     async ({ url, max_pages, max_steps, specialists, wcag_level, model }) => {
         try {
+            const agentModel = model || "gpt-4o-mini";
             logger.info(`Starting agent audit for ${url} (max ${max_pages} pages, ${max_steps} steps${specialists ? ', multi-specialist' : ''})`);
             const { runAgent } = await import("@aria51/agent");
+
+            // Auto-detect provider from model name
+            let provider: any = 'anthropic';
+            if (/^(gpt-|o1|o3|o4)/.test(agentModel)) {
+                const { createOpenAI } = await import("@ai-sdk/openai");
+                const openai = createOpenAI({});
+                provider = { type: 'ai-sdk', model: openai(agentModel) };
+            }
 
             const report = await runAgent({
                 targetUrl: url,
@@ -459,7 +468,8 @@ server.registerTool(
                 maxSteps: max_steps,
                 specialists,
                 wcagLevel: wcag_level as "A" | "AA" | "AAA",
-                model: model || "claude-sonnet-4-6",
+                model: agentModel,
+                provider,
             });
 
             const lines: string[] = [

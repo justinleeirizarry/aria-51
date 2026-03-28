@@ -114,13 +114,7 @@ function outputQuiet(scanUrl: string, results: ScanResults): void {
     }
 
     for (const violation of violations) {
-        console.log(`[${violation.impact}] ${violation.id}: ${violation.description}`);
-        for (const node of violation.nodes) {
-            const label = node.userComponentPath?.length
-                ? node.userComponentPath[node.userComponentPath.length - 1]
-                : node.component || node.cssSelector || node.target?.[0] || node.html?.slice(0, 80) || 'element';
-            console.log(`  - ${label}`);
-        }
+        console.log(`[${violation.impact}] ${violation.id} (${violation.nodes.length}): ${violation.description}`);
         if (violation.helpUrl) console.log(`  Docs: ${violation.helpUrl}`);
     }
 
@@ -132,8 +126,14 @@ function outputQuiet(scanUrl: string, results: ScanResults): void {
         const failed = results.supplementalResults.filter(r => r.status === 'fail').length;
         console.log(`Supplemental: ${results.supplementalResults.length} tests, ${passed} passed, ${failed} failed`);
     }
-    if (summary.keyboardIssues && summary.keyboardIssues > 0) {
-        console.log(`Keyboard: ${summary.keyboardIssues} issues`);
+    if (results.keyboardTests) {
+        const kb = results.keyboardTests;
+        const parts = [];
+        if (kb.tabOrder.violations.length > 0) parts.push(`${kb.tabOrder.violations.length} tab-order`);
+        if (kb.focusManagement.focusIndicatorIssues.length > 0) parts.push(`${kb.focusManagement.focusIndicatorIssues.length} focus-indicator`);
+        const widgetIssues = kb.shortcuts.customWidgets.filter(w => w.keyboardSupport !== 'full').length;
+        if (widgetIssues > 0) parts.push(`${widgetIssues} widget`);
+        if (parts.length > 0) console.log(`Keyboard: ${parts.join(', ')} issues`);
     }
 }
 
@@ -151,7 +151,15 @@ function outputFull(scanUrl: string, results: ScanResults): void {
     const componentsPart = summary.totalComponents > 0 ? `  ${summary.totalComponents} components` : '';
     console.log(`${summary.totalViolations} violations  ${summary.totalPasses} passes${componentsPart}`);
     if (sevParts.length > 0) console.log(sevParts.join('  '));
-    if (summary.keyboardIssues) console.log(`${summary.keyboardIssues} keyboard issues`);
+    if (results.keyboardTests) {
+        const kb = results.keyboardTests;
+        const parts = [];
+        if (kb.tabOrder.violations.length > 0) parts.push(`${kb.tabOrder.violations.length} tab-order`);
+        if (kb.focusManagement.focusIndicatorIssues.length > 0) parts.push(`${kb.focusManagement.focusIndicatorIssues.length} focus-indicator`);
+        const widgetIssues = kb.shortcuts.customWidgets.filter(w => w.keyboardSupport !== 'full').length;
+        if (widgetIssues > 0) parts.push(`${widgetIssues} widget`);
+        if (parts.length > 0) console.log(`Keyboard: ${parts.join(', ')} issues`);
+    }
     console.log(`\n${sep}\n`);
 
     if (violations.length === 0) {

@@ -19,14 +19,28 @@ export interface AgentModeOptions {
     isTTY: boolean;
 }
 
+function isOpenAIModel(model: string): boolean {
+    return /^(gpt-|o1|o3|o4)/.test(model);
+}
+
+async function resolveProvider(model: string) {
+    if (isOpenAIModel(model)) {
+        const { createOpenAI } = await import('@ai-sdk/openai');
+        const openai = createOpenAI({});
+        return { type: 'ai-sdk' as const, model: openai(model) };
+    }
+    return 'anthropic' as const;
+}
+
 export async function runAgentMode(opts: AgentModeOptions): Promise<void> {
     const { runAgent } = await import('@aria51/agent');
-    const model = opts.model || 'claude-sonnet-4-6';
+    const model = opts.model || 'gpt-4o-mini';
+    const provider = await resolveProvider(model);
 
     if (opts.isTTY) {
-        await runAgentTTY(opts, runAgent, model);
+        await runAgentTTY(opts, runAgent, model, provider);
     } else {
-        await runAgentJSON(opts, runAgent, model);
+        await runAgentJSON(opts, runAgent, model, provider);
     }
 }
 
@@ -34,6 +48,7 @@ async function runAgentTTY(
     opts: AgentModeOptions,
     runAgent: any,
     model: string,
+    provider: any,
 ): Promise<void> {
     try {
         const chalk = (await import('chalk')).default;
@@ -48,6 +63,7 @@ async function runAgentTTY(
             maxSteps: opts.maxSteps,
             specialists: opts.specialists,
             model,
+            provider,
             wcagLevel: opts.wcagLevel,
             onEvent: (event: any) => {
                 const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
@@ -121,6 +137,7 @@ async function runAgentJSON(
     opts: AgentModeOptions,
     runAgent: any,
     model: string,
+    provider: any,
 ): Promise<void> {
     try {
         const report = await runAgent({
@@ -129,6 +146,7 @@ async function runAgentJSON(
             maxSteps: opts.maxSteps,
             specialists: opts.specialists,
             model,
+            provider,
             wcagLevel: opts.wcagLevel,
             onEvent: (event: any) => {
                 if (event.type === 'thinking') logger.info(event.message);
