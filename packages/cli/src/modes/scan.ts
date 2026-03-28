@@ -21,6 +21,7 @@ export interface ScanModeOptions {
     browser: BrowserType;
     headless: boolean;
     tags?: string[];
+    mobile?: boolean;
     keyboardNav?: boolean;
     output?: string;
     ci: boolean;
@@ -37,6 +38,7 @@ export async function runScanMode(opts: ScanModeOptions): Promise<void> {
         browser: opts.browser,
         headless: opts.headless,
         tags: opts.tags,
+        mobile: opts.mobile,
         includeKeyboardTests: opts.keyboardNav,
         outputFile: opts.output,
         ciMode: opts.ci,

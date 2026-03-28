@@ -61,6 +61,7 @@ const cli = meow(
     --tags             Comma-separated list of axe-core tags (e.g. wcag2a,best-practice)
     --disable-rules    Comma-separated axe rule IDs to disable (e.g. color-contrast,link-name)
     --exclude          Comma-separated CSS selectors to exclude from scanning
+    --mobile           Emulate a mobile device viewport
     --keyboard-nav     Run keyboard navigation tests [default: true]
     --tree             Show component hierarchy view
     --quiet, -q        Minimal output - show only summary line
@@ -126,6 +127,7 @@ const cli = meow(
             tags: { type: 'string', default: '' },
             disableRules: { type: 'string', default: '' },
             exclude: { type: 'string', default: '' },
+            mobile: { type: 'boolean', default: false },
             keyboardNav: { type: 'boolean', default: true },
             tree: { type: 'boolean', default: false },
             quiet: { type: 'boolean', shortFlag: 'q', default: false },
@@ -288,6 +290,7 @@ if (isAgentMode) {
                 browser: cli.flags.browser as BrowserType,
                 headless: cli.flags.headless,
                 tags: cli.flags.tags ? cli.flags.tags.split(',') : undefined,
+                mobile: cli.flags.mobile,
                 keyboardNav: cli.flags.keyboardNav,
                 output: cli.flags.output,
                 ci: cli.flags.ci,

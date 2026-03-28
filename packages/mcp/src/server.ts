@@ -44,11 +44,12 @@ server.registerTool(
             components: z.boolean().optional().default(true).describe("Auto-detect and attribute violations to framework components (React, Vue, Svelte, Solid). Set false to disable."),
             disable_rules: z.array(z.string()).optional().describe("Axe rule IDs to disable (e.g. ['color-contrast'])"),
             exclude: z.array(z.string()).optional().describe("CSS selectors to exclude from scanning"),
+            tags: z.array(z.string()).optional().describe("Axe-core tags to filter by (e.g. ['wcag2a', 'wcag2aa', 'best-practice'])"),
             stagehand: z.boolean().optional().default(false).describe("Enable AI-powered tests (keyboard navigation, tree analysis, screen reader). Requires OPENAI_API_KEY."),
             stagehand_model: z.string().optional().describe("AI model for Stagehand tests (default: openai/gpt-4o-mini)"),
         },
     },
-    async ({ url, browser, mobile, include_tree, components, disable_rules, exclude, stagehand, stagehand_model }) => {
+    async ({ url, browser, mobile, include_tree, components, disable_rules, exclude, tags, stagehand, stagehand_model }) => {
         try {
             logger.info(`Starting scan for ${url} using ${browser}${stagehand ? ' with Stagehand AI tests' : ''}`);
 
@@ -61,6 +62,7 @@ server.registerTool(
                 mobile,
                 disableRules: disable_rules,
                 exclude,
+                tags,
                 stagehand,
                 stagehandModel: stagehand_model,
             }, AppLayer);
@@ -100,11 +102,12 @@ server.registerTool(
             components: z.boolean().optional().default(true).describe("Auto-detect and attribute violations to framework components (React, Vue, Svelte, Solid). Set false to disable."),
             disable_rules: z.array(z.string()).optional().describe("Axe rule IDs to disable (e.g. ['color-contrast'])"),
             exclude: z.array(z.string()).optional().describe("CSS selectors to exclude from scanning"),
+            tags: z.array(z.string()).optional().describe("Axe-core tags to filter by (e.g. ['wcag2a', 'wcag2aa', 'best-practice'])"),
             stagehand: z.boolean().optional().default(false).describe("Enable AI-powered tests (keyboard navigation, tree analysis, screen reader). Requires OPENAI_API_KEY."),
             stagehand_model: z.string().optional().describe("AI model for Stagehand tests (default: openai/gpt-4o-mini)"),
         },
     },
-    async ({ urls, browser, mobile, include_tree, components, disable_rules, exclude, stagehand, stagehand_model }) => {
+    async ({ urls, browser, mobile, include_tree, components, disable_rules, exclude, tags, stagehand, stagehand_model }) => {
         try {
             logger.info(`Starting multi-page scan for ${urls.length} URLs using ${browser}${stagehand ? ' with Stagehand AI tests' : ''}`);
 
@@ -118,6 +121,7 @@ server.registerTool(
                     mobile,
                     disableRules: disable_rules,
                     exclude,
+                    tags,
                     stagehand,
                     stagehandModel: stagehand_model,
                 },
@@ -228,6 +232,44 @@ server.registerTool(
         return {
             content: [{ type: "text", text: lines.join("\n") }],
         };
+    }
+);
+
+// Register WCAG criteria listing tool
+server.registerTool(
+    "list_wcag_criteria",
+    {
+        description: "List WCAG 2.2 success criteria, optionally filtered by conformance level (A, AA, AAA) or principle (Perceivable, Operable, Understandable, Robust). Use this to look up specific WCAG requirements without relying on training data.",
+        inputSchema: {
+            level: z.enum(["A", "AA", "AAA"]).optional().describe("Filter by conformance level"),
+            principle: z.enum(["Perceivable", "Operable", "Understandable", "Robust"]).optional().describe("Filter by WCAG principle"),
+            search: z.string().optional().describe("Search criteria by title or description (case-insensitive)"),
+        },
+    },
+    async ({ level, principle, search }) => {
+        const { getAllCriteria } = await import("@aria51/core");
+
+        let criteria = getAllCriteria();
+        if (level) criteria = criteria.filter((c: any) => c.level === level);
+        if (principle) criteria = criteria.filter((c: any) => c.principle === principle);
+        if (search) {
+            const q = search.toLowerCase();
+            criteria = criteria.filter((c: any) =>
+                c.title.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)
+            );
+        }
+
+        if (criteria.length === 0) {
+            return { content: [{ type: "text", text: "No criteria matched the filters." }] };
+        }
+
+        const lines = [`## WCAG 2.2 Criteria (${criteria.length} results)\n`];
+        for (const c of criteria) {
+            lines.push(`- **${c.id} ${c.title}** (Level ${c.level}, ${c.principle})`);
+            lines.push(`  ${c.description}`);
+        }
+
+        return { content: [{ type: "text", text: lines.join("\n") }] };
     }
 );
 
