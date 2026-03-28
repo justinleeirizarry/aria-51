@@ -10,9 +10,9 @@ import { StagehandWcagAuditAgent } from '../stagehand/wcag-audit-agent.js';
 import type { WcagAuditOptions, WcagAuditResult } from '../types.js';
 import { logger } from '@aria51/core';
 import {
-    EffectWcagAuditInitError,
-    EffectWcagAuditError,
-    EffectWcagAuditNotInitializedError,
+    WcagAuditInitError,
+    WcagAuditError,
+    WcagAuditNotInitializedError,
 } from '../errors.js';
 import type { IWcagAuditService } from './types.js';
 
@@ -29,7 +29,7 @@ export class WcagAuditService implements IWcagAuditService {
     /**
      * Initialize the WCAG audit service
      */
-    init(options?: WcagAuditOptions): Effect.Effect<void, EffectWcagAuditInitError> {
+    init(options?: WcagAuditOptions): Effect.Effect<void, WcagAuditInitError> {
         return Effect.tryPromise({
             try: async () => {
                 this.options = options ?? { targetLevel: 'AA' };
@@ -43,7 +43,7 @@ export class WcagAuditService implements IWcagAuditService {
 
                 logger.debug(`WcagAuditService initialized (target level: ${this.options.targetLevel})`);
             },
-            catch: (error) => new EffectWcagAuditInitError({
+            catch: (error) => new WcagAuditInitError({
                 reason: error instanceof Error ? error.message : String(error),
             }),
         });
@@ -59,12 +59,12 @@ export class WcagAuditService implements IWcagAuditService {
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectWcagAuditNotInitializedError> {
+    getPage(): Effect.Effect<Page, WcagAuditNotInitializedError> {
         return Effect.sync(() => this.agent?.page ?? null).pipe(
             Effect.flatMap((page) =>
                 page
                     ? Effect.succeed(page)
-                    : Effect.fail(new EffectWcagAuditNotInitializedError({ operation: 'getPage' }))
+                    : Effect.fail(new WcagAuditNotInitializedError({ operation: 'getPage' }))
             )
         );
     }
@@ -74,11 +74,11 @@ export class WcagAuditService implements IWcagAuditService {
      */
     audit(url: string): Effect.Effect<
         WcagAuditResult,
-        EffectWcagAuditNotInitializedError | EffectWcagAuditError
+        WcagAuditNotInitializedError | WcagAuditError
     > {
         return Effect.gen(this, function* () {
             if (!this.agent) {
-                return yield* Effect.fail(new EffectWcagAuditNotInitializedError({ operation: 'audit' }));
+                return yield* Effect.fail(new WcagAuditNotInitializedError({ operation: 'audit' }));
             }
 
             return yield* Effect.tryPromise({
@@ -89,7 +89,7 @@ export class WcagAuditService implements IWcagAuditService {
                     logger.info(`WCAG audit complete: ${results.summary.failed} failures, ${results.summary.passed} passes`);
                     return results;
                 },
-                catch: (error) => new EffectWcagAuditError({
+                catch: (error) => new WcagAuditError({
                     operation: 'audit',
                     reason: error instanceof Error ? error.message : String(error),
                 }),

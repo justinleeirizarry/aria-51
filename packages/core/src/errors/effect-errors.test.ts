@@ -1,33 +1,33 @@
 import { describe, it, expect } from 'vitest';
 import { Effect, Exit } from 'effect';
 import {
-    EffectReactNotDetectedError,
-    EffectBrowserLaunchError,
-    EffectBrowserNotLaunchedError,
-    EffectBrowserAlreadyLaunchedError,
-    EffectNavigationTimeoutError,
-    EffectNavigationError,
-    EffectContextDestroyedError,
-    EffectScannerInjectionError,
-    EffectMaxRetriesExceededError,
-    EffectConfigurationError,
-    EffectInvalidUrlError,
-    EffectFileSystemError,
-    EffectServiceStateError,
-    EffectScanDataError,
+    ReactNotDetectedError,
+    BrowserLaunchError,
+    BrowserNotLaunchedError,
+    BrowserAlreadyLaunchedError,
+    NavigationTimeoutError,
+    NavigationError,
+    ContextDestroyedError,
+    ScannerInjectionError,
+    MaxRetriesExceededError,
+    ConfigurationError,
+    InvalidUrlError,
+    FileSystemError,
+    ServiceStateError,
+    ScanDataError,
 } from './effect-errors.js';
 
 describe('Effect Errors', () => {
-    describe('EffectReactNotDetectedError', () => {
+    describe('ReactNotDetectedError', () => {
         it('should create error with url', () => {
-            const error = new EffectReactNotDetectedError({ url: 'http://example.com' });
+            const error = new ReactNotDetectedError({ url: 'http://example.com' });
             expect(error._tag).toBe('ReactNotDetectedError');
             expect(error.url).toBe('http://example.com');
         });
 
         it('should work in Effect error channel', async () => {
             const effect = Effect.fail(
-                new EffectReactNotDetectedError({ url: 'http://example.com' })
+                new ReactNotDetectedError({ url: 'http://example.com' })
             );
             const exit = await Effect.runPromiseExit(effect);
 
@@ -39,9 +39,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectBrowserLaunchError', () => {
+    describe('BrowserLaunchError', () => {
         it('should create error with browserType and optional reason', () => {
-            const error = new EffectBrowserLaunchError({
+            const error = new BrowserLaunchError({
                 browserType: 'chromium',
                 reason: 'Not installed',
             });
@@ -51,29 +51,29 @@ describe('Effect Errors', () => {
         });
 
         it('should create error without reason', () => {
-            const error = new EffectBrowserLaunchError({ browserType: 'firefox' });
+            const error = new BrowserLaunchError({ browserType: 'firefox' });
             expect(error.reason).toBeUndefined();
         });
     });
 
-    describe('EffectBrowserNotLaunchedError', () => {
+    describe('BrowserNotLaunchedError', () => {
         it('should create error with operation', () => {
-            const error = new EffectBrowserNotLaunchedError({ operation: 'navigate' });
+            const error = new BrowserNotLaunchedError({ operation: 'navigate' });
             expect(error._tag).toBe('BrowserNotLaunchedError');
             expect(error.operation).toBe('navigate');
         });
     });
 
-    describe('EffectBrowserAlreadyLaunchedError', () => {
+    describe('BrowserAlreadyLaunchedError', () => {
         it('should create error', () => {
-            const error = new EffectBrowserAlreadyLaunchedError({});
+            const error = new BrowserAlreadyLaunchedError({});
             expect(error._tag).toBe('BrowserAlreadyLaunchedError');
         });
     });
 
-    describe('EffectNavigationTimeoutError', () => {
+    describe('NavigationTimeoutError', () => {
         it('should create error with url and timeout', () => {
-            const error = new EffectNavigationTimeoutError({
+            const error = new NavigationTimeoutError({
                 url: 'http://example.com',
                 timeout: 30000,
             });
@@ -83,9 +83,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectNavigationError', () => {
+    describe('NavigationError', () => {
         it('should create error with url and optional reason', () => {
-            const error = new EffectNavigationError({
+            const error = new NavigationError({
                 url: 'http://example.com',
                 reason: 'Connection refused',
             });
@@ -95,9 +95,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectContextDestroyedError', () => {
+    describe('ContextDestroyedError', () => {
         it('should create error with optional message', () => {
-            const error = new EffectContextDestroyedError({
+            const error = new ContextDestroyedError({
                 message: 'Page was closed',
             });
             expect(error._tag).toBe('ContextDestroyedError');
@@ -105,9 +105,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectScannerInjectionError', () => {
+    describe('ScannerInjectionError', () => {
         it('should create error with reason', () => {
-            const error = new EffectScannerInjectionError({
+            const error = new ScannerInjectionError({
                 reason: 'Bundle not found',
             });
             expect(error._tag).toBe('ScannerInjectionError');
@@ -115,9 +115,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectMaxRetriesExceededError', () => {
+    describe('MaxRetriesExceededError', () => {
         it('should create error with attempts and optional lastError', () => {
-            const error = new EffectMaxRetriesExceededError({
+            const error = new MaxRetriesExceededError({
                 attempts: 3,
                 lastError: 'Connection timeout',
             });
@@ -127,9 +127,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectConfigurationError', () => {
+    describe('ConfigurationError', () => {
         it('should create error with message and optional field', () => {
-            const error = new EffectConfigurationError({
+            const error = new ConfigurationError({
                 message: 'Invalid timeout value',
                 invalidField: 'timeout',
             });
@@ -139,9 +139,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectInvalidUrlError', () => {
+    describe('InvalidUrlError', () => {
         it('should create error with url and optional reason', () => {
-            const error = new EffectInvalidUrlError({
+            const error = new InvalidUrlError({
                 url: 'not-a-url',
                 reason: 'Missing protocol',
             });
@@ -151,9 +151,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectFileSystemError', () => {
+    describe('FileSystemError', () => {
         it('should create error with operation, path, and optional reason', () => {
-            const error = new EffectFileSystemError({
+            const error = new FileSystemError({
                 operation: 'write',
                 path: '/tmp/output.json',
                 reason: 'Permission denied',
@@ -165,9 +165,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectServiceStateError', () => {
+    describe('ServiceStateError', () => {
         it('should create error with service, expectedState, and actualState', () => {
-            const error = new EffectServiceStateError({
+            const error = new ServiceStateError({
                 service: 'BrowserService',
                 expectedState: 'launched',
                 actualState: 'not launched',
@@ -179,9 +179,9 @@ describe('Effect Errors', () => {
         });
     });
 
-    describe('EffectScanDataError', () => {
+    describe('ScanDataError', () => {
         it('should create error with reason', () => {
-            const error = new EffectScanDataError({
+            const error = new ScanDataError({
                 reason: 'No scan data returned from browser',
             });
             expect(error._tag).toBe('ScanDataError');
@@ -191,10 +191,10 @@ describe('Effect Errors', () => {
 
     describe('Error matching with Effect', () => {
         it('should support pattern matching on error types', async () => {
-            type AppError = EffectReactNotDetectedError | EffectBrowserLaunchError;
+            type AppError = ReactNotDetectedError | BrowserLaunchError;
 
             const effect: Effect.Effect<string, AppError> = Effect.fail(
-                new EffectReactNotDetectedError({ url: 'http://example.com' })
+                new ReactNotDetectedError({ url: 'http://example.com' })
             );
 
             const handled = effect.pipe(

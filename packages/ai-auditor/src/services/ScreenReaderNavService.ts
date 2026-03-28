@@ -10,9 +10,9 @@ import { ScreenReaderNavigator } from '../stagehand/screen-reader-navigator.js';
 import type { ScreenReaderNavigatorConfig, ScreenReaderNavigationResults } from '../types.js';
 import { logger } from '@aria51/core';
 import {
-    EffectScreenReaderNavInitError,
-    EffectScreenReaderNavError,
-    EffectScreenReaderNavNotInitializedError,
+    ScreenReaderNavInitError,
+    ScreenReaderNavError,
+    ScreenReaderNavNotInitializedError,
 } from '../errors.js';
 import type { IScreenReaderNavService } from './types.js';
 
@@ -26,7 +26,7 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
     /**
      * Initialize the screen reader navigation service
      */
-    init(config?: ScreenReaderNavigatorConfig): Effect.Effect<void, EffectScreenReaderNavInitError> {
+    init(config?: ScreenReaderNavigatorConfig): Effect.Effect<void, ScreenReaderNavInitError> {
         return Effect.tryPromise({
             try: async () => {
                 this.config = config ?? {};
@@ -40,7 +40,7 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
 
                 logger.debug('ScreenReaderNavService initialized');
             },
-            catch: (error) => new EffectScreenReaderNavInitError({
+            catch: (error) => new ScreenReaderNavInitError({
                 reason: error instanceof Error ? error.message : String(error),
             }),
         });
@@ -56,12 +56,12 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectScreenReaderNavNotInitializedError> {
+    getPage(): Effect.Effect<Page, ScreenReaderNavNotInitializedError> {
         return Effect.sync(() => this.navigator?.page ?? null).pipe(
             Effect.flatMap((page) =>
                 page
                     ? Effect.succeed(page)
-                    : Effect.fail(new EffectScreenReaderNavNotInitializedError({ operation: 'getPage' }))
+                    : Effect.fail(new ScreenReaderNavNotInitializedError({ operation: 'getPage' }))
             )
         );
     }
@@ -71,11 +71,11 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
      */
     navigate(url: string): Effect.Effect<
         ScreenReaderNavigationResults,
-        EffectScreenReaderNavNotInitializedError | EffectScreenReaderNavError
+        ScreenReaderNavNotInitializedError | ScreenReaderNavError
     > {
         return Effect.gen(this, function* () {
             if (!this.navigator) {
-                return yield* Effect.fail(new EffectScreenReaderNavNotInitializedError({ operation: 'navigate' }));
+                return yield* Effect.fail(new ScreenReaderNavNotInitializedError({ operation: 'navigate' }));
             }
 
             return yield* Effect.tryPromise({
@@ -86,7 +86,7 @@ export class ScreenReaderNavService implements IScreenReaderNavService {
                     logger.info(`Navigation complete: ${results.summary.totalIssues} issues found`);
                     return results;
                 },
-                catch: (error) => new EffectScreenReaderNavError({
+                catch: (error) => new ScreenReaderNavError({
                     reason: error instanceof Error ? error.message : String(error),
                 }),
             });

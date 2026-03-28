@@ -9,10 +9,10 @@ import { chromium, firefox, webkit, type Browser, type Page } from 'playwright';
 import { getConfig } from '../../config/index.js';
 import { logger } from '../../utils/logger.js';
 import {
-    EffectBrowserLaunchError,
-    EffectBrowserNotLaunchedError,
-    EffectBrowserAlreadyLaunchedError,
-    EffectNavigationError,
+    BrowserLaunchError,
+    BrowserNotLaunchedError,
+    BrowserAlreadyLaunchedError,
+    NavigationError,
 } from '../../errors/effect-errors.js';
 import { detectFramework as detectFrameworkOnPage } from '../effect/browser-resource.js';
 import type {
@@ -59,10 +59,10 @@ export class BrowserService implements IBrowserService {
     /**
      * Launch a browser with the specified configuration
      */
-    launch(config: BrowserServiceConfig): Effect.Effect<void, EffectBrowserLaunchError | EffectBrowserAlreadyLaunchedError> {
+    launch(config: BrowserServiceConfig): Effect.Effect<void, BrowserLaunchError | BrowserAlreadyLaunchedError> {
         return Effect.gen(this, function* () {
             if (this.browser) {
-                return yield* Effect.fail(new EffectBrowserAlreadyLaunchedError({}));
+                return yield* Effect.fail(new BrowserAlreadyLaunchedError({}));
             }
 
             this.config = config;
@@ -101,13 +101,13 @@ export class BrowserService implements IBrowserService {
                         errorMessage.includes('Failed to find') ||
                         errorMessage.includes('not installed')
                     ) {
-                        return new EffectBrowserLaunchError({
+                        return new BrowserLaunchError({
                             browserType: config.browserType,
                             reason: getPlaywrightInstallInstructions(config.browserType),
                         });
                     }
 
-                    return new EffectBrowserLaunchError({
+                    return new BrowserLaunchError({
                         browserType: config.browserType,
                         reason: errorMessage,
                     });
@@ -119,12 +119,12 @@ export class BrowserService implements IBrowserService {
     /**
      * Get the current page instance
      */
-    getPage(): Effect.Effect<Page, EffectBrowserNotLaunchedError> {
+    getPage(): Effect.Effect<Page, BrowserNotLaunchedError> {
         return Effect.sync(() => this.page).pipe(
             Effect.flatMap((page) =>
                 page
                     ? Effect.succeed(page)
-                    : Effect.fail(new EffectBrowserNotLaunchedError({ operation: 'getPage' }))
+                    : Effect.fail(new BrowserNotLaunchedError({ operation: 'getPage' }))
             )
         );
     }
@@ -132,12 +132,12 @@ export class BrowserService implements IBrowserService {
     /**
      * Get the current browser instance
      */
-    getBrowser(): Effect.Effect<Browser, EffectBrowserNotLaunchedError> {
+    getBrowser(): Effect.Effect<Browser, BrowserNotLaunchedError> {
         return Effect.sync(() => this.browser).pipe(
             Effect.flatMap((browser) =>
                 browser
                     ? Effect.succeed(browser)
-                    : Effect.fail(new EffectBrowserNotLaunchedError({ operation: 'getBrowser' }))
+                    : Effect.fail(new BrowserNotLaunchedError({ operation: 'getBrowser' }))
             )
         );
     }
@@ -152,7 +152,7 @@ export class BrowserService implements IBrowserService {
     /**
      * Navigate to a URL
      */
-    navigate(url: string, options?: NavigateOptions): Effect.Effect<void, EffectBrowserNotLaunchedError | EffectNavigationError> {
+    navigate(url: string, options?: NavigateOptions): Effect.Effect<void, BrowserNotLaunchedError | NavigationError> {
         return Effect.gen(this, function* () {
             const page = yield* this.getPage();
 
@@ -169,7 +169,7 @@ export class BrowserService implements IBrowserService {
                     const stabilizationDelay = this.config?.stabilizationDelay ?? globalConfig.browser.stabilizationDelay;
                     await page.waitForTimeout(stabilizationDelay);
                 },
-                catch: (error) => new EffectNavigationError({
+                catch: (error) => new NavigationError({
                     url,
                     reason: error instanceof Error ? error.message : String(error),
                 }),
@@ -183,7 +183,7 @@ export class BrowserService implements IBrowserService {
      * This monitors for client-side navigations and waits until the page
      * appears stable (no more navigations happening).
      */
-    waitForStability(): Effect.Effect<StabilityCheckResult, EffectBrowserNotLaunchedError> {
+    waitForStability(): Effect.Effect<StabilityCheckResult, BrowserNotLaunchedError> {
         return Effect.gen(this, function* () {
             const page = yield* this.getPage();
 
@@ -249,7 +249,7 @@ export class BrowserService implements IBrowserService {
     /**
      * Detect if a supported framework is present on the page
      */
-    detectFramework(): Effect.Effect<boolean, EffectBrowserNotLaunchedError> {
+    detectFramework(): Effect.Effect<boolean, BrowserNotLaunchedError> {
         return Effect.gen(this, function* () {
             const page = yield* this.getPage();
             return yield* detectFrameworkOnPage(page);

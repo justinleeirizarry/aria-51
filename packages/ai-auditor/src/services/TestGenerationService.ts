@@ -11,10 +11,10 @@ import { TestGenerator } from '../stagehand/test-generator.js';
 import type { ElementDiscovery } from '../types.js';
 import { logger } from '@aria51/core';
 import {
-    EffectTestGenNotInitializedError,
-    EffectTestGenInitError,
-    EffectTestGenNavigationError,
-    EffectTestGenDiscoveryError,
+    TestGenNotInitializedError,
+    TestGenInitError,
+    TestGenNavigationError,
+    TestGenDiscoveryError,
 } from '../errors.js';
 import type { TestGenerationConfig, ITestGenerationService } from './testgen-types.js';
 
@@ -39,7 +39,7 @@ export class TestGenerationService implements ITestGenerationService {
     /**
      * Initialize the Stagehand scanner
      */
-    init(config?: TestGenerationConfig): Effect.Effect<void, EffectTestGenInitError> {
+    init(config?: TestGenerationConfig): Effect.Effect<void, TestGenInitError> {
         return Effect.tryPromise({
             try: async () => {
                 this.config = config ?? {};
@@ -56,7 +56,7 @@ export class TestGenerationService implements ITestGenerationService {
 
                 logger.info('Initializing Stagehand for test generation...');
             },
-            catch: (error) => new EffectTestGenInitError({
+            catch: (error) => new TestGenInitError({
                 reason: error instanceof Error ? error.message : String(error),
             }),
         });
@@ -72,12 +72,12 @@ export class TestGenerationService implements ITestGenerationService {
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectTestGenNotInitializedError> {
+    getPage(): Effect.Effect<Page, TestGenNotInitializedError> {
         return Effect.sync(() => this.scanner?.page ?? null).pipe(
             Effect.flatMap((page) =>
                 page
                     ? Effect.succeed(page)
-                    : Effect.fail(new EffectTestGenNotInitializedError({ operation: 'getPage' }))
+                    : Effect.fail(new TestGenNotInitializedError({ operation: 'getPage' }))
             )
         );
     }
@@ -85,10 +85,10 @@ export class TestGenerationService implements ITestGenerationService {
     /**
      * Navigate to a URL (initializes Stagehand if needed)
      */
-    navigateTo(url: string): Effect.Effect<void, EffectTestGenNotInitializedError | EffectTestGenNavigationError> {
+    navigateTo(url: string): Effect.Effect<void, TestGenNotInitializedError | TestGenNavigationError> {
         return Effect.gen(this, function* () {
             if (!this.scanner) {
-                return yield* Effect.fail(new EffectTestGenNotInitializedError({ operation: 'navigateTo' }));
+                return yield* Effect.fail(new TestGenNotInitializedError({ operation: 'navigateTo' }));
             }
 
             yield* Effect.tryPromise({
@@ -107,7 +107,7 @@ export class TestGenerationService implements ITestGenerationService {
                     // Wait for page to settle
                     await new Promise((resolve) => setTimeout(resolve, 2000));
                 },
-                catch: (error) => new EffectTestGenNavigationError({
+                catch: (error) => new TestGenNavigationError({
                     url,
                     reason: error instanceof Error ? error.message : String(error),
                 }),
@@ -118,10 +118,10 @@ export class TestGenerationService implements ITestGenerationService {
     /**
      * Discover interactive elements on the page using AI
      */
-    discoverElements(): Effect.Effect<ElementDiscovery[], EffectTestGenNotInitializedError | EffectTestGenDiscoveryError> {
+    discoverElements(): Effect.Effect<ElementDiscovery[], TestGenNotInitializedError | TestGenDiscoveryError> {
         return Effect.gen(this, function* () {
             if (!this.scanner) {
-                return yield* Effect.fail(new EffectTestGenNotInitializedError({ operation: 'discoverElements' }));
+                return yield* Effect.fail(new TestGenNotInitializedError({ operation: 'discoverElements' }));
             }
 
             return yield* Effect.tryPromise({
@@ -137,7 +137,7 @@ export class TestGenerationService implements ITestGenerationService {
 
                     return elements;
                 },
-                catch: (error) => new EffectTestGenDiscoveryError({
+                catch: (error) => new TestGenDiscoveryError({
                     reason: error instanceof Error ? error.message : String(error),
                 }),
             });

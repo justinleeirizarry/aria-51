@@ -11,19 +11,19 @@ import {
     ResultsProcessorServiceLive,
 } from './layers.js';
 import {
-    EffectBrowserNotLaunchedError,
-    EffectScanDataError,
+    BrowserNotLaunchedError,
+    ScanDataError,
 } from '../../errors/effect-errors.js';
 
 // Mock the browser service to return Effects like the real implementation
 vi.mock('../browser/index.js', async () => {
     const { Effect } = await import('effect');
-    const { EffectBrowserNotLaunchedError } = await import('../../errors/effect-errors.js');
+    const { BrowserNotLaunchedError } = await import('../../errors/effect-errors.js');
     return {
         createBrowserService: vi.fn(() => ({
             launch: vi.fn(() => Effect.succeed(undefined)),
-            getPage: vi.fn(() => Effect.fail(new EffectBrowserNotLaunchedError({ operation: 'getPage' }))),
-            getBrowser: vi.fn(() => Effect.fail(new EffectBrowserNotLaunchedError({ operation: 'getBrowser' }))),
+            getPage: vi.fn(() => Effect.fail(new BrowserNotLaunchedError({ operation: 'getPage' }))),
+            getBrowser: vi.fn(() => Effect.fail(new BrowserNotLaunchedError({ operation: 'getBrowser' }))),
             isLaunched: vi.fn(() => Effect.succeed(false)),
             navigate: vi.fn(() => Effect.succeed(undefined)),
             waitForStability: vi.fn(() => Effect.succeed({ isStable: true, navigationCount: 0 })),

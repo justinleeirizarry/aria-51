@@ -141,23 +141,22 @@ export type {
 // ScanError - thrown by runScanAsPromise for well-formatted error messages
 export { ScanError, formatTaggedError } from './errors/scan-error.js';
 
-// Effect-compatible errors (Data.TaggedError) - preferred for Effect workflows
+// Domain errors (Data.TaggedError) - preferred for Effect workflows
 export {
-    // Effect error types (prefixed)
-    EffectReactNotDetectedError,
-    EffectBrowserLaunchError,
-    EffectBrowserNotLaunchedError,
-    EffectBrowserAlreadyLaunchedError,
-    EffectNavigationTimeoutError,
-    EffectNavigationError,
-    EffectContextDestroyedError,
-    EffectScannerInjectionError,
-    EffectMaxRetriesExceededError,
-    EffectConfigurationError,
-    EffectInvalidUrlError,
-    EffectFileSystemError,
-    EffectServiceStateError,
-    EffectScanDataError,
+    ReactNotDetectedError,
+    BrowserLaunchError,
+    BrowserNotLaunchedError,
+    BrowserAlreadyLaunchedError,
+    NavigationTimeoutError,
+    NavigationError,
+    ContextDestroyedError,
+    ScannerInjectionError,
+    MaxRetriesExceededError,
+    ConfigurationError,
+    InvalidUrlError,
+    FileSystemError,
+    ServiceStateError,
+    ScanDataError,
 
     // Error type unions
     type BrowserErrors,

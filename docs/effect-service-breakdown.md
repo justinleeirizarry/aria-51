@@ -118,11 +118,11 @@ Low-level `acquireRelease` resource management for the browser, plus standalone 
 // Scoped browser resource — auto-closes on scope end
 export const makeBrowserResource = (
     config: BrowserServiceConfig
-): Effect.Effect<BrowserResource, EffectBrowserLaunchError, Scope.Scope> =>
+): Effect.Effect<BrowserResource, BrowserLaunchError, Scope.Scope> =>
     Effect.acquireRelease(
         Effect.tryPromise({
             try: () => launchBrowser(config),
-            catch: (error) => new EffectBrowserLaunchError({ ... }),
+            catch: (error) => new BrowserLaunchError({ ... }),
         }),
         (resource) => Effect.promise(() => closeBrowser(resource))
     );
@@ -136,7 +136,7 @@ export const detectReact = (page) => ...
 export const withBrowser = <A, E, R>(
     config: BrowserServiceConfig,
     use: (resource: BrowserResource) => Effect.Effect<A, E, R>
-): Effect.Effect<A, E | EffectBrowserLaunchError, R> =>
+): Effect.Effect<A, E | BrowserLaunchError, R> =>
     Effect.scoped(makeBrowserResource(config).pipe(Effect.flatMap(use)));
 ```
 
@@ -171,14 +171,14 @@ Manages browser lifecycle and page operations. All methods return `Effect.Effect
 ```typescript
 export interface EffectBrowserService {
     readonly launch: (config: BrowserServiceConfig) =>
-        Effect.Effect<void, EffectBrowserLaunchError | EffectBrowserAlreadyLaunchedError>;
-    readonly getPage: () => Effect.Effect<Page, EffectBrowserNotLaunchedError>;
-    readonly getBrowser: () => Effect.Effect<Browser, EffectBrowserNotLaunchedError>;
+        Effect.Effect<void, BrowserLaunchError | BrowserAlreadyLaunchedError>;
+    readonly getPage: () => Effect.Effect<Page, BrowserNotLaunchedError>;
+    readonly getBrowser: () => Effect.Effect<Browser, BrowserNotLaunchedError>;
     readonly isLaunched: () => Effect.Effect<boolean>;
     readonly navigate: (url: string, options?: NavigateOptions) =>
-        Effect.Effect<void, EffectBrowserNotLaunchedError | EffectNavigationError>;
-    readonly waitForStability: () => Effect.Effect<StabilityCheckResult, EffectBrowserNotLaunchedError>;
-    readonly detectReact: () => Effect.Effect<boolean, EffectBrowserNotLaunchedError>;
+        Effect.Effect<void, BrowserNotLaunchedError | NavigationError>;
+    readonly waitForStability: () => Effect.Effect<StabilityCheckResult, BrowserNotLaunchedError>;
+    readonly detectReact: () => Effect.Effect<boolean, BrowserNotLaunchedError>;
     readonly close: () => Effect.Effect<void>;
 }
 ```
@@ -198,9 +198,9 @@ Handles injecting the scanner bundle (`scanner-bundle.js`) into pages and execut
 ```typescript
 export interface EffectScannerService {
     readonly isBundleInjected: (page: Page) => Effect.Effect<boolean>;
-    readonly injectBundle: (page: Page) => Effect.Effect<void, EffectScannerInjectionError>;
+    readonly injectBundle: (page: Page) => Effect.Effect<void, ScannerInjectionError>;
     readonly scan: (page: Page, options?: ScanExecutionOptions) =>
-        Effect.Effect<BrowserScanData, EffectScannerInjectionError | EffectScanDataError>;
+        Effect.Effect<BrowserScanData, ScannerInjectionError | ScanDataError>;
 }
 ```
 
@@ -321,7 +321,7 @@ AI-driven test generation wrapping `StagehandScanner` and `TestGenerator`.
 - `generateTest(url, elements)` — Pure test file generation (`Effect.sync`)
 - `close()` — Clean up Stagehand resources
 
-**Error types**: `EffectTestGenInitError`, `EffectTestGenNotInitializedError`, `EffectTestGenNavigationError`, `EffectTestGenDiscoveryError`
+**Error types**: `TestGenInitError`, `TestGenNotInitializedError`, `TestGenNavigationError`, `TestGenDiscoveryError`
 
 ### 5. KeyboardTestService
 
@@ -331,7 +331,7 @@ Stagehand-based keyboard navigation testing wrapping `StagehandKeyboardTester`.
 
 **Methods**: `init(config?)`, `isInitialized()`, `getPage()`, `test(url)`, `close()`
 
-**Error types**: `EffectKeyboardTestInitError`, `EffectKeyboardTestError`, `EffectKeyboardTestNotInitializedError`
+**Error types**: `KeyboardTestInitError`, `KeyboardTestError`, `KeyboardTestNotInitializedError`
 
 ### 6. TreeAnalysisService
 
@@ -341,7 +341,7 @@ Stagehand-based accessibility tree analysis wrapping `StagehandTreeAnalyzer`.
 
 **Methods**: `init(config?)`, `isInitialized()`, `getPage()`, `analyze(url)`, `close()`
 
-**Error types**: `EffectTreeAnalysisInitError`, `EffectTreeAnalysisError`, `EffectTreeAnalysisNotInitializedError`
+**Error types**: `TreeAnalysisInitError`, `TreeAnalysisError`, `TreeAnalysisNotInitializedError`
 
 ### 7. WcagAuditService
 
@@ -351,7 +351,7 @@ Stagehand-based WCAG compliance auditing wrapping `StagehandWcagAuditAgent`.
 
 **Methods**: `init(options?)`, `isInitialized()`, `getPage()`, `audit(url)`, `close()`
 
-**Error types**: `EffectWcagAuditInitError`, `EffectWcagAuditError`, `EffectWcagAuditNotInitializedError`
+**Error types**: `WcagAuditInitError`, `WcagAuditError`, `WcagAuditNotInitializedError`
 
 ---
 
@@ -364,7 +364,7 @@ The codebase uses a dual error system: Effect `Data.TaggedError` types for typed
 All Effect error classes use the `Effect` prefix naming convention and extend `Data.TaggedError`:
 
 ```typescript
-export class EffectBrowserLaunchError extends Data.TaggedError('BrowserLaunchError')<{
+export class BrowserLaunchError extends Data.TaggedError('BrowserLaunchError')<{
     readonly browserType: string;
     readonly reason?: string;
 }> {}
@@ -373,45 +373,45 @@ export class EffectBrowserLaunchError extends Data.TaggedError('BrowserLaunchErr
 **Browser errors** (`BrowserErrors` union):
 | Class | Tag | Fields |
 |-------|-----|--------|
-| `EffectBrowserLaunchError` | `BrowserLaunchError` | `browserType`, `reason?` |
-| `EffectBrowserNotLaunchedError` | `BrowserNotLaunchedError` | `operation` |
-| `EffectBrowserAlreadyLaunchedError` | `BrowserAlreadyLaunchedError` | (none) |
-| `EffectNavigationTimeoutError` | `NavigationTimeoutError` | `url`, `timeout` |
-| `EffectNavigationError` | `NavigationError` | `url`, `reason?` |
-| `EffectContextDestroyedError` | `ContextDestroyedError` | `message?` |
+| `BrowserLaunchError` | `BrowserLaunchError` | `browserType`, `reason?` |
+| `BrowserNotLaunchedError` | `BrowserNotLaunchedError` | `operation` |
+| `BrowserAlreadyLaunchedError` | `BrowserAlreadyLaunchedError` | (none) |
+| `NavigationTimeoutError` | `NavigationTimeoutError` | `url`, `timeout` |
+| `NavigationError` | `NavigationError` | `url`, `reason?` |
+| `ContextDestroyedError` | `ContextDestroyedError` | `message?` |
 
 **Scan errors** (`ScanErrors` union):
 | Class | Tag | Fields |
 |-------|-----|--------|
-| `EffectReactNotDetectedError` | `ReactNotDetectedError` | `url` |
-| `EffectScannerInjectionError` | `ScannerInjectionError` | `reason` |
-| `EffectMaxRetriesExceededError` | `MaxRetriesExceededError` | `attempts`, `lastError?` |
-| `EffectScanDataError` | `ScanDataError` | `reason` |
+| `ReactNotDetectedError` | `ReactNotDetectedError` | `url` |
+| `ScannerInjectionError` | `ScannerInjectionError` | `reason` |
+| `MaxRetriesExceededError` | `MaxRetriesExceededError` | `attempts`, `lastError?` |
+| `ScanDataError` | `ScanDataError` | `reason` |
 
 **Validation errors** (`ValidationErrors` union):
 | Class | Tag | Fields |
 |-------|-----|--------|
-| `EffectConfigurationError` | `ConfigurationError` | `message`, `invalidField?` |
-| `EffectInvalidUrlError` | `InvalidUrlError` | `url`, `reason?` |
+| `ConfigurationError` | `ConfigurationError` | `message`, `invalidField?` |
+| `InvalidUrlError` | `InvalidUrlError` | `url`, `reason?` |
 
 **Infrastructure errors**:
 | Class | Tag | Fields |
 |-------|-----|--------|
-| `EffectFileSystemError` | `FileSystemError` | `operation`, `path`, `reason?` |
-| `EffectServiceStateError` | `ServiceStateError` | `service`, `expectedState`, `actualState` |
+| `FileSystemError` | `FileSystemError` | `operation`, `path`, `reason?` |
+| `ServiceStateError` | `ServiceStateError` | `service`, `expectedState`, `actualState` |
 
-**Workflow union**: `ScanWorkflowErrors = BrowserErrors | ScanErrors | ValidationErrors | EffectServiceStateError | EffectFileSystemError`
+**Workflow union**: `ScanWorkflowErrors = BrowserErrors | ScanErrors | ValidationErrors | ServiceStateError | FileSystemError`
 
-**Orchestration union**: `PerformScanError = BrowserErrors | ScanErrors | EffectReactNotDetectedError | EffectFileSystemError`
+**Orchestration union**: `PerformScanError = BrowserErrors | ScanErrors | ReactNotDetectedError | FileSystemError`
 
 ### AI Auditor Errors (`packages/ai-auditor/src/errors.ts`)
 
 Same `Effect` prefix convention. Four error groups with union types:
 
-- `TestGenErrors` — `EffectTestGenNotInitializedError`, `EffectTestGenInitError`, `EffectTestGenNavigationError`, `EffectTestGenDiscoveryError`
-- `KeyboardTestErrors` — `EffectKeyboardTestInitError`, `EffectKeyboardTestError`, `EffectKeyboardTestNotInitializedError`
-- `TreeAnalysisErrors` — `EffectTreeAnalysisInitError`, `EffectTreeAnalysisError`, `EffectTreeAnalysisNotInitializedError`
-- `WcagAuditErrors` — `EffectWcagAuditInitError`, `EffectWcagAuditError`, `EffectWcagAuditNotInitializedError`
+- `TestGenErrors` — `TestGenNotInitializedError`, `TestGenInitError`, `TestGenNavigationError`, `TestGenDiscoveryError`
+- `KeyboardTestErrors` — `KeyboardTestInitError`, `KeyboardTestError`, `KeyboardTestNotInitializedError`
+- `TreeAnalysisErrors` — `TreeAnalysisInitError`, `TreeAnalysisError`, `TreeAnalysisNotInitializedError`
+- `WcagAuditErrors` — `WcagAuditInitError`, `WcagAuditError`, `WcagAuditNotInitializedError`
 - `StagehandErrors` — Union of all four groups
 
 ### ScanError Bridge (`packages/core/src/errors/scan-error.ts`)

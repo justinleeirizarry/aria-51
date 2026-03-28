@@ -5,10 +5,10 @@ import type { Effect } from 'effect';
 import type { Page } from 'playwright';
 import type { ElementDiscovery } from '../types.js';
 import type {
-    EffectTestGenNotInitializedError,
-    EffectTestGenInitError,
-    EffectTestGenNavigationError,
-    EffectTestGenDiscoveryError,
+    TestGenNotInitializedError,
+    TestGenInitError,
+    TestGenNavigationError,
+    TestGenDiscoveryError,
 } from '../errors.js';
 
 export interface TestGenerationConfig {
@@ -25,22 +25,22 @@ export interface ITestGenerationService {
     /**
      * Initialize the Stagehand scanner
      */
-    init(config?: TestGenerationConfig): Effect.Effect<void, EffectTestGenInitError>;
+    init(config?: TestGenerationConfig): Effect.Effect<void, TestGenInitError>;
 
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectTestGenNotInitializedError>;
+    getPage(): Effect.Effect<Page, TestGenNotInitializedError>;
 
     /**
      * Navigate to a URL
      */
-    navigateTo(url: string): Effect.Effect<void, EffectTestGenNotInitializedError | EffectTestGenNavigationError>;
+    navigateTo(url: string): Effect.Effect<void, TestGenNotInitializedError | TestGenNavigationError>;
 
     /**
      * Discover interactive elements on the page using AI
      */
-    discoverElements(): Effect.Effect<ElementDiscovery[], EffectTestGenNotInitializedError | EffectTestGenDiscoveryError>;
+    discoverElements(): Effect.Effect<ElementDiscovery[], TestGenNotInitializedError | TestGenDiscoveryError>;
 
     /**
      * Generate a Playwright test file from discovered elements

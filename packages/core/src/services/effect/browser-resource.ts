@@ -8,9 +8,9 @@ import { Effect, Scope } from 'effect';
 import { chromium, firefox, webkit, type Browser, type Page } from 'playwright';
 import type { BrowserServiceConfig } from '../browser/types.js';
 import {
-    EffectBrowserLaunchError,
-    EffectNavigationError,
-    EffectNavigationTimeoutError,
+    BrowserLaunchError,
+    NavigationError,
+    NavigationTimeoutError,
 } from '../../errors/effect-errors.js';
 import { getConfig } from '../../config/index.js';
 import { logger } from '../../utils/logger.js';
@@ -108,7 +108,7 @@ const closeBrowser = async (resource: BrowserResource): Promise<void> => {
  */
 export const makeBrowserResource = (
     config: BrowserServiceConfig
-): Effect.Effect<BrowserResource, EffectBrowserLaunchError, Scope.Scope> =>
+): Effect.Effect<BrowserResource, BrowserLaunchError, Scope.Scope> =>
     Effect.acquireRelease(
         // Acquire: launch browser
         Effect.tryPromise({
@@ -123,13 +123,13 @@ export const makeBrowserResource = (
                     errorMessage.includes('Failed to find') ||
                     errorMessage.includes('not installed')
                 ) {
-                    return new EffectBrowserLaunchError({
+                    return new BrowserLaunchError({
                         browserType: config.browserType,
                         reason: `Playwright browsers not installed. Run: npx playwright install ${config.browserType}`,
                     });
                 }
 
-                return new EffectBrowserLaunchError({
+                return new BrowserLaunchError({
                     browserType: config.browserType,
                     reason: errorMessage,
                 });
@@ -150,7 +150,7 @@ export const navigateTo = (
     page: Page,
     url: string,
     options?: { timeout?: number; waitUntil?: 'load' | 'domcontentloaded' | 'networkidle' | 'commit' }
-): Effect.Effect<void, EffectNavigationError | EffectNavigationTimeoutError> => {
+): Effect.Effect<void, NavigationError | NavigationTimeoutError> => {
     const globalConfig = getConfig();
     const timeout = options?.timeout ?? globalConfig.browser.timeout;
     const waitUntil = options?.waitUntil ?? 'networkidle';
@@ -168,10 +168,10 @@ export const navigateTo = (
             const errorMessage = error instanceof Error ? error.message : String(error);
 
             if (errorMessage.includes('timeout') || errorMessage.includes('Timeout')) {
-                return new EffectNavigationTimeoutError({ url, timeout });
+                return new NavigationTimeoutError({ url, timeout });
             }
 
-            return new EffectNavigationError({ url, reason: errorMessage });
+            return new NavigationError({ url, reason: errorMessage });
         },
     });
 };
@@ -314,5 +314,5 @@ export const detectFramework = (page: Page): Effect.Effect<boolean> =>
 export const withBrowser = <A, E, R>(
     config: BrowserServiceConfig,
     use: (resource: BrowserResource) => Effect.Effect<A, E, R>
-): Effect.Effect<A, E | EffectBrowserLaunchError, R> =>
+): Effect.Effect<A, E | BrowserLaunchError, R> =>
     Effect.scoped(makeBrowserResource(config).pipe(Effect.flatMap(use)));

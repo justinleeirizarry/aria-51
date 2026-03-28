@@ -14,18 +14,18 @@ import type {
     ScreenReaderNavigationResults,
 } from '../types.js';
 import type {
-    EffectKeyboardTestInitError,
-    EffectKeyboardTestError,
-    EffectKeyboardTestNotInitializedError,
-    EffectTreeAnalysisInitError,
-    EffectTreeAnalysisError,
-    EffectTreeAnalysisNotInitializedError,
-    EffectWcagAuditInitError,
-    EffectWcagAuditError,
-    EffectWcagAuditNotInitializedError,
-    EffectScreenReaderNavInitError,
-    EffectScreenReaderNavError,
-    EffectScreenReaderNavNotInitializedError,
+    KeyboardTestInitError,
+    KeyboardTestError,
+    KeyboardTestNotInitializedError,
+    TreeAnalysisInitError,
+    TreeAnalysisError,
+    TreeAnalysisNotInitializedError,
+    WcagAuditInitError,
+    WcagAuditError,
+    WcagAuditNotInitializedError,
+    ScreenReaderNavInitError,
+    ScreenReaderNavError,
+    ScreenReaderNavNotInitializedError,
 } from '../errors.js';
 
 /**
@@ -35,20 +35,20 @@ export interface IKeyboardTestService {
     /**
      * Initialize the keyboard test service
      */
-    init(config?: StagehandKeyboardConfig): Effect.Effect<void, EffectKeyboardTestInitError>;
+    init(config?: StagehandKeyboardConfig): Effect.Effect<void, KeyboardTestInitError>;
 
     /**
      * Run keyboard navigation tests on a URL
      */
     test(url: string): Effect.Effect<
         StagehandKeyboardResults,
-        EffectKeyboardTestNotInitializedError | EffectKeyboardTestError
+        KeyboardTestNotInitializedError | KeyboardTestError
     >;
 
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectKeyboardTestNotInitializedError>;
+    getPage(): Effect.Effect<Page, KeyboardTestNotInitializedError>;
 
     /**
      * Close the service and clean up resources
@@ -68,20 +68,20 @@ export interface ITreeAnalysisService {
     /**
      * Initialize the tree analysis service
      */
-    init(config?: TreeAnalysisConfig): Effect.Effect<void, EffectTreeAnalysisInitError>;
+    init(config?: TreeAnalysisConfig): Effect.Effect<void, TreeAnalysisInitError>;
 
     /**
      * Analyze accessibility tree of a URL
      */
     analyze(url: string): Effect.Effect<
         TreeAnalysisResult,
-        EffectTreeAnalysisNotInitializedError | EffectTreeAnalysisError
+        TreeAnalysisNotInitializedError | TreeAnalysisError
     >;
 
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectTreeAnalysisNotInitializedError>;
+    getPage(): Effect.Effect<Page, TreeAnalysisNotInitializedError>;
 
     /**
      * Close the service and clean up resources
@@ -101,20 +101,20 @@ export interface IWcagAuditService {
     /**
      * Initialize the WCAG audit service
      */
-    init(options?: WcagAuditOptions): Effect.Effect<void, EffectWcagAuditInitError>;
+    init(options?: WcagAuditOptions): Effect.Effect<void, WcagAuditInitError>;
 
     /**
      * Run a WCAG audit on a URL
      */
     audit(url: string): Effect.Effect<
         WcagAuditResult,
-        EffectWcagAuditNotInitializedError | EffectWcagAuditError
+        WcagAuditNotInitializedError | WcagAuditError
     >;
 
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectWcagAuditNotInitializedError>;
+    getPage(): Effect.Effect<Page, WcagAuditNotInitializedError>;
 
     /**
      * Close the service and clean up resources
@@ -134,20 +134,20 @@ export interface IScreenReaderNavService {
     /**
      * Initialize the screen reader navigation service
      */
-    init(config?: ScreenReaderNavigatorConfig): Effect.Effect<void, EffectScreenReaderNavInitError>;
+    init(config?: ScreenReaderNavigatorConfig): Effect.Effect<void, ScreenReaderNavInitError>;
 
     /**
      * Run screen reader navigation test on a URL
      */
     navigate(url: string): Effect.Effect<
         ScreenReaderNavigationResults,
-        EffectScreenReaderNavNotInitializedError | EffectScreenReaderNavError
+        ScreenReaderNavNotInitializedError | ScreenReaderNavError
     >;
 
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectScreenReaderNavNotInitializedError>;
+    getPage(): Effect.Effect<Page, ScreenReaderNavNotInitializedError>;
 
     /**
      * Close the service and clean up resources

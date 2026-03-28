@@ -10,9 +10,9 @@ import { StagehandTreeAnalyzer } from '../stagehand/a11y-tree-analyzer.js';
 import type { TreeAnalysisConfig, TreeAnalysisResult } from '../types.js';
 import { logger } from '@aria51/core';
 import {
-    EffectTreeAnalysisInitError,
-    EffectTreeAnalysisError,
-    EffectTreeAnalysisNotInitializedError,
+    TreeAnalysisInitError,
+    TreeAnalysisError,
+    TreeAnalysisNotInitializedError,
 } from '../errors.js';
 import type { ITreeAnalysisService } from './types.js';
 
@@ -29,7 +29,7 @@ export class TreeAnalysisService implements ITreeAnalysisService {
     /**
      * Initialize the tree analysis service
      */
-    init(config?: TreeAnalysisConfig): Effect.Effect<void, EffectTreeAnalysisInitError> {
+    init(config?: TreeAnalysisConfig): Effect.Effect<void, TreeAnalysisInitError> {
         return Effect.tryPromise({
             try: async () => {
                 this.config = config ?? {};
@@ -43,7 +43,7 @@ export class TreeAnalysisService implements ITreeAnalysisService {
 
                 logger.debug('TreeAnalysisService initialized');
             },
-            catch: (error) => new EffectTreeAnalysisInitError({
+            catch: (error) => new TreeAnalysisInitError({
                 reason: error instanceof Error ? error.message : String(error),
             }),
         });
@@ -59,12 +59,12 @@ export class TreeAnalysisService implements ITreeAnalysisService {
     /**
      * Get the underlying page instance
      */
-    getPage(): Effect.Effect<Page, EffectTreeAnalysisNotInitializedError> {
+    getPage(): Effect.Effect<Page, TreeAnalysisNotInitializedError> {
         return Effect.sync(() => this.analyzer?.page ?? null).pipe(
             Effect.flatMap((page) =>
                 page
                     ? Effect.succeed(page)
-                    : Effect.fail(new EffectTreeAnalysisNotInitializedError({ operation: 'getPage' }))
+                    : Effect.fail(new TreeAnalysisNotInitializedError({ operation: 'getPage' }))
             )
         );
     }
@@ -74,11 +74,11 @@ export class TreeAnalysisService implements ITreeAnalysisService {
      */
     analyze(url: string): Effect.Effect<
         TreeAnalysisResult,
-        EffectTreeAnalysisNotInitializedError | EffectTreeAnalysisError
+        TreeAnalysisNotInitializedError | TreeAnalysisError
     > {
         return Effect.gen(this, function* () {
             if (!this.analyzer) {
-                return yield* Effect.fail(new EffectTreeAnalysisNotInitializedError({ operation: 'analyze' }));
+                return yield* Effect.fail(new TreeAnalysisNotInitializedError({ operation: 'analyze' }));
             }
 
             return yield* Effect.tryPromise({
@@ -89,7 +89,7 @@ export class TreeAnalysisService implements ITreeAnalysisService {
                     logger.info(`Tree analysis complete: ${results.summary.totalIssues} issues found`);
                     return results;
                 },
-                catch: (error) => new EffectTreeAnalysisError({
+                catch: (error) => new TreeAnalysisError({
                     reason: error instanceof Error ? error.message : String(error),
                 }),
             });

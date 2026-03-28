@@ -5,10 +5,10 @@ import type { Effect } from 'effect';
 import type { Page, Browser } from 'playwright';
 import type { BrowserType } from '../../types.js';
 import type {
-    EffectBrowserLaunchError,
-    EffectBrowserNotLaunchedError,
-    EffectBrowserAlreadyLaunchedError,
-    EffectNavigationError,
+    BrowserLaunchError,
+    BrowserNotLaunchedError,
+    BrowserAlreadyLaunchedError,
+    NavigationError,
 } from '../../errors/effect-errors.js';
 
 // Re-export for convenience
@@ -48,32 +48,32 @@ export interface IBrowserService {
     /**
      * Launch the browser with the given configuration
      */
-    launch(config: BrowserServiceConfig): Effect.Effect<void, EffectBrowserLaunchError | EffectBrowserAlreadyLaunchedError>;
+    launch(config: BrowserServiceConfig): Effect.Effect<void, BrowserLaunchError | BrowserAlreadyLaunchedError>;
 
     /**
      * Get the current page
      */
-    getPage(): Effect.Effect<Page, EffectBrowserNotLaunchedError>;
+    getPage(): Effect.Effect<Page, BrowserNotLaunchedError>;
 
     /**
      * Get the current browser instance
      */
-    getBrowser(): Effect.Effect<Browser, EffectBrowserNotLaunchedError>;
+    getBrowser(): Effect.Effect<Browser, BrowserNotLaunchedError>;
 
     /**
      * Navigate to a URL
      */
-    navigate(url: string, options?: NavigateOptions): Effect.Effect<void, EffectBrowserNotLaunchedError | EffectNavigationError>;
+    navigate(url: string, options?: NavigateOptions): Effect.Effect<void, BrowserNotLaunchedError | NavigationError>;
 
     /**
      * Wait for page stability (network idle)
      */
-    waitForStability(): Effect.Effect<StabilityCheckResult, EffectBrowserNotLaunchedError>;
+    waitForStability(): Effect.Effect<StabilityCheckResult, BrowserNotLaunchedError>;
 
     /**
      * Detect if a supported framework (React, Vue, Svelte, Solid) is present on the page
      */
-    detectFramework(): Effect.Effect<boolean, EffectBrowserNotLaunchedError>;
+    detectFramework(): Effect.Effect<boolean, BrowserNotLaunchedError>;
 
     /**
      * Close the browser

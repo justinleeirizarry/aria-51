@@ -281,7 +281,7 @@ export class ResultsProcessorService implements IResultsProcessorService {
 
                 let wcag22Text = '\n### WCAG 2.2 Custom Check Violations\n';
                 for (const { key, label } of checkCategories) {
-                    const items = (wcag22Checks as any)[key];
+                    const items = (wcag22Checks as Record<string, unknown>)[key] as Array<{ description: string; selector: string; impact: string }> | undefined;
                     if (items && items.length > 0) {
                         wcag22Text += `\n#### ${label} — ${items.length} violation(s)\n`;
                         const maxShow = 3;

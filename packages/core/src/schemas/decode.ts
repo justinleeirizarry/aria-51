@@ -7,20 +7,20 @@
 import { Schema, Effect } from 'effect';
 import { BrowserScanData as BrowserScanDataSchema } from './scan-results.js';
 import type { BrowserScanData } from './scan-results.js';
-import { EffectScanDataError } from '../errors/effect-errors.js';
+import { ScanDataError } from '../errors/effect-errors.js';
 import { logger } from '../utils/logger.js';
 
 const decode = Schema.decodeUnknown(BrowserScanDataSchema);
 
 /**
- * Strict decoder — fails with EffectScanDataError on invalid data.
+ * Strict decoder — fails with ScanDataError on invalid data.
  * Use this when you want to enforce schema compliance.
  */
-export function decodeBrowserScanData(data: unknown): Effect.Effect<BrowserScanData, EffectScanDataError> {
+export function decodeBrowserScanData(data: unknown): Effect.Effect<BrowserScanData, ScanDataError> {
     return decode(data).pipe(
         Effect.map((result) => result as unknown as BrowserScanData),
         Effect.mapError((parseError) =>
-            new EffectScanDataError({
+            new ScanDataError({
                 reason: `Browser scan data failed schema validation: ${String(parseError)}`,
             })
         ),

@@ -14,8 +14,8 @@ import {
     type EffectResultsProcessorService,
 } from './tags.js';
 import {
-    EffectBrowserLaunchError,
-    EffectReactNotDetectedError,
+    BrowserLaunchError,
+    ReactNotDetectedError,
 } from '../../errors/effect-errors.js';
 
 // Mock logger
@@ -218,7 +218,7 @@ describe('Effect Orchestration', () => {
             const browserService = createMockBrowserService({
                 launch: vi.fn(() =>
                     Effect.fail(
-                        new EffectBrowserLaunchError({
+                        new BrowserLaunchError({
                             browserType: 'chromium',
                             reason: 'Browser not installed',
                         })

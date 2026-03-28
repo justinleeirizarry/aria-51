@@ -4,7 +4,7 @@
 import type { Effect } from 'effect';
 import type { Page } from 'playwright';
 import type { BrowserScanData } from '../../types.js';
-import type { EffectScannerInjectionError, EffectScanDataError } from '../../errors/effect-errors.js';
+import type { ScannerInjectionError, ScanDataError } from '../../errors/effect-errors.js';
 
 /**
  * Options for scanner execution (subset of full ScanOptions)
@@ -30,11 +30,11 @@ export interface IScannerService {
     /**
      * Inject the scanner bundle into the page
      */
-    injectBundle(page: Page): Effect.Effect<void, EffectScannerInjectionError>;
+    injectBundle(page: Page): Effect.Effect<void, ScannerInjectionError>;
 
     /**
      * Run the scan on the page
      */
-    scan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, EffectScannerInjectionError | EffectScanDataError>;
+    scan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, ScannerInjectionError | ScanDataError>;
 }
 

@@ -123,26 +123,26 @@ export {
 
 export {
     // Test Generation Errors
-    EffectTestGenNotInitializedError,
-    EffectTestGenInitError,
-    EffectTestGenNavigationError,
-    EffectTestGenDiscoveryError,
+    TestGenNotInitializedError,
+    TestGenInitError,
+    TestGenNavigationError,
+    TestGenDiscoveryError,
     // Keyboard Test Errors
-    EffectKeyboardTestInitError,
-    EffectKeyboardTestError,
-    EffectKeyboardTestNotInitializedError,
+    KeyboardTestInitError,
+    KeyboardTestError,
+    KeyboardTestNotInitializedError,
     // Tree Analysis Errors
-    EffectTreeAnalysisInitError,
-    EffectTreeAnalysisError,
-    EffectTreeAnalysisNotInitializedError,
+    TreeAnalysisInitError,
+    TreeAnalysisError,
+    TreeAnalysisNotInitializedError,
     // WCAG Audit Errors
-    EffectWcagAuditInitError,
-    EffectWcagAuditError,
-    EffectWcagAuditNotInitializedError,
+    WcagAuditInitError,
+    WcagAuditError,
+    WcagAuditNotInitializedError,
     // Screen Reader Navigation Errors
-    EffectScreenReaderNavInitError,
-    EffectScreenReaderNavError,
-    EffectScreenReaderNavNotInitializedError,
+    ScreenReaderNavInitError,
+    ScreenReaderNavError,
+    ScreenReaderNavNotInitializedError,
     // Error type unions
     type TestGenErrors,
     type KeyboardTestErrors,

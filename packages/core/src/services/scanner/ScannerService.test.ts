@@ -91,7 +91,7 @@ describe('ScannerService', () => {
             expect(mockPage.addScriptTag).not.toHaveBeenCalled();
         });
 
-        it('should fail with EffectScannerInjectionError on injection failure', async () => {
+        it('should fail with ScannerInjectionError on injection failure', async () => {
             mockPage.evaluate.mockResolvedValueOnce(false);
             mockPage.addScriptTag.mockRejectedValue(new Error('File not found'));
 
@@ -104,7 +104,7 @@ describe('ScannerService', () => {
             }
         });
 
-        it('should fail with EffectScannerInjectionError if bundle fails to load in context', async () => {
+        it('should fail with ScannerInjectionError if bundle fails to load in context', async () => {
             // First check: not injected
             mockPage.evaluate.mockResolvedValueOnce(false);
             // Script tag added successfully
@@ -169,7 +169,7 @@ describe('ScannerService', () => {
             expect(mockPage.evaluate).toHaveBeenCalledTimes(2);
         });
 
-        it('should fail with EffectScanDataError when no scan data returned', async () => {
+        it('should fail with ScanDataError when no scan data returned', async () => {
             mockPage.evaluate.mockResolvedValueOnce(true); // Bundle check
             mockPage.evaluate.mockResolvedValueOnce(null); // Scan returns null
 

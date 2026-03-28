@@ -15,9 +15,9 @@ import {
     ResultsProcessorService,
 } from './tags.js';
 import {
-    EffectReactNotDetectedError,
-    EffectFileSystemError,
-    EffectScanDataError,
+    ReactNotDetectedError,
+    FileSystemError,
+    ScanDataError,
     type BrowserErrors,
     type ScanErrors,
 } from '../../errors/effect-errors.js';
@@ -87,7 +87,7 @@ export type EffectScanResult = ScanOperationResult;
 /**
  * Union of all errors that can occur during the scan workflow
  */
-export type PerformScanError = BrowserErrors | ScanErrors | EffectReactNotDetectedError | EffectFileSystemError;
+export type PerformScanError = BrowserErrors | ScanErrors | ReactNotDetectedError | FileSystemError;
 
 // ============================================================================
 // Scan Workflow
@@ -179,7 +179,7 @@ export const performScan = (
         progress('detecting', 'Detecting frameworks…');
         const hasFramework = yield* browser.detectFramework();
         if (options.requireFramework && !hasFramework) {
-            return yield* Effect.fail(new EffectReactNotDetectedError({ url }));
+            return yield* Effect.fail(new ReactNotDetectedError({ url }));
         }
         if (!hasFramework) {
             logger.debug('No supported framework detected on page - running generic accessibility scan');
@@ -227,7 +227,7 @@ export const performScan = (
             },
             catch: (err) => {
                 logger.warn(`Post-scan Playwright checks failed (non-fatal): ${err}`);
-                return new EffectScanDataError({ reason: `Post-scan checks failed: ${err}` });
+                return new ScanDataError({ reason: `Post-scan checks failed: ${err}` });
             },
         }).pipe(Effect.catchAll(() => Effect.void));
 
@@ -258,7 +258,7 @@ export const performScan = (
             },
             catch: (err) => {
                 logger.warn(`Supplemental checks failed (non-fatal): ${err}`);
-                return new EffectScanDataError({ reason: `Supplemental checks failed: ${err}` });
+                return new ScanDataError({ reason: `Supplemental checks failed: ${err}` });
             },
         }).pipe(Effect.catchAll(() => Effect.void));
 
@@ -274,7 +274,7 @@ export const performScan = (
                 },
                 catch: (err) => {
                     logger.warn(`Stagehand tests failed (non-fatal): ${err}`);
-                    return new EffectScanDataError({ reason: `Stagehand tests failed: ${err}` });
+                    return new ScanDataError({ reason: `Stagehand tests failed: ${err}` });
                 },
             }).pipe(Effect.catchAll(() => Effect.void));
         }
@@ -346,7 +346,7 @@ const attributeWithComponentPlugin = (
     page: import('playwright').Page,
     rawData: BrowserScanData,
     componentBundlePath: string
-): Effect.Effect<BrowserScanData, EffectScanDataError> =>
+): Effect.Effect<BrowserScanData, ScanDataError> =>
     Effect.gen(function* () {
         // Inject the component attribution bundle
         yield* Effect.tryPromise({
@@ -354,7 +354,7 @@ const attributeWithComponentPlugin = (
             catch: (error) => {
                 const msg = error instanceof Error ? error.message : String(error);
                 logger.warn(`Failed to inject component bundle: ${msg}`);
-                return new EffectScanDataError({
+                return new ScanDataError({
                     reason: `Failed to inject component plugin bundle: ${msg}`
                 });
             }
@@ -366,7 +366,7 @@ const attributeWithComponentPlugin = (
                 typeof (window as any).Aria51ComponentPlugin !== 'undefined' ||
                 typeof (window as any).Aria51ReactPlugin !== 'undefined'
             ),
-            catch: () => new EffectScanDataError({ reason: 'Failed to verify component plugin injection' })
+            catch: () => new ScanDataError({ reason: 'Failed to verify component plugin injection' })
         });
 
         if (!hasPlugin) {
@@ -396,7 +396,7 @@ const attributeWithComponentPlugin = (
             catch: (error) => {
                 const msg = error instanceof Error ? error.message : String(error);
                 logger.warn(`Component attribution failed: ${msg}`);
-                return new EffectScanDataError({ reason: `Component attribution failed: ${msg}` });
+                return new ScanDataError({ reason: `Component attribution failed: ${msg}` });
             }
         });
 
@@ -431,7 +431,7 @@ const writeResultsToFile = (
     results: ScanResults,
     filePath: string,
     processor: { formatAsJSON: (results: ScanResults) => Effect.Effect<string> }
-): Effect.Effect<void, EffectFileSystemError> =>
+): Effect.Effect<void, FileSystemError> =>
     Effect.gen(function* () {
         const jsonContent = yield* processor.formatAsJSON(results);
 
@@ -441,7 +441,7 @@ const writeResultsToFile = (
             yield* Effect.tryPromise({
                 try: () => mkdir(dir, { recursive: true }),
                 catch: (error) =>
-                    new EffectFileSystemError({
+                    new FileSystemError({
                         operation: 'mkdir',
                         path: dir,
                         reason: error instanceof Error ? error.message : String(error),
@@ -453,7 +453,7 @@ const writeResultsToFile = (
         yield* Effect.tryPromise({
             try: () => writeFile(filePath, jsonContent),
             catch: (error) =>
-                new EffectFileSystemError({
+                new FileSystemError({
                     operation: 'write',
                     path: filePath,
                     reason: error instanceof Error ? error.message : String(error),

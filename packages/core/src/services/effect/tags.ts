@@ -14,15 +14,13 @@ import type { BrowserServiceConfig, StabilityCheckResult, NavigateOptions } from
 import type { ScanExecutionOptions } from '../scanner/types.js';
 import type { ScanMetadata, MCPToolContent, MCPFormatOptions, CIResult } from '../processor/types.js';
 import {
-    EffectBrowserLaunchError,
-    EffectBrowserNotLaunchedError,
-    EffectBrowserAlreadyLaunchedError,
-    EffectNavigationError,
-    EffectReactNotDetectedError,
-    EffectScannerInjectionError,
-    EffectScanDataError,
-    type BrowserErrors,
-    type ScanErrors,
+    BrowserLaunchError,
+    BrowserNotLaunchedError,
+    BrowserAlreadyLaunchedError,
+    NavigationError,
+    ReactNotDetectedError,
+    ScannerInjectionError,
+    ScanDataError,
 } from '../../errors/effect-errors.js';
 
 // ============================================================================
@@ -40,17 +38,17 @@ export interface EffectBrowserService {
      */
     readonly launch: (
         config: BrowserServiceConfig
-    ) => Effect.Effect<void, EffectBrowserLaunchError | EffectBrowserAlreadyLaunchedError>;
+    ) => Effect.Effect<void, BrowserLaunchError | BrowserAlreadyLaunchedError>;
 
     /**
      * Get the current page instance
      */
-    readonly getPage: () => Effect.Effect<Page, EffectBrowserNotLaunchedError>;
+    readonly getPage: () => Effect.Effect<Page, BrowserNotLaunchedError>;
 
     /**
      * Get the current browser instance
      */
-    readonly getBrowser: () => Effect.Effect<Browser, EffectBrowserNotLaunchedError>;
+    readonly getBrowser: () => Effect.Effect<Browser, BrowserNotLaunchedError>;
 
     /**
      * Check if browser is launched
@@ -63,17 +61,17 @@ export interface EffectBrowserService {
     readonly navigate: (
         url: string,
         options?: NavigateOptions
-    ) => Effect.Effect<void, EffectBrowserNotLaunchedError | EffectNavigationError>;
+    ) => Effect.Effect<void, BrowserNotLaunchedError | NavigationError>;
 
     /**
      * Wait for the page to stabilize
      */
-    readonly waitForStability: () => Effect.Effect<StabilityCheckResult, EffectBrowserNotLaunchedError>;
+    readonly waitForStability: () => Effect.Effect<StabilityCheckResult, BrowserNotLaunchedError>;
 
     /**
      * Detect if a supported framework is present on the page
      */
-    readonly detectFramework: () => Effect.Effect<boolean, EffectBrowserNotLaunchedError>;
+    readonly detectFramework: () => Effect.Effect<boolean, BrowserNotLaunchedError>;
 
     /**
      * Close the browser and clean up resources
@@ -107,7 +105,7 @@ export interface EffectScannerService {
     /**
      * Inject the scanner bundle into the page
      */
-    readonly injectBundle: (page: Page) => Effect.Effect<void, EffectScannerInjectionError>;
+    readonly injectBundle: (page: Page) => Effect.Effect<void, ScannerInjectionError>;
 
     /**
      * Run the scan on the page
@@ -115,7 +113,7 @@ export interface EffectScannerService {
     readonly scan: (
         page: Page,
         options?: ScanExecutionOptions
-    ) => Effect.Effect<BrowserScanData, EffectScannerInjectionError | EffectScanDataError>;
+    ) => Effect.Effect<BrowserScanData, ScannerInjectionError | ScanDataError>;
 }
 
 /**
@@ -139,7 +137,7 @@ export interface EffectResultsProcessorService {
     /**
      * Process raw scan data into structured results
      */
-    readonly process: (data: BrowserScanData, metadata: ScanMetadata) => Effect.Effect<ScanResults>;
+    readonly process: (data: BrowserScanData, metadata: ScanMetadata) => Effect.Effect<ScanResults, never>;
 
     /**
      * Format results as JSON string

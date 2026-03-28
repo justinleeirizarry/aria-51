@@ -13,21 +13,21 @@ import { Data } from 'effect';
 /**
  * Test generation service is not initialized
  */
-export class EffectTestGenNotInitializedError extends Data.TaggedError('TestGenNotInitializedError')<{
+export class TestGenNotInitializedError extends Data.TaggedError('TestGenNotInitializedError')<{
     readonly operation?: string;
 }> {}
 
 /**
  * Test generation service initialization failed
  */
-export class EffectTestGenInitError extends Data.TaggedError('TestGenInitError')<{
+export class TestGenInitError extends Data.TaggedError('TestGenInitError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Test generation navigation failed
  */
-export class EffectTestGenNavigationError extends Data.TaggedError('TestGenNavigationError')<{
+export class TestGenNavigationError extends Data.TaggedError('TestGenNavigationError')<{
     readonly url: string;
     readonly reason: string;
 }> {}
@@ -35,7 +35,7 @@ export class EffectTestGenNavigationError extends Data.TaggedError('TestGenNavig
 /**
  * Test generation element discovery failed
  */
-export class EffectTestGenDiscoveryError extends Data.TaggedError('TestGenDiscoveryError')<{
+export class TestGenDiscoveryError extends Data.TaggedError('TestGenDiscoveryError')<{
     readonly reason: string;
 }> {}
 
@@ -46,14 +46,14 @@ export class EffectTestGenDiscoveryError extends Data.TaggedError('TestGenDiscov
 /**
  * Keyboard test service initialization failed
  */
-export class EffectKeyboardTestInitError extends Data.TaggedError('KeyboardTestInitError')<{
+export class KeyboardTestInitError extends Data.TaggedError('KeyboardTestInitError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Keyboard test operation failed
  */
-export class EffectKeyboardTestError extends Data.TaggedError('KeyboardTestError')<{
+export class KeyboardTestError extends Data.TaggedError('KeyboardTestError')<{
     readonly operation: string;
     readonly reason: string;
 }> {}
@@ -61,7 +61,7 @@ export class EffectKeyboardTestError extends Data.TaggedError('KeyboardTestError
 /**
  * Keyboard test service is not initialized
  */
-export class EffectKeyboardTestNotInitializedError extends Data.TaggedError('KeyboardTestNotInitializedError')<{
+export class KeyboardTestNotInitializedError extends Data.TaggedError('KeyboardTestNotInitializedError')<{
     readonly operation?: string;
 }> {}
 
@@ -72,21 +72,21 @@ export class EffectKeyboardTestNotInitializedError extends Data.TaggedError('Key
 /**
  * Tree analysis service initialization failed
  */
-export class EffectTreeAnalysisInitError extends Data.TaggedError('TreeAnalysisInitError')<{
+export class TreeAnalysisInitError extends Data.TaggedError('TreeAnalysisInitError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Tree analysis operation failed
  */
-export class EffectTreeAnalysisError extends Data.TaggedError('TreeAnalysisError')<{
+export class TreeAnalysisError extends Data.TaggedError('TreeAnalysisError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Tree analysis service is not initialized
  */
-export class EffectTreeAnalysisNotInitializedError extends Data.TaggedError('TreeAnalysisNotInitializedError')<{
+export class TreeAnalysisNotInitializedError extends Data.TaggedError('TreeAnalysisNotInitializedError')<{
     readonly operation?: string;
 }> {}
 
@@ -97,14 +97,14 @@ export class EffectTreeAnalysisNotInitializedError extends Data.TaggedError('Tre
 /**
  * WCAG audit service initialization failed
  */
-export class EffectWcagAuditInitError extends Data.TaggedError('WcagAuditInitError')<{
+export class WcagAuditInitError extends Data.TaggedError('WcagAuditInitError')<{
     readonly reason: string;
 }> {}
 
 /**
  * WCAG audit operation failed
  */
-export class EffectWcagAuditError extends Data.TaggedError('WcagAuditError')<{
+export class WcagAuditError extends Data.TaggedError('WcagAuditError')<{
     readonly operation: string;
     readonly reason: string;
 }> {}
@@ -112,7 +112,7 @@ export class EffectWcagAuditError extends Data.TaggedError('WcagAuditError')<{
 /**
  * WCAG audit service is not initialized
  */
-export class EffectWcagAuditNotInitializedError extends Data.TaggedError('WcagAuditNotInitializedError')<{
+export class WcagAuditNotInitializedError extends Data.TaggedError('WcagAuditNotInitializedError')<{
     readonly operation?: string;
 }> {}
 
@@ -123,21 +123,21 @@ export class EffectWcagAuditNotInitializedError extends Data.TaggedError('WcagAu
 /**
  * Screen reader navigator initialization failed
  */
-export class EffectScreenReaderNavInitError extends Data.TaggedError('ScreenReaderNavInitError')<{
+export class ScreenReaderNavInitError extends Data.TaggedError('ScreenReaderNavInitError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Screen reader navigation operation failed
  */
-export class EffectScreenReaderNavError extends Data.TaggedError('ScreenReaderNavError')<{
+export class ScreenReaderNavError extends Data.TaggedError('ScreenReaderNavError')<{
     readonly reason: string;
 }> {}
 
 /**
  * Screen reader navigator is not initialized
  */
-export class EffectScreenReaderNavNotInitializedError extends Data.TaggedError('ScreenReaderNavNotInitializedError')<{
+export class ScreenReaderNavNotInitializedError extends Data.TaggedError('ScreenReaderNavNotInitializedError')<{
     readonly operation?: string;
 }> {}
 
@@ -145,42 +145,42 @@ export class EffectScreenReaderNavNotInitializedError extends Data.TaggedError('
  * Union of all test generation errors
  */
 export type TestGenErrors =
-    | EffectTestGenNotInitializedError
-    | EffectTestGenInitError
-    | EffectTestGenNavigationError
-    | EffectTestGenDiscoveryError;
+    | TestGenNotInitializedError
+    | TestGenInitError
+    | TestGenNavigationError
+    | TestGenDiscoveryError;
 
 /**
  * Union of all keyboard test errors
  */
 export type KeyboardTestErrors =
-    | EffectKeyboardTestInitError
-    | EffectKeyboardTestError
-    | EffectKeyboardTestNotInitializedError;
+    | KeyboardTestInitError
+    | KeyboardTestError
+    | KeyboardTestNotInitializedError;
 
 /**
  * Union of all tree analysis errors
  */
 export type TreeAnalysisErrors =
-    | EffectTreeAnalysisInitError
-    | EffectTreeAnalysisError
-    | EffectTreeAnalysisNotInitializedError;
+    | TreeAnalysisInitError
+    | TreeAnalysisError
+    | TreeAnalysisNotInitializedError;
 
 /**
  * Union of all WCAG audit errors
  */
 export type WcagAuditErrors =
-    | EffectWcagAuditInitError
-    | EffectWcagAuditError
-    | EffectWcagAuditNotInitializedError;
+    | WcagAuditInitError
+    | WcagAuditError
+    | WcagAuditNotInitializedError;
 
 /**
  * Union of all screen reader navigator errors
  */
 export type ScreenReaderNavErrors =
-    | EffectScreenReaderNavInitError
-    | EffectScreenReaderNavError
-    | EffectScreenReaderNavNotInitializedError;
+    | ScreenReaderNavInitError
+    | ScreenReaderNavError
+    | ScreenReaderNavNotInitializedError;
 
 /**
  * Union of all Stagehand-related errors

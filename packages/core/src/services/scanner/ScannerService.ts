@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import type { BrowserScanData } from '../../types.js';
 import { logger } from '../../utils/logger.js';
-import { EffectScannerInjectionError, EffectScanDataError } from '../../errors/effect-errors.js';
+import { ScannerInjectionError, ScanDataError } from '../../errors/effect-errors.js';
 import { decodeBrowserScanDataLenient } from '../../schemas/decode.js';
 import type { ScanExecutionOptions, IScannerService } from './types.js';
 
@@ -48,7 +48,7 @@ export class ScannerService implements IScannerService {
     /**
      * Inject the scanner bundle into the page
      */
-    injectBundle(page: Page): Effect.Effect<void, EffectScannerInjectionError> {
+    injectBundle(page: Page): Effect.Effect<void, ScannerInjectionError> {
         return Effect.gen(this, function* () {
             // Check if already injected
             const alreadyInjected = yield* this.isBundleInjected(page);
@@ -66,7 +66,7 @@ export class ScannerService implements IScannerService {
                     const reason = isCSP
                         ? `This site's Content Security Policy (CSP) blocks inline script injection, which prevents accessibility scanning. To scan this site, try: (1) a staging/development environment without strict CSP, (2) a local development server, or (3) disabling CSP in browser launch flags.`
                         : `Failed to inject scanner bundle: ${errorMsg}. The dist/scanner-bundle.js file may be missing or corrupted. Try running "npm run build" to regenerate it.`;
-                    return new EffectScannerInjectionError({ reason });
+                    return new ScannerInjectionError({ reason });
                 }
             });
 
@@ -75,7 +75,7 @@ export class ScannerService implements IScannerService {
             // Verify injection was successful
             const isInjected = yield* this.isBundleInjected(page);
             if (!isInjected) {
-                return yield* Effect.fail(new EffectScannerInjectionError({
+                return yield* Effect.fail(new ScannerInjectionError({
                     reason: 'Scanner bundle failed to load in page context. This may indicate a JavaScript error in the page. Try running with --headless=false to debug.'
                 }));
             }
@@ -85,7 +85,7 @@ export class ScannerService implements IScannerService {
     /**
      * Run the scan on the page with retry logic
      */
-    scan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, EffectScannerInjectionError | EffectScanDataError> {
+    scan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, ScannerInjectionError | ScanDataError> {
         return Effect.gen(this, function* () {
             return yield* this._scanInternal(page, options);
         });
@@ -94,7 +94,7 @@ export class ScannerService implements IScannerService {
     /**
      * Internal scan implementation
      */
-    private _scanInternal(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, EffectScannerInjectionError | EffectScanDataError> {
+    private _scanInternal(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, ScannerInjectionError | ScanDataError> {
         return Effect.gen(this, function* () {
             // Ensure bundle is injected
             yield* this.injectBundle(page);
@@ -110,7 +110,7 @@ export class ScannerService implements IScannerService {
      * Execute the scan
      * Note: Retry logic is handled at the orchestration layer using Effect.retry()
      */
-    private _executeScan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, EffectScanDataError> {
+    private _executeScan(page: Page, options?: ScanExecutionOptions): Effect.Effect<BrowserScanData, ScanDataError> {
         const { tags, includeKeyboardTests, disableRules, exclude } = options ?? {};
 
         return Effect.gen(this, function* () {
@@ -146,7 +146,7 @@ export class ScannerService implements IScannerService {
                         { scanTags: tags, runKeyboardTests: includeKeyboardTests, rulesToDisable: disableRules, excludeSelectors: exclude }
                     );
                 },
-                catch: (error) => new EffectScanDataError({
+                catch: (error) => new ScanDataError({
                     reason: error instanceof Error ? error.message : String(error)
                 })
             });
@@ -156,7 +156,7 @@ export class ScannerService implements IScannerService {
 
             // Validate that we got results
             if (!rawData) {
-                return yield* Effect.fail(new EffectScanDataError({ reason: 'No scan data returned from browser' }));
+                return yield* Effect.fail(new ScanDataError({ reason: 'No scan data returned from browser' }));
             }
 
             // Validate results have expected structure
