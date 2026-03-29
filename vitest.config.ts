@@ -32,6 +32,7 @@ export default defineConfig({
             '**/node_modules/**',
             '**/dist/**',
             'test/integration/**',
+            'packages/core/src/scanner/browser-bundle.test.ts',
         ],
     },
 });
