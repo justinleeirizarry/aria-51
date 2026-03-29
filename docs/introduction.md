@@ -2,20 +2,20 @@
 
 aria-51 is an accessibility testing platform. It scans websites for WCAG violations using axe-core, keyboard tests, and 34 custom WCAG 2.2 checks — then optionally uses AI to verify findings, attribute them to React components, and generate prioritized remediation plans.
 
-The platform is a monorepo with seven packages that layer on top of each other:
+The platform is a monorepo with six packages that layer on top of each other:
 
 ```
-Interfaces            CLI  ·  Web Dashboard  ·  MCP (MCP)
-                         │         │              │
+Interfaces            CLI  ·  MCP Server
+                         │       │
 AI Layer              Agent (autonomous auditing)
-                      AI Auditor (Stagehand/Browserbase)
+                      AI Auditor (Stagehand)
                          │
-Framework Plugins     React (component attribution)
+Framework Plugins     Components (attribution)
                          │
 Foundation            Core (axe-core + keyboard tests + WCAG 2.2 checks)
 ```
 
-You can use it as a CLI tool, a web dashboard, a MCP integration, an autonomous AI agent, or a Node.js library — depending on what you need.
+You can use it as a CLI tool, an MCP integration, an autonomous AI agent, or a Node.js library — depending on what you need.
 
 ## The scanning engine
 
@@ -67,17 +67,7 @@ pnpm start https://your-site.com -- --ci --threshold 0
 pnpm start https://your-site.com -- --mobile
 ```
 
-### Web dashboard
-
-A browser-based interface on `localhost:3847` with a scan form, results display, and AI prompt generation.
-
-```bash
-cd packages/web
-pnpm dev
-# Open http://localhost:3847
-```
-
-### MCP (MCP)
+### MCP Server
 
 An MCP server that exposes `scan_url` and `scan_urls` tools for MCP. Claude can scan websites and discuss the results in conversation.
 
@@ -162,26 +152,24 @@ This is built on a generic `FrameworkPlugin` interface that supports any UI fram
 | [`@aria51/components`](../packages/components) | Component attribution via element-source (React, Preact, Vue, Svelte, Solid) | core |
 | [`@aria51/ai-auditor`](../packages/ai-auditor) | Stagehand/Browserbase AI testing: keyboard nav, tree analysis, screen reader, WCAG audit | core |
 | [`@aria51/agent`](../packages/agent) | Autonomous auditing agent: planning, scanning, verification, multi-specialist coordination, remediation | core, ai-auditor |
-| [`@aria51/cli`](../packages/cli) | Terminal UI (Ink). Binary: `aria51` | core, react, ai-auditor |
-| [`@aria51/web`](../packages/web) | Web dashboard (Hono). Port 3847 | core, react, ai-auditor |
-| [`@aria51/mcp`](../packages/mcp) | MCP server for MCP. Tools: `scan_url`, `scan_urls` | core, react, ai-auditor |
+| [`@aria51/cli`](../packages/cli) | Terminal UI (Ink). Binary: `aria51` | core, components, ai-auditor |
+| [`@aria51/mcp`](../packages/mcp) | MCP server. Tools: `scan_url`, `scan_urls`, `run_agent`, etc. | core, components, ai-auditor |
 
 ### Dependency diagram
 
 ```
 @aria51/core ─────────────────────────────────────────────┐
     │                                                      │
-    ├── @aria51/react                                      │
+    ├── @aria51/components                                 │
     │                                                      │
     ├── @aria51/ai-auditor                                 │
     │       │                                              │
     │       ├── @aria51/agent (autonomous auditing)        │
     │       │                                              │
     │       ├── @aria51/cli   (terminal UI)      ──────────┤
-    │       ├── @aria51/web   (web dashboard)    ──────────┤
-    │       └── @aria51/mcp   (MCP)   ──────────┘
+    │       └── @aria51/mcp   (MCP server)       ──────────┘
     │
-    └── (all interface packages also depend on core + react)
+    └── (all interface packages also depend on core + components)
 ```
 
 ## Quick start

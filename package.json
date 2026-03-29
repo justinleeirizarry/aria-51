@@ -5,7 +5,7 @@
     "description": "Monorepo for aria51 - Generic accessibility testing with optional React support and AI-powered auditing",
     "type": "module",
     "scripts": {
-        "build": "pnpm --filter @aria51/landing --filter @aria51/core build && pnpm --filter @aria51/components --filter @aria51/ai-auditor build && pnpm --filter @aria51/agent build && pnpm --filter @aria51/cli --filter @aria51/mcp --filter @aria51/web build",
+        "build": "pnpm --filter @aria51/core build && pnpm --filter @aria51/components --filter @aria51/ai-auditor build && pnpm --filter @aria51/agent build && pnpm --filter @aria51/cli --filter @aria51/mcp build",
         "dev": "pnpm -r --parallel dev",
         "test": "vitest run",
         "test:watch": "vitest",

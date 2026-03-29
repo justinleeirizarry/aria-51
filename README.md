@@ -41,7 +41,6 @@ pnpm start https://your-site.com -- --ci --threshold 0
 | [`@aria51/agent`](packages/agent) | Autonomous auditing agent with verification, multi-specialist mode, and remediation plans |
 | [`@aria51/cli`](packages/cli) | Terminal interface. Binary: `aria51` |
 | [`@aria51/mcp`](packages/mcp) | MCP server with 9 tools for AI assistant integration |
-| [`@aria51/web`](packages/web) | Web dashboard (Hono, port 3847) |
 
 ## CLI
 

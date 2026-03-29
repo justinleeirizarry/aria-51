@@ -28,9 +28,8 @@ pnpm test
 | `@aria51/agent` | Autonomous auditing agent powered by Claude |
 | `@aria51/cli` | Terminal interface (`aria51` command) |
 | `@aria51/mcp` | MCP server for AI assistants |
-| `@aria51/web` | Web dashboard |
 
-Dependencies flow: `core` -> `components`, `ai-auditor` -> `agent` -> `cli`, `mcp`, `web`
+Dependencies flow: `core` -> `components`, `ai-auditor` -> `agent` -> `cli`, `mcp`
 
 ## Development Workflow
 

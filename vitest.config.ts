@@ -33,7 +33,6 @@ export default defineConfig({
             '**/dist/**',
             'test/integration/**',
             'packages/core/src/scanner/browser-bundle.test.ts',
-            'packages/landing/**',
         ],
     },
 });

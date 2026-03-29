@@ -169,10 +169,9 @@ This is the coordinator-workers pattern — the lead agent plans the work, speci
     ▼
 @aria51/react          ← React Fiber traversal plugin
 
-Other packages that can consume the agent:
-  @aria51/cli          ← Terminal UI (could add `aria51 audit --agent` command)
-  @aria51/web          ← Web dashboard (could add agent-powered deep audits)
-  @aria51/mcp          ← MCP server (could expose agent as a tool for Claude Desktop)
+Other packages that consume the agent:
+  @aria51/cli          ← Terminal UI (`aria51 --agent` command)
+  @aria51/mcp          ← MCP server (`run_agent` tool)
 ```
 
 The agent doesn't replace the existing scanning tools — it orchestrates them. `@aria51/core` does the actual accessibility scanning. The agent decides what to scan, in what order, and what the results mean.
