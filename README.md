@@ -1,132 +1,169 @@
 # aria-51
 
-Accessibility testing platform that combines axe-core with keyboard navigation testing, WCAG 2.2 checks, screen reader simulation, and an optional AI agent for full compliance audits. Works as a CLI, MCP server, or library.
+Accessibility testing that catches what axe-core misses — keyboard navigation, focus management, screen reader compatibility, and WCAG 2.2 checks that require real browser interaction.
 
-See the [full introduction](docs/introduction.md) for a detailed walkthrough of the architecture.
+<p align="center">
+  <img src="assets/hero.gif" alt="aria-51 scanning Hacker News and finding accessibility violations" width="700">
+</p>
 
 ## Quick Start
 
 ```bash
-# Install dependencies and build
-pnpm install && pnpm build
-
-# Scan a URL
-pnpm start https://your-site.com
-
-# Quiet mode — compact summary
-pnpm start https://your-site.com -- --quiet
-
-# Focused audits (no API keys needed)
-pnpm start https://your-site.com -- --audit-keyboard
-pnpm start https://your-site.com -- --audit-structure
-pnpm start https://your-site.com -- --audit-screen-reader
-
-# Autonomous agent audit
-pnpm start https://your-site.com -- --agent
-
-# Export JSON report
-pnpm start https://your-site.com -- --output report.json
-
-# CI mode — exit code 1 if violations exceed threshold
-pnpm start https://your-site.com -- --ci --threshold 0
+npx aria51 https://your-site.com
 ```
 
-## Packages
+No config, no API key, no setup.
 
-| Package | Description |
-| ------- | ----------- |
-| [`@aria51/core`](packages/core) | Scanning engine: axe-core, keyboard tests, 34 WCAG 2.2 checks, focused audits, component attribution |
-| [`@aria51/ai-auditor`](packages/ai-auditor) | AI-enhanced deep analysis via Stagehand |
-| [`@aria51/agent`](packages/agent) | Autonomous auditing agent with verification, multi-specialist mode, and remediation plans |
-| [`@aria51/cli`](packages/cli) | Terminal interface. Binary: `aria51` |
-| [`@aria51/mcp`](packages/mcp) | MCP server with 9 tools for AI assistant integration |
+### Focused Audits
 
-## CLI
+Test specific accessibility dimensions that static analysis tools can't reach:
 
 ```bash
-# Basic scan
-aria51 https://your-site.com
+# Keyboard: tab order, focus traps, skip links, focus indicators
+npx aria51 https://your-site.com --audit-keyboard
 
-# Multiple URLs
-aria51 https://your-site.com https://your-site.com/about
+# Structure: landmarks, heading hierarchy, form labels
+npx aria51 https://your-site.com --audit-structure
 
-# Browser options
-aria51 https://your-site.com --browser firefox
-aria51 https://your-site.com --mobile
-aria51 https://your-site.com --headless=false
-
-# Focused audits — test specific accessibility dimensions
-aria51 https://your-site.com --audit-keyboard       # Tab order, focus traps, skip links
-aria51 https://your-site.com --audit-structure       # Landmarks, headings, form labels
-aria51 https://your-site.com --audit-screen-reader   # Alt text, ARIA, lang, labels
-
-# AI-enhanced deep analysis (requires OPENAI_API_KEY)
-aria51 https://your-site.com --audit-keyboard --deep
-
-# Agent mode (defaults to gpt-4o-mini, use --agent-model claude-sonnet-4-6 for best results)
-aria51 https://your-site.com --agent
-aria51 https://your-site.com --agent --specialists    # Multi-specialist mode
-aria51 https://your-site.com --agent --max-pages 20
-
-# Filtering
-aria51 https://your-site.com --tags wcag2aa
-aria51 https://your-site.com --disable-rules color-contrast
-aria51 https://your-site.com --exclude ".cookie-banner,.modal"
-
-# Component attribution is auto-detected; disable with:
-aria51 https://your-site.com --no-components
+# Screen reader: alt text, ARIA roles, page language, labels, live regions
+npx aria51 https://your-site.com --audit-screen-reader
 ```
+
+### Full WCAG Compliance Audit
+
+Run a complete multi-page audit with one command — no API key needed:
+
+```bash
+npx aria51 https://your-site.com --full-audit
+npx aria51 https://your-site.com --full-audit --max-pages 20
+```
+
+Discovers pages via sitemap and link crawling, scans every page with axe-core, runs keyboard/structure/screen-reader audits on key pages, and generates a prioritized remediation plan.
+
+### What It Finds That Other Tools Miss
+
+| Site | axe-core alone | + aria-51 focused audits |
+|------|---------------|------------------------|
+| Hacker News | 4 violations | + only 3 of 229 interactive elements reachable via keyboard |
+| GitHub | 4 violations | + 72 tab-order, 104 focus-indicator, 15 widget keyboard issues |
+| Wikipedia | 0 violations | + 699 keyboard navigation issues |
+| Stripe | 0 violations | + 215 keyboard navigation issues |
 
 ## MCP Server
 
-The MCP server exposes 9 tools for integration with AI coding assistants (Claude Code, Cursor, etc.):
+aria-51 ships as an MCP server so AI coding assistants can test accessibility directly. The workflow becomes: **scan a URL, see violations, fix the code, re-scan to verify** — all within the assistant's loop.
+
+### Claude Code
+
+Add to your project's `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "aria51": {
+      "command": "npx",
+      "args": ["-y", "@aria51/mcp"]
+    }
+  }
+}
+```
+
+### Cursor / Windsurf
+
+Add `aria51-mcp` as an MCP command in your editor's MCP settings.
+
+### Available Tools
 
 | Tool | Description |
-| ---- | ----------- |
+|------|-------------|
 | `scan_url` | Scan a URL for accessibility violations |
 | `scan_urls` | Batch scan multiple URLs |
-| `get_accessibility_tree` | Get page semantic structure (works on CSP-restricted sites) |
+| `get_accessibility_tree` | Get page semantic structure |
 | `explain_violation` | Explain an axe-core rule and how to fix it |
 | `list_wcag_criteria` | Look up WCAG 2.2 criteria by level, principle, or keyword |
 | `test_keyboard` | Test keyboard navigation (tab order, focus traps, indicators) |
 | `analyze_structure` | Analyze landmarks, headings, form labels |
 | `test_screen_reader` | Simulate screen reader navigation |
-| `run_agent` | Run autonomous AI audit with remediation plan |
+| `discover_pages` | Find all pages on a site via sitemap + link crawling |
+| `run_full_audit` | Complete WCAG compliance audit with remediation plan |
+
+## CI Integration
 
 ```bash
-# Start the MCP server (after npm install -g @aria51/mcp)
-aria51-mcp
+# Exit code 1 if any violations found
+npx aria51 https://your-site.com --ci --threshold 0
+
+# Allow up to 5 violations
+npx aria51 https://your-site.com --ci --threshold 5
+
+# JSON output for automation
+npx aria51 https://your-site.com --output report.json
 ```
+
+### GitHub Actions
+
+```yaml
+- name: Accessibility check
+  run: npx aria51 https://your-staging-url.com --ci --threshold 0
+```
+
+## CLI Reference
+
+```bash
+# Multiple URLs
+npx aria51 https://your-site.com https://your-site.com/about
+
+# Browser options
+npx aria51 https://your-site.com --browser firefox
+npx aria51 https://your-site.com --mobile
+npx aria51 https://your-site.com --headless=false
+
+# Filtering
+npx aria51 https://your-site.com --tags wcag2aa
+npx aria51 https://your-site.com --disable-rules color-contrast
+npx aria51 https://your-site.com --exclude ".cookie-banner,.modal"
+
+# Component attribution (auto-detected for React, Vue, Svelte, Solid)
+npx aria51 https://your-site.com --no-components  # disable
+
+# AI-enhanced deep analysis (requires OPENAI_API_KEY)
+npx aria51 https://your-site.com --audit-keyboard --deep
+```
+
+## Packages
+
+| Package | Description |
+|---------|-------------|
+| [`@aria51/core`](packages/core) | Scanning engine, focused audits, full audit pipeline, WCAG 2.2 checks, component attribution |
+| [`@aria51/ai-auditor`](packages/ai-auditor) | AI-enhanced deep analysis via Stagehand |
+| [`@aria51/cli`](packages/cli) | Terminal interface. Binary: `aria51` |
+| [`@aria51/mcp`](packages/mcp) | MCP server with 10 tools for AI assistant integration |
+
+## Documentation
+
+- [Introduction](docs/introduction.md) — Architecture and how the pieces fit together
+- [CI Integration](docs/ci.md) — CI/CD setup and configuration
+- [WCAG 2.2 Reference](docs/WCAG-2.2.md) — All 86 success criteria
+- [Effect Architecture](docs/effect-service-breakdown.md) — Core scanning engine internals
 
 ## Development
 
 ```bash
+# Install dependencies and build
+pnpm install && pnpm build
+
 # Watch mode (all packages)
 pnpm dev
 
 # Run tests
 pnpm test
 
-# Test with coverage
-pnpm test:coverage
-
 # Build/test a specific package
 pnpm --filter @aria51/core build
 pnpm --filter @aria51/core test
 ```
 
-## Requirements
-
-- Node.js 18+
-- pnpm 8+
-- Playwright browsers (`npx playwright install chromium`)
-
-## Documentation
-
-- [Introduction](docs/introduction.md) — Architecture and how the pieces fit together
-- [Agent](packages/agent/docs/introduction.md) — The autonomous auditing agent
-- [WCAG 2.2 Reference](docs/WCAG-2.2.md) — All 86 success criteria
-- [Effect Architecture](docs/effect-service-breakdown.md) — Core scanning engine internals
+**Requirements:** Node.js 18+, pnpm 8+, Playwright browsers (`npx playwright install chromium`)
 
 ## Built With
 
@@ -134,4 +171,8 @@ pnpm --filter @aria51/core test
 - [Playwright](https://playwright.dev) — Browser automation for keyboard and screen reader testing
 - [Stagehand](https://github.com/browserbase/stagehand) — AI-powered browser interaction for `--deep` mode
 - [Effect](https://effect.website) — Composable error handling and resource management
-- [element-source](https://github.com/nicolo-ribaudo/element-source) — Maps DOM nodes to framework component source locations
+- [element-source](https://github.com/aidenybai/element-source) — Maps DOM nodes to framework component source locations
+
+## License
+
+[MIT](LICENSE)

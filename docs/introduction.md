@@ -1,21 +1,18 @@
 # aria-51
 
-aria-51 is an accessibility testing platform. It scans websites for WCAG violations using axe-core, keyboard tests, and 34 custom WCAG 2.2 checks — then optionally uses AI to verify findings, attribute them to React components, and generate prioritized remediation plans.
+aria-51 is an accessibility testing platform. It scans websites for WCAG violations using axe-core, keyboard tests, and 34 custom WCAG 2.2 checks — with a full audit pipeline that discovers pages, runs focused audits, and generates prioritized remediation plans. No API keys needed.
 
-The platform is a monorepo with six packages that layer on top of each other:
+The platform is a monorepo with four packages:
 
 ```
 Interfaces            CLI  ·  MCP Server
                          │       │
-AI Layer              Agent (autonomous auditing)
-                      AI Auditor (Stagehand)
+AI Layer              AI Auditor (Stagehand, optional)
                          │
-Framework Plugins     Components (attribution)
-                         │
-Foundation            Core (axe-core + keyboard tests + WCAG 2.2 checks)
+Foundation            Core (axe-core + keyboard tests + WCAG 2.2 checks + full audit pipeline)
 ```
 
-You can use it as a CLI tool, an MCP integration, an autonomous AI agent, or a Node.js library — depending on what you need.
+You can use it as a CLI tool, an MCP integration, or a Node.js library — depending on what you need.
 
 ## The scanning engine
 
@@ -90,42 +87,38 @@ aria-51 has two layers of AI integration, each solving a different problem.
 
 `@aria51/ai-auditor` uses Stagehand and Browserbase for AI-driven testing that goes beyond what static analysis can catch:
 
-- **Keyboard navigation testing** — An AI agent navigates your site by keyboard and reports issues with tab order, focus management, and keyboard traps
+- **Keyboard navigation testing** — AI navigates your site by keyboard and reports issues with tab order, focus management, and keyboard traps
 - **Accessibility tree analysis** — Inspects the browser's accessibility tree for structural issues (missing landmarks, invalid ARIA, heading hierarchy problems)
 - **Screen reader simulation** — Simulates screen reader navigation patterns and reports issues with reading order and announcements
-- **WCAG compliance auditing** — An AI agent systematically checks WCAG criteria that require human judgment
 - **Test generation** — Discovers interactive elements and generates accessibility test cases
 
-These tests are optional — enable them with the `stagehand` flag on any scan.
+These tests are optional — enable them with `--deep` on any focused audit.
 
-### Autonomous Agent
+### Full Audit Pipeline
 
-`@aria51/agent` is a full agent harness that autonomously audits websites end-to-end. You give it a URL; it gives you back a verified audit report with a prioritized fix plan.
+The core package includes a full audit pipeline that runs a complete WCAG compliance audit — no API key needed:
 
 ```typescript
-import { runAgent } from '@aria51/agent';
+import { runFullAudit } from '@aria51/core';
 
-const report = await runAgent({
-    targetUrl: 'https://your-site.com',
+const result = await runFullAudit({
+    url: 'https://your-site.com',
+    maxPages: 10,
+    wcagLevel: 'AA',
 });
 
-console.log(report.agentSummary);       // Markdown audit report
-console.log(report.totalFindings);       // Number of verified findings
-console.log(report.remediationPlan);     // Phased fix plan
+console.log(result.findings);          // Verified findings with confidence levels
+console.log(result.remediationPlan);   // Phased fix plan
 ```
 
-The agent:
+The pipeline:
 
-1. **Plans** a crawl strategy (sitemap or link discovery)
-2. **Scans** pages using the core scanning engine
-3. **Verifies** its findings by cross-referencing AI observations against axe-core's deterministic results — every finding gets a confidence level (confirmed, corroborated, ai-only, or contradicted)
+1. **Discovers** pages via sitemap parsing and link crawling
+2. **Scans** every page using axe-core with keyboard tests
+3. **Runs focused audits** (keyboard, structure, screen reader) on key pages
 4. **Generates** a prioritized remediation plan grouped into immediate, short-term, and long-term phases
 
-For comprehensive audits, the agent supports **multi-specialist mode** — four specialist auditors (keyboard, visual, forms, structure) audit independently through different lenses and their findings are merged and deduplicated. Confidence comes from cross-referencing with axe-core, not vote counting.
-
-The agent defaults to Claude (Sonnet 4.6) via the native Anthropic SDK, with automatic model fallback on overload. It also supports any LLM via the Vercel AI SDK — OpenAI, Google, Ollama, or anything else with tool calling support.
-
-See the [agent introduction](../packages/agent/docs/introduction.md) for the full breakdown.
+From the CLI: `aria51 https://your-site.com --full-audit`
 
 ## Component attribution
 
@@ -148,23 +141,20 @@ This is built on a generic `FrameworkPlugin` interface that supports any UI fram
 
 | Package | What it does | Depends on |
 |---|---|---|
-| [`@aria51/core`](../packages/core) | Scanning engine: axe-core, keyboard tests, WCAG 2.2 checks, fix suggestions, component attribution | — |
-| [`@aria51/ai-auditor`](../packages/ai-auditor) | Stagehand/Browserbase AI testing: keyboard nav, tree analysis, screen reader, WCAG audit | core |
-| [`@aria51/agent`](../packages/agent) | Autonomous auditing agent: planning, scanning, verification, multi-specialist coordination, remediation | core, ai-auditor |
+| [`@aria51/core`](../packages/core) | Scanning engine, focused audits, full audit pipeline, WCAG 2.2 checks, component attribution | — |
+| [`@aria51/ai-auditor`](../packages/ai-auditor) | AI-enhanced deep analysis via Stagehand (optional) | core |
 | [`@aria51/cli`](../packages/cli) | Terminal UI (Ink). Binary: `aria51` | core, ai-auditor |
-| [`@aria51/mcp`](../packages/mcp) | MCP server. Tools: `scan_url`, `scan_urls`, `run_agent`, etc. | core, ai-auditor |
+| [`@aria51/mcp`](../packages/mcp) | MCP server with 10 tools for AI coding assistants | core, ai-auditor |
 
 ### Dependency diagram
 
 ```
-@aria51/core (scanning, component attribution) ───────────┐
+@aria51/core (scanning, audits, pipeline) ─────────────────┐
     │                                                      │
-    ├── @aria51/ai-auditor                                 │
-    │       │                                              │
-    │       ├── @aria51/agent (autonomous auditing)        │
-    │       │                                              │
-    │       ├── @aria51/cli   (terminal UI)      ──────────┤
-    │       └── @aria51/mcp   (MCP server)       ──────────┘
+    ├── @aria51/ai-auditor (optional, --deep mode)         │
+    │                                                      │
+    ├── @aria51/cli   (terminal UI)      ──────────────────┤
+    └── @aria51/mcp   (MCP server)       ──────────────────┘
 ```
 
 ## Quick start
@@ -189,16 +179,15 @@ pnpm build
 pnpm start https://your-site.com
 ```
 
-### Run the autonomous agent
+### Run a full audit
 
 ```typescript
-import { runAgent } from '@aria51/agent';
+import { runFullAudit } from '@aria51/core';
 
-const report = await runAgent({
-    targetUrl: 'https://your-site.com',
+const result = await runFullAudit({
+    url: 'https://your-site.com',
     wcagLevel: 'AA',
     maxPages: 10,
-    onEvent: (e) => console.log(e.type, e),
 });
 ```
 
@@ -259,8 +248,7 @@ export default {
 ```bash
 ARIA51_BROWSER=firefox
 ARIA51_HEADLESS=false
-ANTHROPIC_API_KEY=sk-ant-...     # For agent and AI features
-OPENAI_API_KEY=sk-...            # For Stagehand AI testing
+OPENAI_API_KEY=sk-...            # For Stagehand --deep mode (optional)
 BROWSERBASE_API_KEY=...          # For Browserbase cloud browsers
 BROWSERBASE_PROJECT_ID=...
 ```
@@ -286,6 +274,5 @@ pnpm --filter @aria51/core build
 
 ## What's next
 
-- [Agent Introduction](../packages/agent/docs/introduction.md) — Deep dive into the autonomous auditing agent
 - [WCAG 2.2 Reference](./WCAG-2.2.md) — All 86 success criteria with implementation guidance
 - [Effect Service Architecture](./effect-service-breakdown.md) — How the core scanning engine is structured

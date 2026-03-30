@@ -4,7 +4,7 @@
 
 ```bash
 # Clone and install
-git clone https://github.com/justinirizarry/aria-51.git
+git clone https://github.com/justinleeirizarry/aria-51.git
 cd aria-51
 pnpm install
 

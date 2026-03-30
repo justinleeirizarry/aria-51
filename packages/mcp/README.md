@@ -1,6 +1,6 @@
 # @aria51/mcp
 
-[Model Context Protocol](https://modelcontextprotocol.io) server for aria-51. Exposes 9 accessibility testing tools for AI assistants like Claude Code and Cursor.
+[Model Context Protocol](https://modelcontextprotocol.io) server for aria-51. Exposes 10 accessibility testing tools for AI assistants like Claude Code and Cursor. No API keys required for core functionality.
 
 ## Install
 
@@ -18,19 +18,16 @@ Add to your project's `.mcp.json`:
 {
   "mcpServers": {
     "aria51": {
-      "command": "aria51-mcp",
-      "env": {
-        "OPENAI_API_KEY": "sk-...",
-        "ANTHROPIC_API_KEY": "sk-ant-..."
-      }
+      "command": "npx",
+      "args": ["-y", "@aria51/mcp"]
     }
   }
 }
 ```
 
-### Cursor
+### Cursor / Windsurf
 
-Add to your MCP settings with the command `aria51-mcp`.
+Add `aria51-mcp` as an MCP command in your editor's MCP settings.
 
 ## Tools
 
@@ -44,16 +41,10 @@ Add to your MCP settings with the command `aria51-mcp`.
 | `test_keyboard` | Test keyboard navigation (tab order, focus traps, indicators) |
 | `analyze_structure` | Analyze landmarks, headings, form labels |
 | `test_screen_reader` | Simulate screen reader navigation |
-| `run_agent` | Run autonomous AI audit with remediation plan |
+| `discover_pages` | Find all pages on a site via sitemap + link crawling |
+| `run_full_audit` | Complete WCAG compliance audit with remediation plan |
 
-All tools support optional `deep` mode for AI-enhanced analysis where applicable.
-
-## Environment variables
-
-| Variable | Required for | Description |
-|----------|-------------|-------------|
-| `OPENAI_API_KEY` | `deep` mode, `run_agent` | Stagehand AI features |
-| `ANTHROPIC_API_KEY` | `run_agent` with Claude | Agent mode |
+All tools work without API keys. Optional `deep` mode for AI-enhanced analysis requires `OPENAI_API_KEY`.
 
 ## License
 

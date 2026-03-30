@@ -1,6 +1,6 @@
 # @aria51/cli
 
-Terminal interface for aria-51 accessibility testing. Supports single and multi-URL scanning, focused audits, AI-enhanced deep analysis, autonomous agent mode, and Playwright test generation.
+Terminal interface for aria-51 accessibility testing. Supports single and multi-URL scanning, focused audits, full WCAG compliance audits, AI-enhanced deep analysis, and Playwright test generation.
 
 ## Install
 
@@ -49,16 +49,16 @@ Add `--deep` for AI-enhanced analysis (requires `OPENAI_API_KEY`):
 aria51 https://example.com --audit-keyboard --deep
 ```
 
-### Agent mode
+### Full audit
 
-Autonomous multi-page audit with crawl planning, verification, and remediation:
+Complete multi-page WCAG compliance audit — no API key needed:
 
 ```bash
-aria51 https://example.com --agent
-aria51 https://example.com --agent --specialists      # 4 parallel auditors
-aria51 https://example.com --agent --max-pages 20
-aria51 https://example.com --agent --agent-model claude-sonnet-4-6
+aria51 https://example.com --full-audit
+aria51 https://example.com --full-audit --max-pages 20
 ```
+
+Discovers pages via sitemap + link crawling, scans with axe-core, runs focused audits on key pages, generates a prioritized remediation plan.
 
 ### Test generation
 
@@ -80,18 +80,18 @@ aria51 https://example.com --generate-test --test-file tests/a11y.spec.ts
 | `--output, -o` | JSON output file path | — |
 | `--ci` | CI mode (exit code on violations) | false |
 | `--threshold` | Max violations for CI pass | 0 |
+| `--full-audit` | Run complete WCAG compliance audit | false |
+| `--max-pages` | Max pages for full audit | 10 |
 | `--no-components` | Disable component attribution | — |
 | `--tags` | Comma-separated axe-core tags | — |
 | `--disable-rules` | Comma-separated axe rules to skip | — |
 | `--exclude` | CSS selectors to exclude | — |
-| `--ai` | Generate AI fix prompt (markdown) | false |
 
 ## Environment variables
 
 | Variable | Required for | Description |
 |----------|-------------|-------------|
-| `OPENAI_API_KEY` | `--deep`, `--generate-test` | Stagehand AI features |
-| `ANTHROPIC_API_KEY` | `--agent` with Claude models | Agent mode |
+| `OPENAI_API_KEY` | `--deep`, `--generate-test` | Stagehand AI features (optional) |
 
 ## License
 
