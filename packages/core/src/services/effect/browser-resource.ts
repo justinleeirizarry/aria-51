@@ -14,6 +14,7 @@ import {
 } from '../../errors/effect-errors.js';
 import { getConfig } from '../../config/index.js';
 import { logger } from '../../utils/logger.js';
+import { isBrowserNotInstalledError, autoInstallBrowser } from '../browser/BrowserService.js';
 
 // ============================================================================
 // Types
@@ -106,35 +107,37 @@ const closeBrowser = async (resource: BrowserResource): Promise<void> => {
  * );
  * ```
  */
+const tryLaunchBrowser = (
+    config: BrowserServiceConfig,
+    allowAutoInstall: boolean,
+): Effect.Effect<BrowserResource, BrowserLaunchError> =>
+    Effect.tryPromise({
+        try: () => launchBrowser(config),
+        catch: (error) => new BrowserLaunchError({
+            browserType: config.browserType,
+            reason: error instanceof Error ? error.message : String(error),
+        }),
+    }).pipe(
+        Effect.catchIf(
+            (err) => allowAutoInstall && !!err.reason && isBrowserNotInstalledError(err.reason),
+            (err) => {
+                const installed = autoInstallBrowser(config.browserType);
+                if (installed) {
+                    return tryLaunchBrowser(config, false);
+                }
+                return Effect.fail(new BrowserLaunchError({
+                    browserType: err.browserType,
+                    reason: `Auto-install failed. Run manually: npx playwright install ${config.browserType}`,
+                }));
+            },
+        ),
+    );
+
 export const makeBrowserResource = (
     config: BrowserServiceConfig
 ): Effect.Effect<BrowserResource, BrowserLaunchError, Scope.Scope> =>
     Effect.acquireRelease(
-        // Acquire: launch browser
-        Effect.tryPromise({
-            try: () => launchBrowser(config),
-            catch: (error) => {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-
-                // Detect Playwright browser not installed error
-                if (
-                    errorMessage.includes('No browsers found') ||
-                    errorMessage.includes('browser executable path') ||
-                    errorMessage.includes('Failed to find') ||
-                    errorMessage.includes('not installed')
-                ) {
-                    return new BrowserLaunchError({
-                        browserType: config.browserType,
-                        reason: `Playwright browsers not installed. Run: npx playwright install ${config.browserType}`,
-                    });
-                }
-
-                return new BrowserLaunchError({
-                    browserType: config.browserType,
-                    reason: errorMessage,
-                });
-            },
-        }),
+        tryLaunchBrowser(config, true),
         // Release: close browser (always runs)
         (resource) => Effect.promise(() => closeBrowser(resource))
     );

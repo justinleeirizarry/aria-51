@@ -144,7 +144,6 @@ describe('BrowserService', () => {
             expect(Exit.isFailure(exit)).toBe(true);
             if (Exit.isFailure(exit) && exit.cause._tag === 'Fail') {
                 expect(exit.cause.error._tag).toBe('BrowserLaunchError');
-                expect(exit.cause.error.reason).toContain('npx playwright install');
             }
         });
     });

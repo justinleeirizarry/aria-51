@@ -5,6 +5,7 @@
  * All methods return Effects for composability with the Effect ecosystem.
  */
 import { Effect } from 'effect';
+import { execSync } from 'child_process';
 import { chromium, firefox, webkit, type Browser, type Page } from 'playwright';
 import { getConfig } from '../../config/index.js';
 import { logger } from '../../utils/logger.js';
@@ -23,20 +24,33 @@ import type {
 } from './types.js';
 
 /**
- * Get Playwright browser install instructions
+ * Check if an error indicates Playwright browsers are not installed.
  */
-function getPlaywrightInstallInstructions(browserType: string): string {
-    return `
-Playwright browsers are not installed. Please install them with:
+export function isBrowserNotInstalledError(errorMessage: string): boolean {
+    return (
+        errorMessage.includes('No browsers found') ||
+        errorMessage.includes('browser executable path') ||
+        errorMessage.includes('Failed to find') ||
+        errorMessage.includes('not installed') ||
+        errorMessage.includes("Executable doesn't exist")
+    );
+}
 
-    npx playwright install ${browserType}
-
-Or install all browsers with:
-
-    npx playwright install
-
-For more information, visit: https://playwright.dev/docs/intro
-`;
+/**
+ * Auto-install a Playwright browser. Returns true on success.
+ */
+export function autoInstallBrowser(browserType: string): boolean {
+    try {
+        logger.info(`${browserType} not found. Installing...`);
+        execSync(`npx playwright install ${browserType}`, {
+            stdio: ['ignore', 'pipe', 'pipe'],
+            timeout: 120_000,
+        });
+        logger.info(`${browserType} installed successfully.`);
+        return true;
+    } catch {
+        return false;
+    }
 }
 
 /**
@@ -66,55 +80,62 @@ export class BrowserService implements IBrowserService {
             }
 
             this.config = config;
-            const launchOptions = { headless: config.headless };
-
-            yield* Effect.tryPromise({
-                try: async () => {
-                    switch (config.browserType) {
-                        case 'chromium':
-                            this.browser = await chromium.launch(launchOptions);
-                            break;
-                        case 'firefox':
-                            this.browser = await firefox.launch(launchOptions);
-                            break;
-                        case 'webkit':
-                            this.browser = await webkit.launch(launchOptions);
-                            break;
-                        default:
-                            throw new Error(`Unsupported browser type: ${config.browserType}`);
-                    }
-
-                    this.page = await this.browser.newPage({
-                        bypassCSP: true,
-                        ...(config.viewport ? { viewport: config.viewport } : {}),
-                        ...(config.isMobile !== undefined ? { isMobile: config.isMobile } : {}),
-                        ...(config.hasTouch !== undefined ? { hasTouch: config.hasTouch } : {}),
-                    });
-                    logger.debug(`Browser ${config.browserType} launched successfully`);
-                },
-                catch: (error) => {
-                    const errorMessage = error instanceof Error ? error.message : String(error);
-
-                    // Detect Playwright browser not installed error
-                    if (
-                        errorMessage.includes('No browsers found') ||
-                        errorMessage.includes('browser executable path') ||
-                        errorMessage.includes('Failed to find') ||
-                        errorMessage.includes('not installed')
-                    ) {
-                        return new BrowserLaunchError({
-                            browserType: config.browserType,
-                            reason: getPlaywrightInstallInstructions(config.browserType),
-                        });
-                    }
-
-                    return new BrowserLaunchError({
-                        browserType: config.browserType,
-                        reason: errorMessage,
-                    });
-                },
-            });
+            yield* this._tryLaunch(config, true);
         });
+    }
+
+    /**
+     * Attempt to launch the browser. On "not installed" errors, auto-installs and retries once.
+     */
+    private _tryLaunch(
+        config: BrowserServiceConfig,
+        allowAutoInstall: boolean,
+    ): Effect.Effect<void, BrowserLaunchError> {
+        return Effect.tryPromise({
+            try: async () => {
+                const launchOptions = { headless: config.headless };
+
+                switch (config.browserType) {
+                    case 'chromium':
+                        this.browser = await chromium.launch(launchOptions);
+                        break;
+                    case 'firefox':
+                        this.browser = await firefox.launch(launchOptions);
+                        break;
+                    case 'webkit':
+                        this.browser = await webkit.launch(launchOptions);
+                        break;
+                    default:
+                        throw new Error(`Unsupported browser type: ${config.browserType}`);
+                }
+
+                this.page = await this.browser.newPage({
+                    bypassCSP: true,
+                    ...(config.viewport ? { viewport: config.viewport } : {}),
+                    ...(config.isMobile !== undefined ? { isMobile: config.isMobile } : {}),
+                    ...(config.hasTouch !== undefined ? { hasTouch: config.hasTouch } : {}),
+                });
+                logger.debug(`Browser ${config.browserType} launched successfully`);
+            },
+            catch: (error) => new BrowserLaunchError({
+                browserType: config.browserType,
+                reason: error instanceof Error ? error.message : String(error),
+            }),
+        }).pipe(
+            Effect.catchIf(
+                (err) => allowAutoInstall && !!err.reason && isBrowserNotInstalledError(err.reason),
+                (err) => {
+                    const installed = autoInstallBrowser(config.browserType);
+                    if (installed) {
+                        return this._tryLaunch(config, false);
+                    }
+                    return Effect.fail(new BrowserLaunchError({
+                        browserType: err.browserType,
+                        reason: `Auto-install failed. Run manually: npx playwright install ${config.browserType}`,
+                    }));
+                },
+            ),
+        );
     }
 
     /**
