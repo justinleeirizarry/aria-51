@@ -82,7 +82,7 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
 
             {/* Stats */}
             <Box marginTop={1}>
-                <Text bold color={(summary.totalViolations + wcag22Total) > 0 ? colors.critical : colors.success}>
+                <Text bold color={(summary.totalViolations + wcag22Total) > 0 ? colors.critical : undefined}>
                     {summary.totalViolations + wcag22Total} violations
                 </Text>
                 <Text color="gray">  {summary.totalPasses} passes  {summary.totalComponents} components</Text>
@@ -107,7 +107,7 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
 
             {/* Violations */}
             {violations.length === 0 && (
-                <Text color={colors.success} bold>No violations found.</Text>
+                <Text bold>No violations found.</Text>
             )}
 
             {violations.map((v, idx) => {
@@ -129,7 +129,7 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
                         {/* Fix suggestion */}
                         {v.fixSuggestion && (
                             <Box marginTop={1}>
-                                <Text color={colors.success}>FIX: </Text>
+                                <Text bold>FIX: </Text>
                                 <Text>{v.fixSuggestion.summary}</Text>
                             </Box>
                         )}
@@ -157,7 +157,7 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
                                     <Box>
                                         {sourceLoc ? (
                                             <>
-                                                <Text color={colors.accent} bold>{sourceLoc}</Text>
+                                                <Text bold>{sourceLoc}</Text>
                                                 {comp && <Text color="gray"> in </Text>}
                                                 {comp && <Text bold>{comp}</Text>}
                                             </>
@@ -260,7 +260,7 @@ const Results: React.FC<ResultsProps> = ({ results, url: scanUrl, outputFile, ai
                 if (failed.length === 0 && passed > 0) {
                     return (
                         <Box flexDirection="column" marginTop={1}>
-                            <Text bold color={colors.success}>AI Tests — {passed} criteria passed</Text>
+                            <Text bold>AI Tests — {passed} criteria passed</Text>
                             <Box marginTop={1}>
                                 <Text color="gray">{'─'.repeat(60)}</Text>
                             </Box>

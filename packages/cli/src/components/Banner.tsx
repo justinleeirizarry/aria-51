@@ -21,7 +21,7 @@ export const Banner: React.FC<BannerProps> = ({ url, urlLabel = 'Scanned' }) => 
                     <Text>{` `}</Text>
                     <Text>
                         <Text color={colors.muted}>{`  ${urlLabel}: `}</Text>
-                        <Text color={colors.accent}>{url}</Text>
+                        <Text>{url}</Text>
                     </Text>
                 </>
             )}

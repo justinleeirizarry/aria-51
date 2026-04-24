@@ -35,7 +35,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
       <Box justifyContent="space-between">
         <Box>
           <Text color={colors.muted}>{index}. </Text>
-          <Text bold color={colors.accent}>
+          <Text bold>
             {violation.id}
           </Text>
         </Box>
@@ -109,7 +109,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
       {violation.helpUrl && (
         <Box marginTop={1}>
           <Text color={colors.muted}>Docs: </Text>
-          <Text color={colors.accent} underline>
+          <Text underline>
             {violation.helpUrl}
           </Text>
         </Box>
@@ -118,7 +118,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
       {/* Fix Suggestion - summary only, no generic code examples */}
       {violation.fixSuggestion && (
         <Box marginTop={1} flexDirection="column" paddingLeft={1}>
-          <Text color={colors.success} bold>
+          <Text bold>
             How to Fix:
           </Text>
           <Text>{violation.fixSuggestion.summary}</Text>
@@ -188,12 +188,12 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                 <Text color="gray">• </Text>
                 {sourceLoc ? (
                   <>
-                    <Text color={colors.accent} bold>{sourceLoc}</Text>
+                    <Text bold>{sourceLoc}</Text>
                     <Text color="gray"> in </Text>
-                    <Text color={colors.highlight} bold>{componentName}</Text>
+                    <Text bold>{componentName}</Text>
                   </>
                 ) : (
-                  <Text color={colors.highlight} bold>{componentName}</Text>
+                  <Text bold>{componentName}</Text>
                 )}
               </Box>
 
@@ -243,7 +243,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                     <Box flexDirection="column" marginTop={1}>
                       <Text color="gray">Suggested:</Text>
                       <Box marginLeft={2}>
-                        <Text color={colors.success}>
+                        <Text>
                           {truncateHtml(contextualFix.fixed, 70)}
                         </Text>
                       </Box>
@@ -259,7 +259,7 @@ export const ViolationCard: React.FC<ViolationCardProps> = ({
                           .split("\n")
                           .slice(0, 3)
                           .map((line, j) => (
-                            <Text key={j} color={colors.info} dimColor>
+                            <Text key={j} dimColor>
                               {line}
                             </Text>
                           ))}
