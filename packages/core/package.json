@@ -1,6 +1,6 @@
 {
     "name": "@aria51/core",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Core library for aria51 - framework-agnostic accessibility testing with axe-core",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -40,9 +40,6 @@
     },
     "publishConfig": {
         "access": "public"
-    },
-    "optionalDependencies": {
-        "@aria51/ai-auditor": "workspace:*"
     },
     "dependencies": {
         "axe-core": "^4.8.3",

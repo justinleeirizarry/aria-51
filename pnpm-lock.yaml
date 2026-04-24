@@ -127,10 +127,6 @@ importers:
       zod:
         specifier: ^3.25.76
         version: 3.25.76
-    optionalDependencies:
-      '@aria51/ai-auditor':
-        specifier: workspace:*
-        version: link:../ai-auditor
     devDependencies:
       '@axe-core/playwright':
         specifier: ^4.11.0
